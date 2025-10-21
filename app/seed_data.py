@@ -205,7 +205,7 @@ def seed_database():
         credentials="MD, Board Certified Pediatrics, FAAP",
         hourly_rate=225.00,
         phone="555-0301",
-        image_url="https://randomuser.me/api/portraits/men/32.jpg"
+        image_url="https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -217,7 +217,7 @@ def seed_database():
         credentials="PhD in Clinical Psychology, Licensed Psychologist",
         hourly_rate=180.00,
         phone="555-0302",
-        image_url="https://randomuser.me/api/portraits/women/44.jpg"
+        image_url="https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -229,7 +229,7 @@ def seed_database():
         credentials="DDS, Member of National Dental Association",
         hourly_rate=195.00,
         phone="555-0303",
-        image_url="https://randomuser.me/api/portraits/men/52.jpg"
+        image_url="https://images.pexels.com/photos/6303761/pexels-photo-6303761.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -241,7 +241,7 @@ def seed_database():
         credentials="MSN, FNP-C, 12 years experience",
         hourly_rate=150.00,
         phone="555-0304",
-        image_url="https://randomuser.me/api/portraits/women/65.jpg"
+        image_url="https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -253,7 +253,7 @@ def seed_database():
         credentials="JD, Licensed in Multiple States",
         hourly_rate=400.00,
         phone="555-0305",
-        image_url="https://randomuser.me/api/portraits/men/43.jpg"
+        image_url="https://images.pexels.com/photos/5668838/pexels-photo-5668838.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -265,7 +265,7 @@ def seed_database():
         credentials="JD, Certified Family Law Specialist",
         hourly_rate=325.00,
         phone="555-0306",
-        image_url="https://randomuser.me/api/portraits/women/28.jpg"
+        image_url="https://images.pexels.com/photos/5668858/pexels-photo-5668858.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -277,7 +277,7 @@ def seed_database():
         credentials="JD, MBA, Business Law Specialist",
         hourly_rate=375.00,
         phone="555-0307",
-        image_url="https://randomuser.me/api/portraits/men/67.jpg"
+        image_url="https://images.pexels.com/photos/8112199/pexels-photo-8112199.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -289,7 +289,7 @@ def seed_database():
         credentials="JD, AILA Member, Fluent in Spanish",
         hourly_rate=300.00,
         phone="555-0308",
-        image_url="https://randomuser.me/api/portraits/women/72.jpg"
+        image_url="https://images.pexels.com/photos/7640443/pexels-photo-7640443.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -301,7 +301,7 @@ def seed_database():
         credentials="CPA, MBA in Accounting",
         hourly_rate=165.00,
         phone="555-0309",
-        image_url="https://randomuser.me/api/portraits/men/22.jpg"
+        image_url="https://images.pexels.com/photos/8112198/pexels-photo-8112198.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -313,7 +313,7 @@ def seed_database():
         credentials="CFP, CFA, Series 7 & 66",
         hourly_rate=250.00,
         phone="555-0310",
-        image_url="https://randomuser.me/api/portraits/women/33.jpg"
+        image_url="https://images.pexels.com/photos/7640432/pexels-photo-7640432.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -325,7 +325,7 @@ def seed_database():
         credentials="CRPC, 15 years experience",
         hourly_rate=185.00,
         phone="555-0311",
-        image_url="https://randomuser.me/api/portraits/men/58.jpg"
+        image_url="https://images.pexels.com/photos/5668882/pexels-photo-5668882.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -337,7 +337,7 @@ def seed_database():
         credentials="CFA Level III, MS Finance",
         hourly_rate=200.00,
         phone="555-0312",
-        image_url="https://randomuser.me/api/portraits/women/47.jpg"
+        image_url="https://images.pexels.com/photos/7640461/pexels-photo-7640461.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -349,7 +349,7 @@ def seed_database():
         credentials="PCC, MBA, 25 years corporate experience",
         hourly_rate=275.00,
         phone="555-0313",
-        image_url="https://randomuser.me/api/portraits/women/55.jpg"
+        image_url="https://images.pexels.com/photos/8112180/pexels-photo-8112180.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -361,7 +361,7 @@ def seed_database():
         credentials="CPCC, Former Fortune 500 Recruiter",
         hourly_rate=125.00,
         phone="555-0314",
-        image_url="https://randomuser.me/api/portraits/men/38.jpg"
+        image_url="https://images.pexels.com/photos/7640450/pexels-photo-7640450.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -373,7 +373,7 @@ def seed_database():
         credentials="NBC-HWC, Certified Nutritionist",
         hourly_rate=110.00,
         phone="555-0315",
-        image_url="https://randomuser.me/api/portraits/women/62.jpg"
+        image_url="https://images.pexels.com/photos/5668772/pexels-photo-5668772.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -385,7 +385,7 @@ def seed_database():
         credentials="PhD in Counseling Psychology, LMFT",
         hourly_rate=160.00,
         phone="555-0316",
-        image_url="https://randomuser.me/api/portraits/men/71.jpg"
+        image_url="https://images.pexels.com/photos/7640424/pexels-photo-7640424.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -397,7 +397,7 @@ def seed_database():
         credentials="MBA from Wharton, 18 years consulting",
         hourly_rate=350.00,
         phone="555-0317",
-        image_url="https://randomuser.me/api/portraits/women/39.jpg"
+        image_url="https://images.pexels.com/photos/8112182/pexels-photo-8112182.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -409,7 +409,7 @@ def seed_database():
         credentials="SPHR, SHRM-SCP, 20+ years HR leadership",
         hourly_rate=225.00,
         phone="555-0318",
-        image_url="https://randomuser.me/api/portraits/men/45.jpg"
+        image_url="https://images.pexels.com/photos/7640427/pexels-photo-7640427.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -421,7 +421,7 @@ def seed_database():
         credentials="CISSP, MS Computer Science",
         hourly_rate=275.00,
         phone="555-0319",
-        image_url="https://randomuser.me/api/portraits/women/51.jpg"
+        image_url="https://images.pexels.com/photos/5668473/pexels-photo-5668473.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -433,7 +433,7 @@ def seed_database():
         credentials="MBA Marketing, Google Analytics Certified",
         hourly_rate=200.00,
         phone="555-0320",
-        image_url="https://randomuser.me/api/portraits/men/29.jpg"
+        image_url="https://images.pexels.com/photos/7640456/pexels-photo-7640456.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -445,7 +445,7 @@ def seed_database():
         credentials="PhD in Education, 15 years teaching",
         hourly_rate=140.00,
         phone="555-0321",
-        image_url="https://randomuser.me/api/portraits/women/68.jpg"
+        image_url="https://images.pexels.com/photos/8197543/pexels-photo-8197543.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -457,7 +457,7 @@ def seed_database():
         credentials="MS Mathematics, Perfect SAT Score",
         hourly_rate=95.00,
         phone="555-0322",
-        image_url="https://randomuser.me/api/portraits/men/56.jpg"
+        image_url="https://images.pexels.com/photos/8197527/pexels-photo-8197527.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -469,7 +469,7 @@ def seed_database():
         credentials="MEd Reading, Wilson Reading Certified",
         hourly_rate=105.00,
         phone="555-0323",
-        image_url="https://randomuser.me/api/portraits/women/41.jpg"
+        image_url="https://images.pexels.com/photos/5212317/pexels-photo-5212317.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -481,7 +481,7 @@ def seed_database():
         credentials="EdD in Counseling, Licensed School Counselor",
         hourly_rate=120.00,
         phone="555-0324",
-        image_url="https://randomuser.me/api/portraits/men/64.jpg"
+        image_url="https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -493,7 +493,7 @@ def seed_database():
         credentials="MEd Adult Education, CPTD Certified",
         hourly_rate=135.00,
         phone="555-0355",
-        image_url="https://randomuser.me/api/portraits/women/70.jpg"
+        image_url="https://images.pexels.com/photos/8197539/pexels-photo-8197539.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -505,7 +505,7 @@ def seed_database():
         credentials="Licensed Broker, 12 years experience",
         hourly_rate=175.00,
         phone="555-0325",
-        image_url="https://randomuser.me/api/portraits/women/36.jpg"
+        image_url="https://images.pexels.com/photos/7640471/pexels-photo-7640471.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -517,7 +517,7 @@ def seed_database():
         credentials="CFP, Real Estate Investment Specialist",
         hourly_rate=225.00,
         phone="555-0326",
-        image_url="https://randomuser.me/api/portraits/men/48.jpg"
+        image_url="https://images.pexels.com/photos/8112183/pexels-photo-8112183.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -529,7 +529,7 @@ def seed_database():
         credentials="Licensed Realtor, Accredited Buyer Representative",
         hourly_rate=150.00,
         phone="555-0327",
-        image_url="https://randomuser.me/api/portraits/women/59.jpg"
+        image_url="https://images.pexels.com/photos/5668840/pexels-photo-5668840.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -541,7 +541,7 @@ def seed_database():
         credentials="Licensed Broker, 50+ Properties Managed",
         hourly_rate=200.00,
         phone="555-0328",
-        image_url="https://randomuser.me/api/portraits/men/35.jpg"
+        image_url="https://images.pexels.com/photos/7640438/pexels-photo-7640438.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -553,7 +553,7 @@ def seed_database():
         credentials="Certified Residential Appraiser",
         hourly_rate=165.00,
         phone="555-0329",
-        image_url="https://randomuser.me/api/portraits/women/46.jpg"
+        image_url="https://images.pexels.com/photos/5669617/pexels-photo-5669617.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -565,7 +565,7 @@ def seed_database():
         credentials="Licensed Master Barber, 15 years experience",
         hourly_rate=85.00,
         phone="555-0330",
-        image_url="https://randomuser.me/api/portraits/men/42.jpg"
+        image_url="https://images.pexels.com/photos/3992870/pexels-photo-3992870.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -577,7 +577,7 @@ def seed_database():
         credentials="Licensed Cosmetologist, Natural Hair Certified",
         hourly_rate=95.00,
         phone="555-0331",
-        image_url="https://randomuser.me/api/portraits/women/53.jpg"
+        image_url="https://images.pexels.com/photos/3065209/pexels-photo-3065209.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -589,7 +589,7 @@ def seed_database():
         credentials="Certified Makeup Artist, 10 years experience",
         hourly_rate=125.00,
         phone="555-0332",
-        image_url="https://randomuser.me/api/portraits/women/37.jpg"
+        image_url="https://images.pexels.com/photos/3992871/pexels-photo-3992871.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -601,7 +601,7 @@ def seed_database():
         credentials="Licensed Esthetician, Skincare Specialist",
         hourly_rate=110.00,
         phone="555-0333",
-        image_url="https://randomuser.me/api/portraits/women/61.jpg"
+        image_url="https://images.pexels.com/photos/3065171/pexels-photo-3065171.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -613,7 +613,7 @@ def seed_database():
         credentials="Licensed Nail Technician, Nail Art Specialist",
         hourly_rate=75.00,
         phone="555-0334",
-        image_url="https://randomuser.me/api/portraits/women/49.jpg"
+        image_url="https://images.pexels.com/photos/3065210/pexels-photo-3065210.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -625,7 +625,7 @@ def seed_database():
         credentials="Professional Photographer, 18 years experience",
         hourly_rate=200.00,
         phone="555-0335",
-        image_url="https://randomuser.me/api/portraits/men/51.jpg"
+        image_url="https://images.pexels.com/photos/1264210/pexels-photo-1264210.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -637,7 +637,7 @@ def seed_database():
         credentials="BFA Graphic Design, Adobe Certified Expert",
         hourly_rate=135.00,
         phone="555-0336",
-        image_url="https://randomuser.me/api/portraits/women/43.jpg"
+        image_url="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -649,7 +649,7 @@ def seed_database():
         credentials="NCIDQ Certified, 14 years experience",
         hourly_rate=165.00,
         phone="555-0337",
-        image_url="https://randomuser.me/api/portraits/women/57.jpg"
+        image_url="https://images.pexels.com/photos/1264210/pexels-photo-1264210.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -661,7 +661,7 @@ def seed_database():
         credentials="Film Production Degree, Emmy Nominated",
         hourly_rate=185.00,
         phone="555-0338",
-        image_url="https://randomuser.me/api/portraits/men/63.jpg"
+        image_url="https://images.pexels.com/photos/3184611/pexels-photo-3184611.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -673,7 +673,7 @@ def seed_database():
         credentials="MS Human-Computer Interaction, Google UX Certified",
         hourly_rate=155.00,
         phone="555-0339",
-        image_url="https://randomuser.me/api/portraits/women/34.jpg"
+        image_url="https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -685,7 +685,7 @@ def seed_database():
         credentials="Certified Automotive Finance Manager",
         hourly_rate=120.00,
         phone="555-0340",
-        image_url="https://randomuser.me/api/portraits/men/39.jpg"
+        image_url="https://images.pexels.com/photos/7640469/pexels-photo-7640469.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -697,7 +697,7 @@ def seed_database():
         credentials="NMLS Licensed, 16 years mortgage experience",
         hourly_rate=145.00,
         phone="555-0341",
-        image_url="https://randomuser.me/api/portraits/women/52.jpg"
+        image_url="https://images.pexels.com/photos/8112184/pexels-photo-8112184.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -709,7 +709,7 @@ def seed_database():
         credentials="HUD Certified Housing Counselor",
         hourly_rate=110.00,
         phone="555-0342",
-        image_url="https://randomuser.me/api/portraits/men/46.jpg"
+        image_url="https://images.pexels.com/photos/5668841/pexels-photo-5668841.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -721,7 +721,7 @@ def seed_database():
         credentials="Certified Credit Consultant, FICO Expert",
         hourly_rate=95.00,
         phone="555-0343",
-        image_url="https://randomuser.me/api/portraits/women/48.jpg"
+        image_url="https://images.pexels.com/photos/7640435/pexels-photo-7640435.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -733,7 +733,7 @@ def seed_database():
         credentials="ASHI Certified, 20 years construction experience",
         hourly_rate=130.00,
         phone="555-0344",
-        image_url="https://randomuser.me/api/portraits/men/54.jpg"
+        image_url="https://images.pexels.com/photos/5669618/pexels-photo-5669618.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -745,7 +745,7 @@ def seed_database():
         credentials="MBA Marketing, Google Ads Certified",
         hourly_rate=175.00,
         phone="555-0345",
-        image_url="https://randomuser.me/api/portraits/women/38.jpg"
+        image_url="https://images.pexels.com/photos/7640447/pexels-photo-7640447.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -757,7 +757,7 @@ def seed_database():
         credentials="Certified Social Media Manager, 10 years experience",
         hourly_rate=140.00,
         phone="555-0346",
-        image_url="https://randomuser.me/api/portraits/men/37.jpg"
+        image_url="https://images.pexels.com/photos/8112185/pexels-photo-8112185.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -769,7 +769,7 @@ def seed_database():
         credentials="APR Accreditation, Former Journalist",
         hourly_rate=160.00,
         phone="555-0347",
-        image_url="https://randomuser.me/api/portraits/women/56.jpg"
+        image_url="https://images.pexels.com/photos/5668842/pexels-photo-5668842.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -781,7 +781,7 @@ def seed_database():
         credentials="BA Journalism, SEO Certified",
         hourly_rate=115.00,
         phone="555-0348",
-        image_url="https://randomuser.me/api/portraits/men/44.jpg"
+        image_url="https://images.pexels.com/photos/7640441/pexels-photo-7640441.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -793,7 +793,7 @@ def seed_database():
         credentials="Emmy Award Winner, 15 years broadcasting",
         hourly_rate=195.00,
         phone="555-0349",
-        image_url="https://randomuser.me/api/portraits/women/63.jpg"
+        image_url="https://images.pexels.com/photos/5669620/pexels-photo-5669620.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -805,7 +805,7 @@ def seed_database():
         credentials="MPA, 20 years nonprofit leadership",
         hourly_rate=185.00,
         phone="555-0350",
-        image_url="https://randomuser.me/api/portraits/women/45.jpg"
+        image_url="https://images.pexels.com/photos/7640454/pexels-photo-7640454.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -817,7 +817,7 @@ def seed_database():
         credentials="MSW, 12 years community organizing",
         hourly_rate=125.00,
         phone="555-0351",
-        image_url="https://randomuser.me/api/portraits/men/59.jpg"
+        image_url="https://images.pexels.com/photos/8112186/pexels-photo-8112186.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -829,7 +829,7 @@ def seed_database():
         credentials="GPC Certified, $50M+ Grants Secured",
         hourly_rate=150.00,
         phone="555-0352",
-        image_url="https://randomuser.me/api/portraits/women/54.jpg"
+        image_url="https://images.pexels.com/photos/5668843/pexels-photo-5668843.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -841,7 +841,7 @@ def seed_database():
         credentials="CVA Certified, Nonprofit Management Certificate",
         hourly_rate=105.00,
         phone="555-0353",
-        image_url="https://randomuser.me/api/portraits/men/66.jpg"
+        image_url="https://images.pexels.com/photos/7640448/pexels-photo-7640448.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -853,7 +853,7 @@ def seed_database():
         credentials="LCSW, PhD in Social Work",
         hourly_rate=135.00,
         phone="555-0354",
-        image_url="https://randomuser.me/api/portraits/women/67.jpg"
+        image_url="https://images.pexels.com/photos/5669621/pexels-photo-5669621.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
     print("Database seeded successfully!")
