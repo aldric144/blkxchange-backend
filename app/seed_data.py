@@ -37,6 +37,46 @@ def seed_database():
         phone="555-0104"
     ))
     
+    vendor5 = db.create_vendor(VendorCreate(
+        email="info@harlemessence.com",
+        name="Keisha Thompson",
+        business_name="Harlem Essence",
+        business_description="Luxury wellness products and home goods inspired by Harlem Renaissance elegance.",
+        phone="555-0105"
+    ))
+    
+    vendor6 = db.create_vendor(VendorCreate(
+        email="contact@diasporathreads.com",
+        name="Jamal Washington",
+        business_name="Diaspora Threads",
+        business_description="Contemporary streetwear celebrating the African diaspora and Black culture worldwide.",
+        phone="555-0106"
+    ))
+    
+    vendor7 = db.create_vendor(VendorCreate(
+        email="hello@afrozenco.com",
+        name="Nia Robinson",
+        business_name="AfroZen Wellness Co.",
+        business_description="Holistic wellness products rooted in African healing traditions and mindfulness.",
+        phone="555-0107"
+    ))
+    
+    vendor8 = db.create_vendor(VendorCreate(
+        email="support@herrootsbeauty.com",
+        name="Tasha Mitchell",
+        business_name="Her Roots Beauty",
+        business_description="Natural beauty and hair care products celebrating Black women's natural beauty.",
+        phone="555-0108"
+    ))
+    
+    vendor9 = db.create_vendor(VendorCreate(
+        email="shop@panafricanprints.com",
+        name="Kwame Osei",
+        business_name="PanAfrican Prints",
+        business_description="Authentic African art, jewelry, and home décor connecting the diaspora to the motherland.",
+        phone="555-0109"
+    ))
+    
     db.create_product(vendor1.id, ProductCreate(
         name="Ankara Print Dress",
         description="Beautiful handmade dress featuring vibrant Ankara print fabric. Perfect for any occasion.",
@@ -134,6 +174,312 @@ def seed_database():
         category=ProductCategory.ART,
         image_url="https://images.unsplash.com/photo-1549887534-1541e9326642?w=500",
         stock=12
+    ))
+    
+    db.create_product(vendor6.id, ProductCreate(
+        name="CrownCulture Streetwear Hoodie",
+        description="Premium unisex hoodie with embroidered crown logo. Ethically made and designed by HBCU graduate.",
+        price=75.00,
+        category=ProductCategory.APPAREL,
+        image_url="https://images.pexels.com/photos/8148577/pexels-photo-8148577.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=40
+    ))
+    
+    db.create_product(vendor6.id, ProductCreate(
+        name="HBCU Pride Collection Tee",
+        description="Celebrate Black excellence with this premium cotton tee featuring iconic HBCU designs.",
+        price=35.00,
+        category=ProductCategory.APPAREL,
+        image_url="https://images.pexels.com/photos/8148583/pexels-photo-8148583.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=60
+    ))
+    
+    db.create_product(vendor8.id, ProductCreate(
+        name="Loc & Twist Butter",
+        description="Nourishing butter blend for locs, twists, and braids. Made with shea butter and essential oils.",
+        price=22.99,
+        category=ProductCategory.BEAUTY,
+        image_url="https://images.pexels.com/photos/7428100/pexels-photo-7428100.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=45
+    ))
+    
+    db.create_product(vendor8.id, ProductCreate(
+        name="Beard Growth & Care Kit",
+        description="Complete beard care system with oil, balm, and brush. Specially formulated for coarse hair.",
+        price=45.00,
+        category=ProductCategory.BEAUTY,
+        image_url="https://images.pexels.com/photos/7428095/pexels-photo-7428095.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=30
+    ))
+    
+    db.create_product(vendor3.id, ProductCreate(
+        name="The New Jim Crow by Michelle Alexander",
+        description="Groundbreaking work on mass incarceration and racial justice in America.",
+        price=18.99,
+        category=ProductCategory.BOOKS,
+        image_url="https://images.pexels.com/photos/4866041/pexels-photo-4866041.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=25
+    ))
+    
+    db.create_product(vendor3.id, ProductCreate(
+        name="Black Entrepreneurship Guide",
+        description="Comprehensive guide to building wealth and business success in the Black community.",
+        price=24.99,
+        category=ProductCategory.BOOKS,
+        image_url="https://images.pexels.com/photos/4866043/pexels-photo-4866043.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=35
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Afrofuturist Canvas Print",
+        description="Vibrant 24x36 canvas featuring Afrofuturist themes and Black excellence.",
+        price=150.00,
+        category=ProductCategory.ART,
+        image_url="https://images.pexels.com/photos/1839919/pexels-photo-1839919.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=15
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Handcrafted Wooden Sculpture",
+        description="Beautiful hand-carved African sculpture celebrating ancestral heritage.",
+        price=200.00,
+        category=ProductCategory.ART,
+        image_url="https://images.pexels.com/photos/3004909/pexels-photo-3004909.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=8
+    ))
+    
+    db.create_product(vendor4.id, ProductCreate(
+        name="Black History Portrait Series",
+        description="Limited edition print series featuring iconic Black leaders and changemakers.",
+        price=95.00,
+        category=ProductCategory.ART,
+        image_url="https://images.pexels.com/photos/1839924/pexels-photo-1839924.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=20
+    ))
+    
+    db.create_product(vendor5.id, ProductCreate(
+        name="Melanin Tech Wireless Earbuds",
+        description="Premium wireless earbuds from Black-owned tech startup. Superior sound quality and comfort.",
+        price=89.99,
+        category=ProductCategory.TECH,
+        image_url="https://images.pexels.com/photos/3825517/pexels-photo-3825517.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=50
+    ))
+    
+    db.create_product(vendor5.id, ProductCreate(
+        name="Smart Home Hub - Onyx Edition",
+        description="Voice-activated smart home controller designed by Black engineers. Compatible with all devices.",
+        price=149.99,
+        category=ProductCategory.TECH,
+        image_url="https://images.pexels.com/photos/4219861/pexels-photo-4219861.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=30
+    ))
+    
+    db.create_product(vendor5.id, ProductCreate(
+        name="Digital Planner Pro",
+        description="Comprehensive digital planner app subscription designed for Black entrepreneurs and creatives.",
+        price=12.99,
+        category=ProductCategory.TECH,
+        image_url="https://images.pexels.com/photos/4219862/pexels-photo-4219862.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=999
+    ))
+    
+    db.create_product(vendor5.id, ProductCreate(
+        name="Portable Power Bank - 20000mAh",
+        description="High-capacity power bank with fast charging. Perfect for entrepreneurs on the go.",
+        price=45.00,
+        category=ProductCategory.TECH,
+        image_url="https://images.pexels.com/photos/4219863/pexels-photo-4219863.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=75
+    ))
+    
+    db.create_product(vendor5.id, ProductCreate(
+        name="Bluetooth Speaker - Heritage Series",
+        description="Premium Bluetooth speaker with 360° sound. Designed and engineered by Black-owned tech company.",
+        price=79.99,
+        category=ProductCategory.TECH,
+        image_url="https://images.pexels.com/photos/3825518/pexels-photo-3825518.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=40
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Soul Spice Blend Collection",
+        description="Authentic Southern spice blends passed down through generations. Set of 5 premium seasonings.",
+        price=35.00,
+        category=ProductCategory.FOOD,
+        image_url="https://images.pexels.com/photos/4198933/pexels-photo-4198933.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=60
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Gourmet Hot Sauce Trio",
+        description="Award-winning hot sauce collection featuring Caribbean and African flavors.",
+        price=28.00,
+        category=ProductCategory.FOOD,
+        image_url="https://images.pexels.com/photos/4198935/pexels-photo-4198935.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=45
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Artisan Coffee - Diaspora Blend",
+        description="Small-batch roasted coffee beans sourced from Black-owned farms in Ethiopia and Jamaica.",
+        price=18.99,
+        category=ProductCategory.FOOD,
+        image_url="https://images.pexels.com/photos/4198936/pexels-photo-4198936.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=80
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Herbal Tea Collection",
+        description="Organic herbal tea blends inspired by African healing traditions. Set of 6 flavors.",
+        price=24.99,
+        category=ProductCategory.FOOD,
+        image_url="https://images.pexels.com/photos/4198937/pexels-photo-4198937.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=55
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Gourmet Baking Mix Bundle",
+        description="Premium baking mixes for sweet potato pie, cornbread, and biscuits. Family recipes.",
+        price=32.00,
+        category=ProductCategory.FOOD,
+        image_url="https://images.pexels.com/photos/4198938/pexels-photo-4198938.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=40
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Meditation & Mindfulness Journal",
+        description="Guided journal for Black mental wellness and self-care. 90-day transformation program.",
+        price=29.99,
+        category=ProductCategory.WELLNESS,
+        image_url="https://images.pexels.com/photos/4498362/pexels-photo-4498362.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=70
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Aromatherapy Candle Set",
+        description="Hand-poured soy candles with essential oils. Lavender, eucalyptus, and sandalwood scents.",
+        price=45.00,
+        category=ProductCategory.WELLNESS,
+        image_url="https://images.pexels.com/photos/4498363/pexels-photo-4498363.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=50
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Luxury Bath Salt Collection",
+        description="Mineral-rich bath salts infused with African botanicals. Perfect for relaxation and self-care.",
+        price=32.00,
+        category=ProductCategory.WELLNESS,
+        image_url="https://images.pexels.com/photos/4498364/pexels-photo-4498364.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=60
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Yoga Mat - Melanin Magic",
+        description="Premium non-slip yoga mat with inspirational affirmations. Eco-friendly materials.",
+        price=55.00,
+        category=ProductCategory.WELLNESS,
+        image_url="https://images.pexels.com/photos/4498365/pexels-photo-4498365.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=35
+    ))
+    
+    db.create_product(vendor7.id, ProductCreate(
+        name="Essential Oil Diffuser Set",
+        description="Ultrasonic diffuser with 10 essential oils. Create your perfect wellness sanctuary.",
+        price=65.00,
+        category=ProductCategory.WELLNESS,
+        image_url="https://images.pexels.com/photos/4498366/pexels-photo-4498366.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=40
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Ankara Print Throw Pillows",
+        description="Set of 4 decorative pillows featuring authentic Ankara fabric. Handmade with love.",
+        price=85.00,
+        category=ProductCategory.HOME,
+        image_url="https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=30
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Afrocentric Wall Tapestry",
+        description="Large woven tapestry featuring African-inspired geometric patterns. 60x80 inches.",
+        price=120.00,
+        category=ProductCategory.HOME,
+        image_url="https://images.pexels.com/photos/6969832/pexels-photo-6969832.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=20
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Handcrafted Ceramic Dinnerware Set",
+        description="12-piece dinnerware set with African-inspired designs. Microwave and dishwasher safe.",
+        price=180.00,
+        category=ProductCategory.HOME,
+        image_url="https://images.pexels.com/photos/6969833/pexels-photo-6969833.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=15
+    ))
+    
+    db.create_product(vendor5.id, ProductCreate(
+        name="Luxury Throw Blanket - Kente",
+        description="Plush throw blanket featuring Kente cloth pattern. Perfect for cozy evenings.",
+        price=95.00,
+        category=ProductCategory.HOME,
+        image_url="https://images.pexels.com/photos/6969834/pexels-photo-6969834.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=40
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="African Basket Wall Décor Set",
+        description="Set of 3 handwoven baskets from Rwanda. Beautiful wall art with cultural significance.",
+        price=75.00,
+        category=ProductCategory.HOME,
+        image_url="https://images.pexels.com/photos/6969835/pexels-photo-6969835.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=25
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Ankh Pendant Necklace - Gold",
+        description="18K gold-plated ankh pendant on 24-inch chain. Symbol of life and eternal wisdom.",
+        price=65.00,
+        category=ProductCategory.JEWELRY,
+        image_url="https://images.pexels.com/photos/1191531/pexels-photo-1191531.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=50
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Beaded Bracelet Collection",
+        description="Set of 3 handmade African beaded bracelets. Each tells a unique cultural story.",
+        price=35.00,
+        category=ProductCategory.JEWELRY,
+        image_url="https://images.pexels.com/photos/1191532/pexels-photo-1191532.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=60
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Cowrie Shell Earrings",
+        description="Elegant cowrie shell drop earrings. Handcrafted with sterling silver hooks.",
+        price=42.00,
+        category=ProductCategory.JEWELRY,
+        image_url="https://images.pexels.com/photos/1191533/pexels-photo-1191533.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=45
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="Custom Name Plate Necklace",
+        description="Personalized gold name plate necklace. Classic style celebrating your identity.",
+        price=89.00,
+        category=ProductCategory.JEWELRY,
+        image_url="https://images.pexels.com/photos/1191534/pexels-photo-1191534.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=100
+    ))
+    
+    db.create_product(vendor9.id, ProductCreate(
+        name="African Map Pendant - Sterling Silver",
+        description="Detailed Africa continent pendant in sterling silver. Celebrate your roots with pride.",
+        price=55.00,
+        category=ProductCategory.JEWELRY,
+        image_url="https://images.pexels.com/photos/1191535/pexels-photo-1191535.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=70
     ))
     
     db.create_professional(ProfessionalCreate(
