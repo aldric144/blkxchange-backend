@@ -1,10 +1,14 @@
 from typing import Dict, List, Optional
 from datetime import datetime
 import uuid
+import hashlib
 from app.models import (
     Vendor, VendorCreate, Product, ProductCreate, 
     Professional, ProfessionalCreate, Order, OrderCreate,
-    OrderItem, OrderStatus, ImpactStats
+    OrderItem, OrderStatus, ImpactStats,
+    VendorApplication, VendorApplicationCreate, VendorApplicationStatus,
+    VendorAccount, VendorAccountCreate,
+    ProductEnhanced, ProductCreateEnhanced, ProductStatus
 )
 
 class InMemoryDatabase:
@@ -13,6 +17,10 @@ class InMemoryDatabase:
         self.products: Dict[str, Product] = {}
         self.professionals: Dict[str, Professional] = {}
         self.orders: Dict[str, Order] = {}
+        self.vendor_applications: Dict[str, VendorApplication] = {}
+        self.vendor_accounts: Dict[str, VendorAccount] = {}
+        self.products_enhanced: Dict[str, ProductEnhanced] = {}
+        self.password_setup_tokens: Dict[str, dict] = {}
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -195,5 +203,138 @@ class InMemoryDatabase:
             scholarship_donations=self.impact_stats["scholarship_donations"],
             nonprofit_donations=self.impact_stats["nonprofit_donations"]
         )
+    
+    def create_vendor_application(self, application_data: VendorApplicationCreate) -> VendorApplication:
+        application_id = str(uuid.uuid4())
+        application = VendorApplication(
+            id=application_id,
+            business_name=application_data.business_name,
+            contact_name=application_data.contact_name,
+            email=application_data.email,
+            phone=application_data.phone,
+            address=application_data.address,
+            website=application_data.website,
+            category=application_data.category,
+            description=application_data.description,
+            price_range=application_data.price_range,
+            fulfillment_method=application_data.fulfillment_method,
+            image_urls=application_data.image_urls,
+            status=VendorApplicationStatus.PENDING,
+            agreement_accepted=application_data.agreement_accepted,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.vendor_applications[application_id] = application
+        return application
+    
+    def get_vendor_application(self, application_id: str) -> Optional[VendorApplication]:
+        return self.vendor_applications.get(application_id)
+    
+    def get_all_vendor_applications(self, status: Optional[VendorApplicationStatus] = None) -> List[VendorApplication]:
+        applications = list(self.vendor_applications.values())
+        if status:
+            applications = [a for a in applications if a.status == status]
+        return applications
+    
+    def update_vendor_application_status(self, application_id: str, status: VendorApplicationStatus) -> Optional[VendorApplication]:
+        if application_id in self.vendor_applications:
+            self.vendor_applications[application_id].status = status
+            self.vendor_applications[application_id].updated_at = datetime.now()
+            return self.vendor_applications[application_id]
+        return None
+    
+    def create_vendor_account(self, account_data: VendorAccountCreate) -> VendorAccount:
+        account_id = str(uuid.uuid4())
+        password_hash = hashlib.sha256(account_data.password.encode()).hexdigest()
+        account = VendorAccount(
+            id=account_id,
+            vendor_id=account_data.vendor_id,
+            email=account_data.email,
+            password_hash=password_hash,
+            created_at=datetime.now()
+        )
+        self.vendor_accounts[account_id] = account
+        return account
+    
+    def get_vendor_account_by_email(self, email: str) -> Optional[VendorAccount]:
+        for account in self.vendor_accounts.values():
+            if account.email == email:
+                return account
+        return None
+    
+    def verify_vendor_password(self, email: str, password: str) -> Optional[VendorAccount]:
+        account = self.get_vendor_account_by_email(email)
+        if account:
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
+            if account.password_hash == password_hash:
+                return account
+        return None
+    
+    def create_product_enhanced(self, product_data: ProductCreateEnhanced) -> ProductEnhanced:
+        product_id = str(uuid.uuid4())
+        product = ProductEnhanced(
+            id=product_id,
+            vendor_id=product_data.vendor_id,
+            name=product_data.name,
+            description=product_data.description,
+            price=product_data.price,
+            category=product_data.category,
+            quantity=product_data.quantity,
+            image_urls=product_data.image_urls,
+            status=ProductStatus.PENDING,
+            rating=0.0,
+            reviews_count=0,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.products_enhanced[product_id] = product
+        return product
+    
+    def get_product_enhanced(self, product_id: str) -> Optional[ProductEnhanced]:
+        return self.products_enhanced.get(product_id)
+    
+    def get_all_products_enhanced(self, vendor_id: Optional[str] = None, status: Optional[ProductStatus] = None) -> List[ProductEnhanced]:
+        products = list(self.products_enhanced.values())
+        if vendor_id:
+            products = [p for p in products if p.vendor_id == vendor_id]
+        if status:
+            products = [p for p in products if p.status == status]
+        return products
+    
+    def update_product_enhanced_status(self, product_id: str, status: ProductStatus) -> Optional[ProductEnhanced]:
+        if product_id in self.products_enhanced:
+            self.products_enhanced[product_id].status = status
+            self.products_enhanced[product_id].updated_at = datetime.now()
+            return self.products_enhanced[product_id]
+        return None
+    
+    def update_product_enhanced(self, product_id: str, product_data: ProductCreateEnhanced) -> Optional[ProductEnhanced]:
+        if product_id in self.products_enhanced:
+            product = self.products_enhanced[product_id]
+            product.name = product_data.name
+            product.description = product_data.description
+            product.price = product_data.price
+            product.category = product_data.category
+            product.quantity = product_data.quantity
+            product.image_urls = product_data.image_urls
+            product.updated_at = datetime.now()
+            return product
+        return None
+
+    def create_password_setup_token(self, vendor_id: str, email: str) -> str:
+        token = str(uuid.uuid4())
+        expires_at = datetime.now().timestamp() + 24 * 60 * 60
+        self.password_setup_tokens[token] = {"vendor_id": vendor_id, "email": email, "expires_at": expires_at}
+        return token
+
+    def consume_password_setup_token(self, token: str) -> Optional[dict]:
+        data = self.password_setup_tokens.get(token)
+        if not data:
+            return None
+        if datetime.now().timestamp() > data.get("expires_at", 0):
+            del self.password_setup_tokens[token]
+            return None
+        del self.password_setup_tokens[token]
+        return data
 
 db = InMemoryDatabase()

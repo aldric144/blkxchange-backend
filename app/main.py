@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
+import os
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List
 import psycopg
@@ -6,13 +7,24 @@ import psycopg
 from app.models import (
     VendorCreate, Vendor, ProductCreate, Product,
     ProfessionalCreate, Professional, OrderCreate, Order,
-    ImpactStats, ProductCategory, ProfessionalCategory
+    ImpactStats, ProductCategory, ProfessionalCategory,
+    VendorApplicationCreate, VendorApplication, VendorApplicationStatus,
+    VendorAccountCreate, VendorAccount,
+    ProductCreateEnhanced, ProductEnhanced, ProductStatus
 )
 from app.database import db
 from app.seed_data import seed_database
 from app.email import send_vendor_welcome_email
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
+
+ADMIN_SECRET = os.getenv("ADMIN_SECRET_KEY", "changeme")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
+async def require_admin(x_admin_secret: Optional[str] = Header(None)):
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return True
 
 @app.on_event("startup")
 async def startup_event():
@@ -144,3 +156,126 @@ async def get_order(order_id: str):
 @app.get("/api/impact", response_model=ImpactStats)
 async def get_impact_stats():
     return db.get_impact_stats()
+
+# Vendor Application Endpoints
+@app.post("/api/vendor-applications", response_model=VendorApplication)
+async def create_vendor_application(application: VendorApplicationCreate):
+    if not application.agreement_accepted:
+        raise HTTPException(status_code=400, detail="Vendor agreement must be accepted")
+    new_application = db.create_vendor_application(application)
+    print("\n" + "="*80)
+    print("📥 New vendor application submitted")
+    print(f"Business: {new_application.business_name} | Contact: {new_application.contact_name} | Email: {new_application.email}")
+    print("- Sending confirmation email to applicant (console/Ethereal)")
+    print("- Sending notification email to admin (console/Ethereal)")
+    print("="*80 + "\n")
+    return new_application
+
+@app.get("/api/vendor-applications", response_model=List[VendorApplication])
+async def get_vendor_applications(status: Optional[VendorApplicationStatus] = None, admin_ok: bool = Depends(require_admin)):
+    return db.get_all_vendor_applications(status=status)
+
+@app.get("/api/vendor-applications/{application_id}", response_model=VendorApplication)
+async def get_vendor_application(application_id: str):
+    application = db.get_vendor_application(application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return application
+
+@app.put("/api/vendor-applications/{application_id}/status")
+async def update_vendor_application_status(application_id: str, status: VendorApplicationStatus, admin_ok: bool = Depends(require_admin)):
+    application = db.update_vendor_application_status(application_id, status)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return {"message": f"Application status updated to {status}", "application": application}
+
+# Vendor Account Endpoints
+@app.post("/api/vendor-accounts", response_model=VendorAccount)
+async def create_vendor_account(account: VendorAccountCreate):
+    existing_account = db.get_vendor_account_by_email(account.email)
+    if existing_account:
+        raise HTTPException(status_code=400, detail="Account with this email already exists")
+    new_account = db.create_vendor_account(account)
+    return new_account
+
+@app.post("/api/vendor-accounts/login")
+async def vendor_login(email: str, password: str):
+    account = db.verify_vendor_password(email, password)
+    if not account:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {"message": "Login successful", "vendor_id": account.vendor_id, "email": account.email}
+
+# Enhanced Product Endpoints
+@app.post("/api/products-enhanced", response_model=ProductEnhanced)
+async def create_product_enhanced(product: ProductCreateEnhanced):
+    new_product = db.create_product_enhanced(product)
+    return new_product
+
+@app.get("/api/products-enhanced", response_model=List[ProductEnhanced])
+async def get_products_enhanced(vendor_id: Optional[str] = None, status: Optional[ProductStatus] = None):
+    return db.get_all_products_enhanced(vendor_id=vendor_id, status=status)
+
+@app.get("/api/products-enhanced/{product_id}", response_model=ProductEnhanced)
+async def get_product_enhanced(product_id: str):
+    product = db.get_product_enhanced(product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
+@app.put("/api/products-enhanced/{product_id}", response_model=ProductEnhanced)
+async def update_product_enhanced(product_id: str, product: ProductCreateEnhanced):
+    updated_product = db.update_product_enhanced(product_id, product)
+    if not updated_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return updated_product
+
+@app.put("/api/products-enhanced/{product_id}/status")
+async def update_product_enhanced_status(product_id: str, status: ProductStatus):
+    product = db.update_product_enhanced_status(product_id, status)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"message": f"Product status updated to {status}", "product": product}
+
+# Admin Endpoints
+@app.post("/api/admin/approve-vendor/{application_id}")
+async def approve_vendor_application(application_id: str, admin_ok: bool = Depends(require_admin)):
+    application = db.get_vendor_application(application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    db.update_vendor_application_status(application_id, VendorApplicationStatus.APPROVED)
+    
+    vendor_data = VendorCreate(
+        email=application.email,
+        name=application.contact_name,
+        business_name=application.business_name,
+        business_description=application.description,
+        phone=application.phone
+    )
+    new_vendor = db.create_vendor(vendor_data)
+    
+    return {"message": "Vendor application approved", "vendor_id": new_vendor.id}
+
+@app.post("/api/admin/reject-vendor/{application_id}")
+async def reject_vendor_application(application_id: str, reason: Optional[str] = None, admin_ok: bool = Depends(require_admin)):
+    application = db.get_vendor_application(application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    
+    db.update_vendor_application_status(application_id, VendorApplicationStatus.REJECTED)
+    
+    return {"message": "Vendor application rejected", "reason": reason}
+
+@app.post("/api/admin/approve-product/{product_id}")
+async def approve_product(product_id: str, admin_ok: bool = Depends(require_admin)):
+    product = db.update_product_enhanced_status(product_id, ProductStatus.APPROVED)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"message": "Product approved", "product": product}
+
+@app.post("/api/admin/reject-product/{product_id}")
+async def reject_product(product_id: str, reason: Optional[str] = None, admin_ok: bool = Depends(require_admin)):
+    product = db.update_product_enhanced_status(product_id, ProductStatus.REJECTED)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"message": "Product rejected", "reason": reason}

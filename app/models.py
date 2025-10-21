@@ -36,6 +36,26 @@ class OrderStatus(str, Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
+class VendorApplicationStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+class ProductStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+class FulfillmentMethod(str, Enum):
+    SHIPPING = "shipping"
+    LOCAL = "local"
+
+class PriceRange(str, Enum):
+    UNDER_25 = "<$25"
+    RANGE_25_50 = "$25-$50"
+    RANGE_50_100 = "$50-$100"
+    OVER_100 = ">$100"
+
 class User(BaseModel):
     id: str
     email: EmailStr
@@ -150,3 +170,72 @@ class ImpactStats(BaseModel):
     hbcu_donations: float
     scholarship_donations: float
     nonprofit_donations: float
+
+class VendorApplicationCreate(BaseModel):
+    business_name: str
+    contact_name: str
+    email: EmailStr
+    phone: str
+    address: str
+    website: Optional[str] = None
+    category: ProductCategory
+    description: str
+    price_range: PriceRange
+    fulfillment_method: FulfillmentMethod
+    image_urls: List[str] = []
+    agreement_accepted: bool
+
+class VendorApplication(BaseModel):
+    id: str
+    business_name: str
+    contact_name: str
+    email: EmailStr
+    phone: str
+    address: str
+    website: Optional[str] = None
+    category: ProductCategory
+    description: str
+    price_range: PriceRange
+    fulfillment_method: FulfillmentMethod
+    image_urls: List[str]
+    status: VendorApplicationStatus
+    agreement_accepted: bool
+    created_at: datetime
+    updated_at: datetime
+
+class VendorAccountCreate(BaseModel):
+    vendor_id: str
+    email: EmailStr
+    password: str
+
+class VendorAccount(BaseModel):
+    id: str
+    vendor_id: str
+    email: EmailStr
+    password_hash: str
+    role: UserRole = UserRole.VENDOR
+    created_at: datetime
+
+class ProductCreateEnhanced(BaseModel):
+    vendor_id: str
+    name: str
+    description: str
+    price: float
+    category: ProductCategory
+    quantity: int
+    image_urls: List[str] = []
+
+class ProductEnhanced(BaseModel):
+    id: str
+    vendor_id: str
+    name: str
+    description: str
+    price: float
+    category: ProductCategory
+    quantity: int
+    image_urls: List[str]
+    status: ProductStatus
+    rating: float = 0.0
+    reviews_count: int = 0
+    created_at: datetime
+    updated_at: datetime
