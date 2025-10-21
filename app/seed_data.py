@@ -196,6 +196,666 @@ def seed_database():
         image_url="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500"
     ))
     
+    db.create_professional(ProfessionalCreate(
+        email="dr.martinez@pediatrics.com",
+        name="Dr. Carlos Martinez",
+        title="Pediatrician",
+        category=ProfessionalCategory.HEALTH,
+        bio="Compassionate pediatrician dedicated to providing quality healthcare for children in underserved communities.",
+        credentials="MD, Board Certified Pediatrics, FAAP",
+        hourly_rate=225.00,
+        phone="555-0301",
+        image_url="https://randomuser.me/api/portraits/men/32.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="dr.johnson@mentalhealth.com",
+        name="Dr. Keisha Johnson",
+        title="Clinical Psychologist",
+        category=ProfessionalCategory.HEALTH,
+        bio="Licensed clinical psychologist specializing in trauma therapy and culturally responsive mental health care.",
+        credentials="PhD in Clinical Psychology, Licensed Psychologist",
+        hourly_rate=180.00,
+        phone="555-0302",
+        image_url="https://randomuser.me/api/portraits/women/44.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="dr.brown@dentistry.com",
+        name="Dr. Marcus Brown",
+        title="Dentist",
+        category=ProfessionalCategory.HEALTH,
+        bio="Family dentist committed to making dental care accessible and comfortable for all ages.",
+        credentials="DDS, Member of National Dental Association",
+        hourly_rate=195.00,
+        phone="555-0303",
+        image_url="https://randomuser.me/api/portraits/men/52.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="nurse.davis@healthcare.com",
+        name="Nurse Practitioner Angela Davis",
+        title="Family Nurse Practitioner",
+        category=ProfessionalCategory.HEALTH,
+        bio="Experienced nurse practitioner providing primary care with a focus on preventive medicine and wellness.",
+        credentials="MSN, FNP-C, 12 years experience",
+        hourly_rate=150.00,
+        phone="555-0304",
+        image_url="https://randomuser.me/api/portraits/women/65.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="attorney.washington@law.com",
+        name="Attorney James Washington",
+        title="Criminal Defense Attorney",
+        category=ProfessionalCategory.LEGAL,
+        bio="Aggressive criminal defense attorney protecting the rights of the accused with over 20 years of courtroom experience.",
+        credentials="JD, Licensed in Multiple States",
+        hourly_rate=400.00,
+        phone="555-0305",
+        image_url="https://randomuser.me/api/portraits/men/43.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="attorney.harris@familylaw.com",
+        name="Attorney Nicole Harris",
+        title="Family Law Attorney",
+        category=ProfessionalCategory.LEGAL,
+        bio="Compassionate family law attorney specializing in divorce, custody, and adoption cases.",
+        credentials="JD, Certified Family Law Specialist",
+        hourly_rate=325.00,
+        phone="555-0306",
+        image_url="https://randomuser.me/api/portraits/women/28.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="attorney.robinson@business.com",
+        name="Attorney Terrence Robinson",
+        title="Business Attorney",
+        category=ProfessionalCategory.LEGAL,
+        bio="Corporate attorney helping Black-owned businesses navigate contracts, compliance, and business formation.",
+        credentials="JD, MBA, Business Law Specialist",
+        hourly_rate=375.00,
+        phone="555-0307",
+        image_url="https://randomuser.me/api/portraits/men/67.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="attorney.green@immigration.com",
+        name="Attorney Fatima Green",
+        title="Immigration Attorney",
+        category=ProfessionalCategory.LEGAL,
+        bio="Dedicated immigration attorney helping families reunite and achieve their American dream.",
+        credentials="JD, AILA Member, Fluent in Spanish",
+        hourly_rate=300.00,
+        phone="555-0308",
+        image_url="https://randomuser.me/api/portraits/women/72.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="cpa.mitchell@accounting.com",
+        name="CPA Robert Mitchell",
+        title="Certified Public Accountant",
+        category=ProfessionalCategory.FINANCE,
+        bio="Experienced CPA specializing in tax planning and small business accounting for entrepreneurs.",
+        credentials="CPA, MBA in Accounting",
+        hourly_rate=165.00,
+        phone="555-0309",
+        image_url="https://randomuser.me/api/portraits/men/22.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="advisor.lewis@wealth.com",
+        name="Wealth Advisor Jasmine Lewis",
+        title="Wealth Management Advisor",
+        category=ProfessionalCategory.FINANCE,
+        bio="Helping high-net-worth individuals and families preserve and grow wealth across generations.",
+        credentials="CFP, CFA, Series 7 & 66",
+        hourly_rate=250.00,
+        phone="555-0310",
+        image_url="https://randomuser.me/api/portraits/women/33.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="planner.taylor@retirement.com",
+        name="Retirement Planner Marcus Taylor",
+        title="Retirement Planning Specialist",
+        category=ProfessionalCategory.FINANCE,
+        bio="Certified retirement counselor helping clients achieve financial security in their golden years.",
+        credentials="CRPC, 15 years experience",
+        hourly_rate=185.00,
+        phone="555-0311",
+        image_url="https://randomuser.me/api/portraits/men/58.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="analyst.cooper@investment.com",
+        name="Investment Analyst Shanice Cooper",
+        title="Investment Analyst",
+        category=ProfessionalCategory.FINANCE,
+        bio="Data-driven investment analyst specializing in portfolio optimization and risk management.",
+        credentials="CFA Level III, MS Finance",
+        hourly_rate=200.00,
+        phone="555-0312",
+        image_url="https://randomuser.me/api/portraits/women/47.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="coach.williams@executive.com",
+        name="Executive Coach Denise Williams",
+        title="Executive Leadership Coach",
+        category=ProfessionalCategory.COACHING,
+        bio="Empowering C-suite executives and emerging leaders to maximize their impact and influence.",
+        credentials="PCC, MBA, 25 years corporate experience",
+        hourly_rate=275.00,
+        phone="555-0313",
+        image_url="https://randomuser.me/api/portraits/women/55.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="coach.jenkins@career.com",
+        name="Career Coach Brandon Jenkins",
+        title="Career Transition Coach",
+        category=ProfessionalCategory.COACHING,
+        bio="Helping professionals navigate career transitions and land their dream jobs with confidence.",
+        credentials="CPCC, Former Fortune 500 Recruiter",
+        hourly_rate=125.00,
+        phone="555-0314",
+        image_url="https://randomuser.me/api/portraits/men/38.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="coach.parker@wellness.com",
+        name="Wellness Coach Tanya Parker",
+        title="Health & Wellness Coach",
+        category=ProfessionalCategory.COACHING,
+        bio="Certified wellness coach guiding clients toward holistic health through nutrition, fitness, and mindfulness.",
+        credentials="NBC-HWC, Certified Nutritionist",
+        hourly_rate=110.00,
+        phone="555-0315",
+        image_url="https://randomuser.me/api/portraits/women/62.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="coach.henderson@relationship.com",
+        name="Relationship Coach Dr. Kevin Henderson",
+        title="Marriage & Relationship Coach",
+        category=ProfessionalCategory.COACHING,
+        bio="Licensed therapist and relationship coach helping couples build stronger, healthier partnerships.",
+        credentials="PhD in Counseling Psychology, LMFT",
+        hourly_rate=160.00,
+        phone="555-0316",
+        image_url="https://randomuser.me/api/portraits/men/71.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="consultant.adams@strategy.com",
+        name="Strategy Consultant Monica Adams",
+        title="Business Strategy Consultant",
+        category=ProfessionalCategory.CONSULTING,
+        bio="Former McKinsey consultant helping businesses develop winning strategies and operational excellence.",
+        credentials="MBA from Wharton, 18 years consulting",
+        hourly_rate=350.00,
+        phone="555-0317",
+        image_url="https://randomuser.me/api/portraits/women/39.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="consultant.foster@hr.com",
+        name="HR Consultant Gerald Foster",
+        title="Human Resources Consultant",
+        category=ProfessionalCategory.CONSULTING,
+        bio="HR expert specializing in talent acquisition, employee relations, and organizational development.",
+        credentials="SPHR, SHRM-SCP, 20+ years HR leadership",
+        hourly_rate=225.00,
+        phone="555-0318",
+        image_url="https://randomuser.me/api/portraits/men/45.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="consultant.brooks@tech.com",
+        name="IT Consultant Alicia Brooks",
+        title="Technology Consultant",
+        category=ProfessionalCategory.CONSULTING,
+        bio="Technology strategist helping businesses leverage digital transformation and cybersecurity solutions.",
+        credentials="CISSP, MS Computer Science",
+        hourly_rate=275.00,
+        phone="555-0319",
+        image_url="https://randomuser.me/api/portraits/women/51.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="consultant.reed@marketing.com",
+        name="Marketing Consultant Isaiah Reed",
+        title="Marketing Strategy Consultant",
+        category=ProfessionalCategory.CONSULTING,
+        bio="Award-winning marketing consultant specializing in brand development and digital marketing strategies.",
+        credentials="MBA Marketing, Google Analytics Certified",
+        hourly_rate=200.00,
+        phone="555-0320",
+        image_url="https://randomuser.me/api/portraits/men/29.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="prof.carter@university.edu",
+        name="Professor Vanessa Carter",
+        title="College Professor & Academic Advisor",
+        category=ProfessionalCategory.EDUCATION,
+        bio="PhD professor and academic advisor helping students navigate higher education and career planning.",
+        credentials="PhD in Education, 15 years teaching",
+        hourly_rate=140.00,
+        phone="555-0321",
+        image_url="https://randomuser.me/api/portraits/women/68.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="tutor.simmons@learning.com",
+        name="Tutor Malcolm Simmons",
+        title="STEM Tutor & Test Prep Specialist",
+        category=ProfessionalCategory.EDUCATION,
+        bio="Experienced tutor specializing in SAT/ACT prep, mathematics, and science for high school students.",
+        credentials="MS Mathematics, Perfect SAT Score",
+        hourly_rate=95.00,
+        phone="555-0322",
+        image_url="https://randomuser.me/api/portraits/men/56.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="educator.bell@literacy.org",
+        name="Literacy Specialist Tamika Bell",
+        title="Reading & Literacy Specialist",
+        category=ProfessionalCategory.EDUCATION,
+        bio="Certified reading specialist helping children overcome learning challenges and develop strong literacy skills.",
+        credentials="MEd Reading, Wilson Reading Certified",
+        hourly_rate=105.00,
+        phone="555-0323",
+        image_url="https://randomuser.me/api/portraits/women/41.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="counselor.hayes@guidance.edu",
+        name="School Counselor Dr. Raymond Hayes",
+        title="Educational Counselor",
+        category=ProfessionalCategory.EDUCATION,
+        bio="Licensed school counselor providing academic guidance, college planning, and social-emotional support.",
+        credentials="EdD in Counseling, Licensed School Counselor",
+        hourly_rate=120.00,
+        phone="555-0324",
+        image_url="https://randomuser.me/api/portraits/men/64.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="instructor.freeman@training.com",
+        name="Training Specialist Jasmine Freeman",
+        title="Corporate Training Specialist",
+        category=ProfessionalCategory.EDUCATION,
+        bio="Professional development trainer designing and delivering engaging corporate training programs and workshops.",
+        credentials="MEd Adult Education, CPTD Certified",
+        hourly_rate=135.00,
+        phone="555-0355",
+        image_url="https://randomuser.me/api/portraits/women/70.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="broker.patterson@realestate.com",
+        name="Real Estate Broker Candace Patterson",
+        title="Licensed Real Estate Broker",
+        category=ProfessionalCategory.REAL_ESTATE,
+        bio="Top-producing broker specializing in residential and commercial properties in urban markets.",
+        credentials="Licensed Broker, 12 years experience",
+        hourly_rate=175.00,
+        phone="555-0325",
+        image_url="https://randomuser.me/api/portraits/women/36.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="advisor.coleman@wealth.com",
+        name="Wealth Advisor Jerome Coleman",
+        title="Private Wealth Advisor",
+        category=ProfessionalCategory.REAL_ESTATE,
+        bio="Certified wealth advisor helping clients build real estate portfolios and achieve financial independence.",
+        credentials="CFP, Real Estate Investment Specialist",
+        hourly_rate=225.00,
+        phone="555-0326",
+        image_url="https://randomuser.me/api/portraits/men/48.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="agent.russell@homes.com",
+        name="Real Estate Agent Kimberly Russell",
+        title="Residential Real Estate Agent",
+        category=ProfessionalCategory.REAL_ESTATE,
+        bio="Dedicated agent helping first-time homebuyers and families find their dream homes.",
+        credentials="Licensed Realtor, Accredited Buyer Representative",
+        hourly_rate=150.00,
+        phone="555-0327",
+        image_url="https://randomuser.me/api/portraits/women/59.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="investor.morgan@property.com",
+        name="Property Investor Darius Morgan",
+        title="Real Estate Investment Consultant",
+        category=ProfessionalCategory.REAL_ESTATE,
+        bio="Experienced investor teaching others how to build wealth through strategic real estate investments.",
+        credentials="Licensed Broker, 50+ Properties Managed",
+        hourly_rate=200.00,
+        phone="555-0328",
+        image_url="https://randomuser.me/api/portraits/men/35.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="appraiser.dixon@valuation.com",
+        name="Property Appraiser Latoya Dixon",
+        title="Certified Real Estate Appraiser",
+        category=ProfessionalCategory.REAL_ESTATE,
+        bio="Licensed appraiser providing accurate property valuations for residential and commercial real estate.",
+        credentials="Certified Residential Appraiser",
+        hourly_rate=165.00,
+        phone="555-0329",
+        image_url="https://randomuser.me/api/portraits/women/46.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="barber.thompson@cuts.com",
+        name="Master Barber Jamal Thompson",
+        title="Master Barber & Stylist",
+        category=ProfessionalCategory.BARBERS_BEAUTY,
+        bio="Award-winning master barber specializing in precision cuts, fades, and beard grooming.",
+        credentials="Licensed Master Barber, 15 years experience",
+        hourly_rate=85.00,
+        phone="555-0330",
+        image_url="https://randomuser.me/api/portraits/men/42.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="stylist.washington@salon.com",
+        name="Hair Stylist Ebony Washington",
+        title="Natural Hair Specialist",
+        category=ProfessionalCategory.BARBERS_BEAUTY,
+        bio="Certified natural hair stylist specializing in locs, braids, and protective styles for all hair types.",
+        credentials="Licensed Cosmetologist, Natural Hair Certified",
+        hourly_rate=95.00,
+        phone="555-0331",
+        image_url="https://randomuser.me/api/portraits/women/53.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="mua.jackson@beauty.com",
+        name="Makeup Artist Destiny Jackson",
+        title="Professional Makeup Artist",
+        category=ProfessionalCategory.BARBERS_BEAUTY,
+        bio="Professional makeup artist specializing in bridal, editorial, and special occasion makeup for melanin-rich skin.",
+        credentials="Certified Makeup Artist, 10 years experience",
+        hourly_rate=125.00,
+        phone="555-0332",
+        image_url="https://randomuser.me/api/portraits/women/37.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="esthetician.moore@skincare.com",
+        name="Esthetician Tiffany Moore",
+        title="Licensed Esthetician",
+        category=ProfessionalCategory.BARBERS_BEAUTY,
+        bio="Licensed esthetician providing customized skincare treatments and facials for all skin types.",
+        credentials="Licensed Esthetician, Skincare Specialist",
+        hourly_rate=110.00,
+        phone="555-0333",
+        image_url="https://randomuser.me/api/portraits/women/61.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="nail.tech@nails.com",
+        name="Nail Technician Crystal Lee",
+        title="Master Nail Technician",
+        category=ProfessionalCategory.BARBERS_BEAUTY,
+        bio="Master nail technician specializing in nail art, gel manicures, and pedicures with 12 years experience.",
+        credentials="Licensed Nail Technician, Nail Art Specialist",
+        hourly_rate=75.00,
+        phone="555-0334",
+        image_url="https://randomuser.me/api/portraits/women/49.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="photographer.evans@studio.com",
+        name="Photographer Marcus Evans",
+        title="Portrait & Wedding Photographer",
+        category=ProfessionalCategory.PHOTOGRAPHY_DESIGN,
+        bio="Award-winning photographer capturing life's most precious moments with artistic vision and technical excellence.",
+        credentials="Professional Photographer, 18 years experience",
+        hourly_rate=200.00,
+        phone="555-0335",
+        image_url="https://randomuser.me/api/portraits/men/51.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="designer.clark@creative.com",
+        name="Graphic Designer Jasmine Clark",
+        title="Brand & Graphic Designer",
+        category=ProfessionalCategory.PHOTOGRAPHY_DESIGN,
+        bio="Creative graphic designer specializing in brand identity, logo design, and marketing materials.",
+        credentials="BFA Graphic Design, Adobe Certified Expert",
+        hourly_rate=135.00,
+        phone="555-0336",
+        image_url="https://randomuser.me/api/portraits/women/43.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="designer.walker@interiors.com",
+        name="Interior Designer Natalie Walker",
+        title="Interior Designer",
+        category=ProfessionalCategory.PHOTOGRAPHY_DESIGN,
+        bio="Licensed interior designer creating beautiful, functional spaces that reflect clients' unique personalities.",
+        credentials="NCIDQ Certified, 14 years experience",
+        hourly_rate=165.00,
+        phone="555-0337",
+        image_url="https://randomuser.me/api/portraits/women/57.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="videographer.hill@media.com",
+        name="Videographer Andre Hill",
+        title="Commercial Videographer",
+        category=ProfessionalCategory.PHOTOGRAPHY_DESIGN,
+        bio="Professional videographer producing high-quality commercial videos, documentaries, and event coverage.",
+        credentials="Film Production Degree, Emmy Nominated",
+        hourly_rate=185.00,
+        phone="555-0338",
+        image_url="https://randomuser.me/api/portraits/men/63.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="designer.scott@web.com",
+        name="Web Designer Brittany Scott",
+        title="UX/UI Designer",
+        category=ProfessionalCategory.PHOTOGRAPHY_DESIGN,
+        bio="User experience designer creating intuitive, beautiful digital experiences for web and mobile applications.",
+        credentials="MS Human-Computer Interaction, Google UX Certified",
+        hourly_rate=155.00,
+        phone="555-0339",
+        image_url="https://randomuser.me/api/portraits/women/34.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="advisor.turner@auto.com",
+        name="Auto Finance Advisor Derek Turner",
+        title="Automotive Finance Specialist",
+        category=ProfessionalCategory.AUTOMOTIVE_HOUSING,
+        bio="Experienced auto finance specialist helping clients secure the best financing options for vehicle purchases.",
+        credentials="Certified Automotive Finance Manager",
+        hourly_rate=120.00,
+        phone="555-0340",
+        image_url="https://randomuser.me/api/portraits/men/39.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="broker.phillips@mortgage.com",
+        name="Mortgage Broker Sandra Phillips",
+        title="Mortgage Loan Officer",
+        category=ProfessionalCategory.AUTOMOTIVE_HOUSING,
+        bio="Licensed mortgage broker specializing in first-time homebuyer programs and refinancing solutions.",
+        credentials="NMLS Licensed, 16 years mortgage experience",
+        hourly_rate=145.00,
+        phone="555-0341",
+        image_url="https://randomuser.me/api/portraits/women/52.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="consultant.gray@housing.com",
+        name="Housing Consultant Michael Gray",
+        title="Affordable Housing Consultant",
+        category=ProfessionalCategory.AUTOMOTIVE_HOUSING,
+        bio="Housing consultant helping families navigate affordable housing programs and homeownership opportunities.",
+        credentials="HUD Certified Housing Counselor",
+        hourly_rate=110.00,
+        phone="555-0342",
+        image_url="https://randomuser.me/api/portraits/men/46.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="advisor.bennett@credit.com",
+        name="Credit Advisor Monique Bennett",
+        title="Credit Repair Specialist",
+        category=ProfessionalCategory.AUTOMOTIVE_HOUSING,
+        bio="Credit repair specialist helping clients improve credit scores and qualify for better financing options.",
+        credentials="Certified Credit Consultant, FICO Expert",
+        hourly_rate=95.00,
+        phone="555-0343",
+        image_url="https://randomuser.me/api/portraits/women/48.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="inspector.collins@home.com",
+        name="Home Inspector Leonard Collins",
+        title="Certified Home Inspector",
+        category=ProfessionalCategory.AUTOMOTIVE_HOUSING,
+        bio="Licensed home inspector providing thorough property inspections to protect homebuyers' investments.",
+        credentials="ASHI Certified, 20 years construction experience",
+        hourly_rate=130.00,
+        phone="555-0344",
+        image_url="https://randomuser.me/api/portraits/men/54.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="strategist.price@media.com",
+        name="Media Strategist Gabrielle Price",
+        title="Digital Media Strategist",
+        category=ProfessionalCategory.MEDIA_MARKETING,
+        bio="Digital media strategist developing comprehensive campaigns that drive engagement and business growth.",
+        credentials="MBA Marketing, Google Ads Certified",
+        hourly_rate=175.00,
+        phone="555-0345",
+        image_url="https://randomuser.me/api/portraits/women/38.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="manager.butler@social.com",
+        name="Social Media Manager Tyrone Butler",
+        title="Social Media Marketing Manager",
+        category=ProfessionalCategory.MEDIA_MARKETING,
+        bio="Social media expert helping brands build authentic connections and grow their online presence.",
+        credentials="Certified Social Media Manager, 10 years experience",
+        hourly_rate=140.00,
+        phone="555-0346",
+        image_url="https://randomuser.me/api/portraits/men/37.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="specialist.rivera@pr.com",
+        name="PR Specialist Carmen Rivera",
+        title="Public Relations Specialist",
+        category=ProfessionalCategory.MEDIA_MARKETING,
+        bio="Public relations professional managing brand reputation and securing media coverage for clients.",
+        credentials="APR Accreditation, Former Journalist",
+        hourly_rate=160.00,
+        phone="555-0347",
+        image_url="https://randomuser.me/api/portraits/women/56.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="writer.sanders@content.com",
+        name="Content Writer Jordan Sanders",
+        title="Content Marketing Writer",
+        category=ProfessionalCategory.MEDIA_MARKETING,
+        bio="Professional content writer creating compelling copy that converts readers into customers.",
+        credentials="BA Journalism, SEO Certified",
+        hourly_rate=115.00,
+        phone="555-0348",
+        image_url="https://randomuser.me/api/portraits/men/44.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="producer.hughes@broadcast.com",
+        name="Media Producer Vanessa Hughes",
+        title="Broadcast Media Producer",
+        category=ProfessionalCategory.MEDIA_MARKETING,
+        bio="Award-winning media producer with experience in television, radio, and digital content production.",
+        credentials="Emmy Award Winner, 15 years broadcasting",
+        hourly_rate=195.00,
+        phone="555-0349",
+        image_url="https://randomuser.me/api/portraits/women/63.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="director.powell@nonprofit.org",
+        name="Nonprofit Director Angela Powell",
+        title="Nonprofit Executive Director",
+        category=ProfessionalCategory.NONPROFITS,
+        bio="Experienced nonprofit leader with proven track record in fundraising, program development, and community impact.",
+        credentials="MPA, 20 years nonprofit leadership",
+        hourly_rate=185.00,
+        phone="555-0350",
+        image_url="https://randomuser.me/api/portraits/women/45.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="coordinator.long@community.org",
+        name="Community Organizer Marcus Long",
+        title="Community Engagement Coordinator",
+        category=ProfessionalCategory.NONPROFITS,
+        bio="Grassroots organizer mobilizing communities for social justice and positive change.",
+        credentials="MSW, 12 years community organizing",
+        hourly_rate=125.00,
+        phone="555-0351",
+        image_url="https://randomuser.me/api/portraits/men/59.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="manager.perry@grants.org",
+        name="Grant Writer Stephanie Perry",
+        title="Grant Writing Specialist",
+        category=ProfessionalCategory.NONPROFITS,
+        bio="Professional grant writer securing millions in funding for nonprofits and community organizations.",
+        credentials="GPC Certified, $50M+ Grants Secured",
+        hourly_rate=150.00,
+        phone="555-0352",
+        image_url="https://randomuser.me/api/portraits/women/54.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="coordinator.jenkins@volunteer.org",
+        name="Volunteer Coordinator Keith Jenkins",
+        title="Volunteer Program Manager",
+        category=ProfessionalCategory.NONPROFITS,
+        bio="Volunteer coordinator building and managing effective volunteer programs that create lasting community impact.",
+        credentials="CVA Certified, Nonprofit Management Certificate",
+        hourly_rate=105.00,
+        phone="555-0353",
+        image_url="https://randomuser.me/api/portraits/men/66.jpg"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="advocate.barnes@social.org",
+        name="Social Worker Dr. Michelle Barnes",
+        title="Licensed Clinical Social Worker",
+        category=ProfessionalCategory.NONPROFITS,
+        bio="Licensed social worker providing counseling, advocacy, and support services to underserved communities.",
+        credentials="LCSW, PhD in Social Work",
+        hourly_rate=135.00,
+        phone="555-0354",
+        image_url="https://randomuser.me/api/portraits/women/67.jpg"
+    ))
+    
     print("Database seeded successfully!")
     print(f"Created {len(db.vendors)} vendors")
     print(f"Created {len(db.products)} products")
