@@ -49,11 +49,14 @@ async def log_email_to_console(to_email: str, vendor_name: str, vendor_id: str):
     print("\n" + "-"*80)
     print(f"Welcome, {vendor_name}!")
     print("")
+    print("Thank you for applying to become a BlkXchange™ Vendor.")
+    print("")
     print("We're thrilled to have you join BlkXchange™, a platform dedicated to")
     print("empowering Black and BIPOC entrepreneurs.")
     print("")
     print("Your vendor application has been received and is being reviewed by our team.")
-    print("We'll notify you within 2-3 business days about your approval status.")
+    print("Your agreement acceptance has been recorded.")
+    print("You will be notified once your application has been reviewed.")
     print("")
     print("What You Get as a BlkXchange™ Vendor:")
     print("  • No Upfront Fees: Only pay when you make a sale (10% platform fee)")
@@ -203,9 +206,11 @@ async def send_vendor_welcome_email(to_email: str, vendor_name: str, vendor_id: 
                 <div class="content">
                     <h2>Welcome, {vendor_name}! 🎉</h2>
                     
+                    <p>Thank you for applying to become a BlkXchange™ Vendor.</p>
+                    
                     <p>We're thrilled to have you join BlkXchange™, a platform dedicated to empowering Black and BIPOC entrepreneurs.</p>
                     
-                    <p>Your vendor application has been received and is being reviewed by our team. We'll notify you within 2-3 business days about your approval status.</p>
+                    <p>Your vendor application has been received and is being reviewed by our team. Your agreement acceptance has been recorded. You will be notified once your application has been reviewed.</p>
                     
                     <div class="benefits">
                         <h3 style="margin-top: 0; color: #000000;">What You Get as a BlkXchange™ Vendor:</h3>
@@ -247,9 +252,11 @@ async def send_vendor_welcome_email(to_email: str, vendor_name: str, vendor_id: 
         
         Welcome, {vendor_name}!
         
+        Thank you for applying to become a BlkXchange™ Vendor.
+        
         We're thrilled to have you join BlkXchange™, a platform dedicated to empowering Black and BIPOC entrepreneurs.
         
-        Your vendor application has been received and is being reviewed by our team. We'll notify you within 2-3 business days about your approval status.
+        Your vendor application has been received and is being reviewed by our team. Your agreement acceptance has been recorded. You will be notified once your application has been reviewed.
         
         What You Get as a BlkXchange™ Vendor:
         - No Upfront Fees: Only pay when you make a sale (10% platform fee)
