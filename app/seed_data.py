@@ -243,7 +243,7 @@ def seed_database():
         description="A powerful and revelatory work that unveils how spiritual exchanges take place in the unseen realm — both godly and ungodly. Dr. Aldric Marshall draws from biblical insight and divine revelation to guide readers in reclaiming spiritual authority, breaking cycles of loss, and walking in heavenly alignment. This book helps believers understand how to position themselves on Heaven's trading floors to receive divine strategy, favor, and restoration.",
         price=24.99,
         category=ProductCategory.BOOKS,
-        image_url="https://images.pexels.com/photos/4866045/pexels-photo-4866045.jpeg?auto=compress&cs=tinysrgb&w=500",
+        image_url="/images/books/seven-trading-floors.jpg",
         stock=100
     ))
     
