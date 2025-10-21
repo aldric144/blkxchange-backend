@@ -101,6 +101,7 @@ class ProductCreate(BaseModel):
 class Product(BaseModel):
     id: str
     vendor_id: str
+    vendor_name: Optional[str] = None
     name: str
     description: str
     price: float

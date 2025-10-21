@@ -77,6 +77,14 @@ def seed_database():
         phone="555-0109"
     ))
     
+    vendor10 = db.create_vendor(VendorCreate(
+        email="klove144@bellsouth.net",
+        name="Dr. Aldric Marshall",
+        business_name="Dr. Aldric Marshall Ministries",
+        business_description="Empowering believers with divine revelation and Kingdom teaching through transformative books and resources.",
+        phone="555-0110"
+    ))
+    
     db.create_product(vendor1.id, ProductCreate(
         name="Ankara Print Dress",
         description="Beautiful handmade dress featuring vibrant Ankara print fabric. Perfect for any occasion.",
@@ -228,6 +236,15 @@ def seed_database():
         category=ProductCategory.BOOKS,
         image_url="https://images.pexels.com/photos/4866043/pexels-photo-4866043.jpeg?auto=compress&cs=tinysrgb&w=500",
         stock=35
+    ))
+    
+    db.create_product(vendor10.id, ProductCreate(
+        name="Seven Trading Floors of Heaven: Confronting and Overcoming Ungodly Exchanges",
+        description="A powerful and revelatory work that unveils how spiritual exchanges take place in the unseen realm — both godly and ungodly. Dr. Aldric Marshall draws from biblical insight and divine revelation to guide readers in reclaiming spiritual authority, breaking cycles of loss, and walking in heavenly alignment. This book helps believers understand how to position themselves on Heaven's trading floors to receive divine strategy, favor, and restoration.",
+        price=24.99,
+        category=ProductCategory.BOOKS,
+        image_url="https://images.pexels.com/photos/4866045/pexels-photo-4866045.jpeg?auto=compress&cs=tinysrgb&w=500",
+        stock=100
     ))
     
     db.create_product(vendor9.id, ProductCreate(

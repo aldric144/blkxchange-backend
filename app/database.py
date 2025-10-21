@@ -69,9 +69,12 @@ class InMemoryDatabase:
     
     def create_product(self, vendor_id: str, product_data: ProductCreate) -> Product:
         product_id = str(uuid.uuid4())
+        vendor = self.get_vendor(vendor_id)
+        vendor_name = vendor.name if vendor else None
         product = Product(
             id=product_id,
             vendor_id=vendor_id,
+            vendor_name=vendor_name,
             name=product_data.name,
             description=product_data.description,
             price=product_data.price,
