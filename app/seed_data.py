@@ -1,7 +1,8 @@
 from app.database import db
 from app.models import (
     VendorCreate, ProductCreate, ProfessionalCreate,
-    ProductCategory, ProfessionalCategory
+    ProductCategory, ProfessionalCategory,
+    ArticleCreate, ArticleCategory
 )
 
 def seed_database():
@@ -1219,7 +1220,133 @@ def seed_database():
         image_url="https://images.pexels.com/photos/5669621/pexels-photo-5669621.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
+    article1 = db.create_article(ArticleCreate(
+        title="Black Tech Entrepreneur Raises $50M for AI Healthcare Platform",
+        author="Marcus Williams",
+        email="marcus@blackchronicle.com",
+        category=ArticleCategory.ENTREPRENEUR_SPOTLIGHT,
+        excerpt="Dr. Jasmine Carter's innovative AI-powered healthcare platform secures major funding to revolutionize patient care in underserved communities.",
+        body="""Dr. Jasmine Carter, founder and CEO of HealthBridge AI, has successfully raised $50 million in Series B funding to expand her groundbreaking healthcare technology platform. The platform uses artificial intelligence to improve diagnostic accuracy and patient outcomes in underserved communities.
+
+Access to quality healthcare should not depend on your zip code, says Dr. Carter, who grew up in a medically underserved neighborhood in Detroit. Our AI platform helps community health centers provide the same level of diagnostic support as major hospitals.
+
+HealthBridge AI has already partnered with over 200 community health centers across 15 states, serving more than 500,000 patients. The new funding will enable the company to expand to 1,000 centers by 2026.
+
+The investment round was led by Impact Ventures and included participation from several prominent Black-led venture capital firms. This marks one of the largest funding rounds for a Black woman founder in the healthcare technology sector.
+
+Dr. Carter's journey from medical school to tech entrepreneurship exemplifies the innovation happening at the intersection of healthcare and technology. Her platform has demonstrated a 40% improvement in early disease detection rates in the communities it serves.
+
+This is just the beginning, Dr. Carter adds. We are proving that technology can be a powerful equalizer in healthcare access.""",
+        image_url="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article1.id, "published")
+    
+    article2 = db.create_article(ArticleCreate(
+        title="Historic HBCU Partnership Creates $100M Scholarship Fund",
+        author="Dr. Angela Thompson",
+        email="angela@blackchronicle.com",
+        category=ArticleCategory.EDUCATION_CULTURE,
+        excerpt="A coalition of HBCUs announces groundbreaking scholarship initiative to support 10,000 students over the next decade.",
+        body="""In a historic move, a coalition of 20 Historically Black Colleges and Universities (HBCUs) has announced the creation of a $100 million scholarship fund aimed at supporting 10,000 students over the next decade.
+
+The Legacy Scholars Initiative represents one of the largest coordinated scholarship efforts in HBCU history. The fund will provide full-tuition scholarships to students pursuing degrees in STEM fields, business, and the arts.
+
+This initiative ensures that financial barriers do not prevent talented students from accessing the transformative education HBCUs provide, said Dr. Michael Johnson, president of the HBCU Coalition.
+
+The scholarship fund was made possible through contributions from alumni, corporate partners, and philanthropic organizations. Major donors include several Fortune 500 companies and successful HBCU alumni who have achieved prominence in business, entertainment, and technology.
+
+Priority will be given to first-generation college students and those from economically disadvantaged backgrounds. The program also includes mentorship components, connecting scholars with successful professionals in their chosen fields.
+
+Applications for the first cohort of Legacy Scholars will open in January 2026, with the inaugural class beginning their studies in Fall 2026.
+
+This is about more than just scholarships, adds Dr. Johnson. It is about investing in the next generation of Black leaders, innovators, and changemakers.""",
+        image_url="https://images.pexels.com/photos/1595391/pexels-photo-1595391.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article2.id, "published")
+    
+    article3 = db.create_article(ArticleCreate(
+        title="Young Inventor's Water Purification System Wins International Award",
+        author="Jennifer Davis",
+        email="jennifer@blackchronicle.com",
+        category=ArticleCategory.BLACK_ACHIEVEMENTS,
+        excerpt="17-year-old Malik Johnson's innovative water purification system earns top honors at global science competition.",
+        body="""Seventeen-year-old Malik Johnson from Atlanta has won the prestigious International Young Inventors Award for his revolutionary low-cost water purification system designed for communities without access to clean drinking water.
+
+Johnson's invention uses a combination of solar power and natural filtration materials to purify water at a fraction of the cost of existing systems. The device can purify up to 50 gallons of water per day and costs less than $100 to manufacture.
+
+I was inspired by stories of communities around the world struggling with water access, Johnson explains. I wanted to create something that could actually make a difference.
+
+The young inventor's system has already been deployed in pilot programs in three countries, providing clean water to over 5,000 people. Several international aid organizations have expressed interest in scaling up production.
+
+Johnson's achievement is particularly remarkable given that he developed the prototype in his high school's science lab using mostly recycled materials. His innovation caught the attention of judges from 50 countries competing in the International Young Inventors Competition.
+
+Along with the award, Johnson received a $50,000 grant to further develop his invention and mentorship from leading engineers and scientists.
+
+Malik represents the best of what young people can achieve when given the opportunity and support, said his science teacher, Mrs. Patricia Williams. His invention will literally save lives.
+
+Johnson plans to study engineering at MIT in the fall and continue developing affordable solutions for global challenges.""",
+        image_url="https://images.pexels.com/photos/2280571/pexels-photo-2280571.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article3.id, "published")
+    
+    article4 = db.create_article(ArticleCreate(
+        title="Faith and Resilience: How One Church Transformed a Community",
+        author="Pastor David Brown",
+        email="david@blackchronicle.com",
+        category=ArticleCategory.FAITH_RESILIENCE,
+        excerpt="New Hope Community Church's holistic approach to ministry creates lasting change in struggling neighborhood.",
+        body="""When Pastor Sarah Mitchell arrived at New Hope Community Church five years ago, the surrounding neighborhood was struggling with high unemployment, food insecurity, and limited access to social services. Today, the community is thriving, thanks to the church's innovative faith-based initiatives.
+
+We realized that preaching alone was not enough, Pastor Mitchell explains. We needed to address the whole person - spiritual, physical, economic, and social needs.
+
+Under her leadership, New Hope launched several transformative programs:
+
+The Community Kitchen serves 500 hot meals weekly and operates a food pantry serving 200 families. The church's job training center has helped 300 residents gain employment. A free health clinic provides basic medical care to uninsured community members. An after-school program serves 150 children with tutoring and mentorship.
+
+The church also established a small business incubator, helping 25 entrepreneurs launch successful ventures. Many of these businesses now employ other community members, creating a positive economic cycle.
+
+Faith without works is dead, Pastor Mitchell often says, quoting James 2:26. Our faith calls us to action, to be the hands and feet of Christ in our community.
+
+The transformation has not gone unnoticed. Crime rates in the neighborhood have dropped 40%, high school graduation rates have increased 25%, and property values have risen as the community stabilizes.
+
+Other churches across the country are now studying New Hope's model, seeking to replicate its success in their own communities.
+
+This is what the church is supposed to be, says longtime member Dorothy Washington. A beacon of hope and a catalyst for real change.
+
+Pastor Mitchell credits the community's resilience and faith for the transformation. We just provided the framework. The people did the work, trusting God every step of the way.""",
+        image_url="https://images.pexels.com/photos/8468135/pexels-photo-8468135.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article4.id, "published")
+    
+    article5 = db.create_article(ArticleCreate(
+        title="Black-Owned Bookstore Chain Expands to 50 Locations Nationwide",
+        author="Lisa Anderson",
+        email="lisa@blackchronicle.com",
+        category=ArticleCategory.ENTREPRENEUR_SPOTLIGHT,
+        excerpt="Sankofa Books celebrates milestone expansion, becoming largest Black-owned bookstore chain in America.",
+        body="""Sankofa Books, the beloved Black-owned bookstore chain, has announced the opening of its 50th location, marking a historic milestone in Black entrepreneurship and literary culture.
+
+Founded by siblings Marcus and Tanya Freeman in 2015 with a single store in Harlem, Sankofa Books has grown into the largest Black-owned bookstore chain in the United States. The company specializes in books by and about Black authors, while also offering a carefully curated selection of general interest titles.
+
+We started with a simple mission: to create spaces where Black stories are centered and celebrated, says Marcus Freeman, co-founder and CEO. Fifty stores later, that mission remains unchanged.
+
+Each Sankofa location serves as more than just a bookstore. They function as community hubs, hosting author readings, book clubs, educational workshops, and cultural events. The stores have become gathering places for Black intellectuals, artists, and community members.
+
+The expansion comes at a time when independent bookstores nationwide have struggled to compete with online retailers. Sankofa's success demonstrates the power of community-focused business models and authentic cultural connection.
+
+People do not just come here to buy books, explains Tanya Freeman, co-founder and COO. They come for the experience, the community, the sense of belonging. That is something you cannot get from clicking add to cart.
+
+The company employs over 500 people nationwide and has become a launching pad for Black authors. Sankofa's book recommendations often propel titles to bestseller lists.
+
+The 50th store, opening in Oakland, California, will feature the chain's largest event space yet, capable of hosting 300 people for author talks and community gatherings.
+
+This is just the beginning, Marcus Freeman adds. Our goal is to have a Sankofa Books in every major city in America, ensuring that Black literary culture has a permanent home everywhere.""",
+        image_url="https://images.pexels.com/photos/2908984/pexels-photo-2908984.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article5.id, "published")
+    
     print("Database seeded successfully!")
     print(f"Created {len(db.vendors)} vendors")
     print(f"Created {len(db.products)} products")
     print(f"Created {len(db.professionals)} professionals")
+    print(f"Created {len(db.articles)} articles")

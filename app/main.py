@@ -14,7 +14,8 @@ from app.models import (
     StartupApplicationCreate, StartupApplication,
     AngelInvestorCreate, AngelInvestor,
     DonationCreate, Donation,
-    BlackBank, InvestImpactStats
+    BlackBank, InvestImpactStats,
+    Article, ArticleCreate, ArticleCategory, ArticleStatus
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -326,3 +327,36 @@ async def get_black_banks():
 @app.get("/api/invest-impact", response_model=InvestImpactStats)
 async def get_invest_impact_stats():
     return db.get_invest_impact_stats()
+
+@app.post("/api/articles", response_model=Article)
+async def create_article(article_data: ArticleCreate):
+    article = db.create_article(article_data)
+    return article
+
+@app.get("/api/articles", response_model=List[Article])
+async def get_articles(
+    category: Optional[ArticleCategory] = None,
+    status: Optional[ArticleStatus] = None
+):
+    return db.get_all_articles(category=category, status=status)
+
+@app.get("/api/articles/{article_id}", response_model=Article)
+async def get_article(article_id: str):
+    article = db.get_article(article_id)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return article
+
+@app.get("/api/articles/slug/{slug}", response_model=Article)
+async def get_article_by_slug(slug: str):
+    article = db.get_article_by_slug(slug)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return article
+
+@app.patch("/api/articles/{article_id}/status", response_model=Article, dependencies=[Depends(require_admin)])
+async def update_article_status(article_id: str, status: ArticleStatus):
+    article = db.update_article_status(article_id, status)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return article

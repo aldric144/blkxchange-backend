@@ -318,3 +318,38 @@ class InvestImpactStats(BaseModel):
     startup_investments: float
     angel_investors_count: int
     businesses_supported: int
+
+class ArticleCategory(str, Enum):
+    LATEST_NEWS = "latest_news"
+    BLACK_ACHIEVEMENTS = "black_achievements"
+    ENTREPRENEUR_SPOTLIGHT = "entrepreneur_spotlight"
+    EDUCATION_CULTURE = "education_culture"
+    FAITH_RESILIENCE = "faith_resilience"
+
+class ArticleStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    PUBLISHED = "published"
+
+class ArticleCreate(BaseModel):
+    title: str
+    author: str
+    email: EmailStr
+    category: ArticleCategory
+    excerpt: str
+    body: str
+    image_url: Optional[str] = None
+
+class Article(BaseModel):
+    id: str
+    title: str
+    author: str
+    email: EmailStr
+    category: ArticleCategory
+    excerpt: str
+    body: str
+    image_url: Optional[str] = None
+    status: ArticleStatus
+    slug: str
+    created_at: datetime
+    updated_at: datetime

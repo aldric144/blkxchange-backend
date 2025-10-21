@@ -12,7 +12,8 @@ from app.models import (
     StartupApplication, StartupApplicationCreate,
     AngelInvestor, AngelInvestorCreate,
     Donation, DonationCreate,
-    BlackBank, InvestImpactStats
+    BlackBank, InvestImpactStats,
+    Article, ArticleCreate, ArticleStatus, ArticleCategory
 )
 
 class InMemoryDatabase:
@@ -29,6 +30,7 @@ class InMemoryDatabase:
         self.angel_investors: Dict[str, AngelInvestor] = {}
         self.donations: Dict[str, Donation] = {}
         self.black_banks: Dict[str, BlackBank] = {}
+        self.articles: Dict[str, Article] = {}
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -431,5 +433,57 @@ class InMemoryDatabase:
             angel_investors_count=len(self.angel_investors),
             businesses_supported=len(self.startup_applications)
         )
+    
+    def _generate_slug(self, title: str) -> str:
+        """Generate URL-friendly slug from title"""
+        slug = title.lower()
+        slug = slug.replace(" ", "-")
+        slug = ''.join(c for c in slug if c.isalnum() or c == '-')
+        return f"{slug}-{str(uuid.uuid4())[:8]}"
+    
+    def create_article(self, article_data: ArticleCreate) -> Article:
+        article_id = str(uuid.uuid4())
+        slug = self._generate_slug(article_data.title)
+        article = Article(
+            id=article_id,
+            title=article_data.title,
+            author=article_data.author,
+            email=article_data.email,
+            category=article_data.category,
+            excerpt=article_data.excerpt,
+            body=article_data.body,
+            image_url=article_data.image_url,
+            status=ArticleStatus.PENDING,
+            slug=slug,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.articles[article_id] = article
+        return article
+    
+    def get_article(self, article_id: str) -> Optional[Article]:
+        return self.articles.get(article_id)
+    
+    def get_article_by_slug(self, slug: str) -> Optional[Article]:
+        for article in self.articles.values():
+            if article.slug == slug:
+                return article
+        return None
+    
+    def get_all_articles(self, category: Optional[ArticleCategory] = None, status: Optional[ArticleStatus] = None) -> List[Article]:
+        articles = list(self.articles.values())
+        if category:
+            articles = [a for a in articles if a.category == category]
+        if status:
+            articles = [a for a in articles if a.status == status]
+        articles.sort(key=lambda x: x.created_at, reverse=True)
+        return articles
+    
+    def update_article_status(self, article_id: str, status: ArticleStatus) -> Optional[Article]:
+        if article_id in self.articles:
+            self.articles[article_id].status = status
+            self.articles[article_id].updated_at = datetime.now()
+            return self.articles[article_id]
+        return None
 
 db = InMemoryDatabase()
