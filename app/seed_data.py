@@ -1345,6 +1345,65 @@ This is just the beginning, Marcus Freeman adds. Our goal is to have a Sankofa B
     ))
     db.update_article_status(article5.id, "published")
     
+    article6 = db.create_article(ArticleCreate(
+        title="The Rise of Black Tech Founders in the AI Revolution",
+        author="Dr. Aldric Marshall",
+        email="aldric@blackchronicle.com",
+        category=ArticleCategory.ENTREPRENEUR_SPOTLIGHT,
+        excerpt="Black innovators are no longer waiting for a seat at the table—they're building their own. Across the globe, Black technologists are launching AI-driven platforms that redefine access, equity, and creativity.",
+        body="""From Atlanta to Accra, Black founders are claiming space in the world's fastest-growing tech sector — artificial intelligence. Once an arena reserved for Silicon Valley elites, AI is now a platform for equity, driven by creators who see technology not as exclusion, but liberation.
+
+Startups like NeuroNexus Innovations, DataCulture AI, and CodeBlack Labs are proving that inclusion is not charity — it is innovation. These founders are not just coding; they are creating tools that address bias, expand opportunity, and amplify culture.
+
+Venture capital is finally taking notice. In 2024 alone, investments in Black-led AI startups grew by 38%, signaling a new age of intentional funding. Yet the true revolution is not in dollars, but in purpose — using algorithms to tell our stories, to heal, to educate, and to build generational wealth through digital sovereignty.
+
+We are not behind; we are building differently, says one founder. Our vision of AI includes empathy, justice, and legacy.
+
+The next wave of the AI revolution is not happening in closed labs — it is being written by the innovators who were once locked out.""",
+        image_url="https://images.pexels.com/photos/1181329/pexels-photo-1181329.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article6.id, "published")
+    
+    article7 = db.create_article(ArticleCreate(
+        title="Black Wall Street Reimagined: The Digital Renaissance",
+        author="Editorial Team – The Black Chronicle",
+        email="editorial@blackchronicle.com",
+        category=ArticleCategory.BLACK_ACHIEVEMENTS,
+        excerpt="A century after the original Black Wall Street was destroyed, a new one is rising — not on land, but online.",
+        body="""The spirit of Tulsa has found a new home — in code. Platforms like BlkXchange™, BuyBlack Global, and Harlem Blockchain Network are merging technology with legacy, giving birth to a new kind of Wall Street: one built on digital ownership and collective economics.
+
+In this modern renaissance, every purchase, every connection, every mentorship fuels an ecosystem of empowerment. The mission is not nostalgia — it is restoration. What was once burned to ashes is now reborn in pixels, partnerships, and purpose.
+
+From NFTs that honor African art to fintech solutions that serve Black banks, this digital movement transforms pain into power. Entrepreneurs are not just selling — they are circulating. Wealth does not just accumulate — it returns home.
+
+Our ancestors built with brick and soul; we are building with data and code.
+
+As the next generation embraces crypto, AI, and global trade, Black Wall Street 2.0 is no longer a dream — it is a destination.""",
+        image_url="https://images.pexels.com/photos/3783514/pexels-photo-3783514.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article7.id, "published")
+    
+    article8 = db.create_article(ArticleCreate(
+        title="Healing Through Heritage: The Return of Black Cultural Education",
+        author="Dr. Aldric Marshall",
+        email="aldric@blackchronicle.com",
+        category=ArticleCategory.EDUCATION_CULTURE,
+        excerpt="From classrooms to community centers, a new wave of educators is reclaiming Black identity through storytelling, history, and cultural restoration.",
+        body="""After years of underrepresentation in school curriculums, a cultural awakening is taking root. Across the nation, educators, parents, and organizations are demanding that African and African American history be taught not as a sidebar — but as the spine of education.
+
+Initiatives like Freedom Curriculum, Legacy Literacy Labs, and Roots Rising are weaving culture into every lesson, reminding young minds that heritage is not just history — it is inheritance.
+
+At HBCUs, enrollment is surging as students seek purpose beyond profit. They are not just earning degrees; they are reclaiming identity. Education must heal as much as it teaches, says Dr. Tanya Ellis of Spelman College.
+
+This cultural restoration is reshaping education's purpose: to produce not just professionals, but protectors of legacy.
+
+When we remember who we are, we rise higher than we have ever been.
+
+The future of Black education is not just about information — it is about transformation.""",
+        image_url="https://images.pexels.com/photos/935949/pexels-photo-935949.jpeg?auto=compress&cs=tinysrgb&w=800"
+    ))
+    db.update_article_status(article8.id, "published")
+    
     print("Database seeded successfully!")
     print(f"Created {len(db.vendors)} vendors")
     print(f"Created {len(db.products)} products")
