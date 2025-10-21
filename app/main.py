@@ -10,7 +10,11 @@ from app.models import (
     ImpactStats, ProductCategory, ProfessionalCategory,
     VendorApplicationCreate, VendorApplication, VendorApplicationStatus,
     VendorAccountCreate, VendorAccount,
-    ProductCreateEnhanced, ProductEnhanced, ProductStatus
+    ProductCreateEnhanced, ProductEnhanced, ProductStatus,
+    StartupApplicationCreate, StartupApplication,
+    AngelInvestorCreate, AngelInvestor,
+    DonationCreate, Donation,
+    BlackBank, InvestImpactStats
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -279,3 +283,46 @@ async def reject_product(product_id: str, reason: Optional[str] = None, admin_ok
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product rejected", "reason": reason}
+
+# Invest in the Future Hub Endpoints
+@app.post("/api/startup-applications", response_model=StartupApplication)
+async def create_startup_application(application: StartupApplicationCreate):
+    if not application.agreement_accepted:
+        raise HTTPException(status_code=400, detail="Agreement must be accepted")
+    new_application = db.create_startup_application(application)
+    print(f"\n📥 New startup application: {new_application.business_name} seeking ${new_application.funding_goal:,.2f}")
+    return new_application
+
+@app.get("/api/startup-applications", response_model=List[StartupApplication])
+async def get_startup_applications():
+    return db.get_all_startup_applications()
+
+@app.post("/api/angel-investors", response_model=AngelInvestor)
+async def create_angel_investor(investor: AngelInvestorCreate):
+    if not investor.agreement_accepted:
+        raise HTTPException(status_code=400, detail="Agreement must be accepted")
+    new_investor = db.create_angel_investor(investor)
+    print(f"\n👼 New angel investor registered: {new_investor.name} ({new_investor.investment_range})")
+    return new_investor
+
+@app.get("/api/angel-investors", response_model=List[AngelInvestor])
+async def get_angel_investors():
+    return db.get_all_angel_investors()
+
+@app.post("/api/donations", response_model=Donation)
+async def create_donation(donation: DonationCreate):
+    new_donation = db.create_donation(donation)
+    print(f"\n💰 New donation: ${new_donation.amount:,.2f} to {new_donation.institution} from {new_donation.donor_name}")
+    return new_donation
+
+@app.get("/api/donations", response_model=List[Donation])
+async def get_donations():
+    return db.get_all_donations()
+
+@app.get("/api/black-banks", response_model=List[BlackBank])
+async def get_black_banks():
+    return db.get_all_black_banks()
+
+@app.get("/api/invest-impact", response_model=InvestImpactStats)
+async def get_invest_impact_stats():
+    return db.get_invest_impact_stats()

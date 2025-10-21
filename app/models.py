@@ -28,6 +28,12 @@ class ProfessionalCategory(str, Enum):
     COACHING = "coaching"
     CONSULTING = "consulting"
     EDUCATION = "education"
+    REAL_ESTATE = "real_estate"
+    BARBERS_BEAUTY = "barbers_beauty"
+    PHOTOGRAPHY_DESIGN = "photography_design"
+    AUTOMOTIVE_HOUSING = "automotive_housing"
+    MEDIA_MARKETING = "media_marketing"
+    NONPROFITS = "nonprofits"
     OTHER = "other"
 
 class OrderStatus(str, Enum):
@@ -239,3 +245,75 @@ class ProductEnhanced(BaseModel):
     reviews_count: int = 0
     created_at: datetime
     updated_at: datetime
+
+class StartupApplicationCreate(BaseModel):
+    name: str
+    business_name: str
+    email: EmailStr
+    phone: str
+    website: Optional[str] = None
+    funding_goal: float
+    business_summary: str
+    pitch_deck_url: Optional[str] = None
+    agreement_accepted: bool
+
+class StartupApplication(BaseModel):
+    id: str
+    name: str
+    business_name: str
+    email: EmailStr
+    phone: str
+    website: Optional[str] = None
+    funding_goal: float
+    business_summary: str
+    pitch_deck_url: Optional[str] = None
+    agreement_accepted: bool
+    created_at: datetime
+
+class AngelInvestorCreate(BaseModel):
+    name: str
+    email: EmailStr
+    company: Optional[str] = None
+    accreditation_type: str
+    investment_range: str
+    interests: List[str]
+    agreement_accepted: bool
+
+class AngelInvestor(BaseModel):
+    id: str
+    name: str
+    email: EmailStr
+    company: Optional[str] = None
+    accreditation_type: str
+    investment_range: str
+    interests: List[str]
+    agreement_accepted: bool
+    created_at: datetime
+
+class DonationCreate(BaseModel):
+    donor_name: str
+    email: EmailStr
+    amount: float
+    institution: str
+
+class Donation(BaseModel):
+    id: str
+    donor_name: str
+    email: EmailStr
+    amount: float
+    institution: str
+    created_at: datetime
+
+class BlackBank(BaseModel):
+    id: str
+    name: str
+    description: str
+    location: str
+    affiliate_link: str
+
+class InvestImpactStats(BaseModel):
+    total_funds_reinvested: float
+    hbcu_donations: float
+    startup_investments: float
+    angel_investors_count: int
+    businesses_supported: int

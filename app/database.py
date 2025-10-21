@@ -8,7 +8,11 @@ from app.models import (
     OrderItem, OrderStatus, ImpactStats,
     VendorApplication, VendorApplicationCreate, VendorApplicationStatus,
     VendorAccount, VendorAccountCreate,
-    ProductEnhanced, ProductCreateEnhanced, ProductStatus
+    ProductEnhanced, ProductCreateEnhanced, ProductStatus,
+    StartupApplication, StartupApplicationCreate,
+    AngelInvestor, AngelInvestorCreate,
+    Donation, DonationCreate,
+    BlackBank, InvestImpactStats
 )
 
 class InMemoryDatabase:
@@ -21,6 +25,10 @@ class InMemoryDatabase:
         self.vendor_accounts: Dict[str, VendorAccount] = {}
         self.products_enhanced: Dict[str, ProductEnhanced] = {}
         self.password_setup_tokens: Dict[str, dict] = {}
+        self.startup_applications: Dict[str, StartupApplication] = {}
+        self.angel_investors: Dict[str, AngelInvestor] = {}
+        self.donations: Dict[str, Donation] = {}
+        self.black_banks: Dict[str, BlackBank] = {}
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -28,6 +36,7 @@ class InMemoryDatabase:
             "scholarship_donations": 0.0,
             "nonprofit_donations": 0.0
         }
+        self._seed_black_banks()
     
     def create_vendor(self, vendor_data: VendorCreate) -> Vendor:
         vendor_id = str(uuid.uuid4())
@@ -336,5 +345,88 @@ class InMemoryDatabase:
             return None
         del self.password_setup_tokens[token]
         return data
+    
+    def _seed_black_banks(self):
+        banks = [
+            {"name": "OneUnited Bank", "description": "Nation's largest Black-owned bank", "location": "Nationwide", "affiliate_link": "https://www.oneunited.com"},
+            {"name": "Carver Federal Savings", "description": "Historic NYC institution", "location": "New York", "affiliate_link": "https://www.carverbank.com"},
+            {"name": "Liberty Bank", "description": "One of the oldest Black-owned banks", "location": "New Orleans, LA", "affiliate_link": "https://www.liberty-bank.com"},
+            {"name": "Citizens Trust Bank", "description": "Atlanta's premier Black-owned bank", "location": "Atlanta, GA", "affiliate_link": "https://www.ctbconnect.com"}
+        ]
+        for bank_data in banks:
+            bank_id = str(uuid.uuid4())
+            bank = BlackBank(id=bank_id, **bank_data)
+            self.black_banks[bank_id] = bank
+    
+    def create_startup_application(self, application_data: StartupApplicationCreate) -> StartupApplication:
+        application_id = str(uuid.uuid4())
+        application = StartupApplication(
+            id=application_id,
+            name=application_data.name,
+            business_name=application_data.business_name,
+            email=application_data.email,
+            phone=application_data.phone,
+            website=application_data.website,
+            funding_goal=application_data.funding_goal,
+            business_summary=application_data.business_summary,
+            pitch_deck_url=application_data.pitch_deck_url,
+            agreement_accepted=application_data.agreement_accepted,
+            created_at=datetime.now()
+        )
+        self.startup_applications[application_id] = application
+        return application
+    
+    def get_all_startup_applications(self) -> List[StartupApplication]:
+        return list(self.startup_applications.values())
+    
+    def create_angel_investor(self, investor_data: AngelInvestorCreate) -> AngelInvestor:
+        investor_id = str(uuid.uuid4())
+        investor = AngelInvestor(
+            id=investor_id,
+            name=investor_data.name,
+            email=investor_data.email,
+            company=investor_data.company,
+            accreditation_type=investor_data.accreditation_type,
+            investment_range=investor_data.investment_range,
+            interests=investor_data.interests,
+            agreement_accepted=investor_data.agreement_accepted,
+            created_at=datetime.now()
+        )
+        self.angel_investors[investor_id] = investor
+        return investor
+    
+    def get_all_angel_investors(self) -> List[AngelInvestor]:
+        return list(self.angel_investors.values())
+    
+    def create_donation(self, donation_data: DonationCreate) -> Donation:
+        donation_id = str(uuid.uuid4())
+        donation = Donation(
+            id=donation_id,
+            donor_name=donation_data.donor_name,
+            email=donation_data.email,
+            amount=donation_data.amount,
+            institution=donation_data.institution,
+            created_at=datetime.now()
+        )
+        self.donations[donation_id] = donation
+        self.impact_stats["hbcu_donations"] += donation_data.amount
+        self.impact_stats["total_donations"] += donation_data.amount
+        return donation
+    
+    def get_all_donations(self) -> List[Donation]:
+        return list(self.donations.values())
+    
+    def get_all_black_banks(self) -> List[BlackBank]:
+        return list(self.black_banks.values())
+    
+    def get_invest_impact_stats(self) -> InvestImpactStats:
+        total_startup_funding = sum(app.funding_goal for app in self.startup_applications.values())
+        return InvestImpactStats(
+            total_funds_reinvested=self.impact_stats["total_donations"],
+            hbcu_donations=self.impact_stats["hbcu_donations"],
+            startup_investments=total_startup_funding,
+            angel_investors_count=len(self.angel_investors),
+            businesses_supported=len(self.startup_applications)
+        )
 
 db = InMemoryDatabase()
