@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta
 from app.database import db
 from app.models import (
     VendorCreate, ProductCreate, ProfessionalCreate,
     ProductCategory, ProfessionalCategory,
-    ArticleCreate, ArticleCategory
+    ArticleCreate, ArticleCategory,
+    AdvertiserCreate, AdCreativeCreate, AdType, PriceTier, AdSlotCreate
 )
 
 def seed_database():
@@ -1404,13 +1406,11 @@ The future of Black education is not just about information — it is about tran
     ))
     db.update_article_status(article8.id, "published")
     
-    from datetime import timedelta
-    from app.models import AdvertiserCreate, AdCreativeCreate, AdType, PriceTier, AdSlotCreate
-    
     advertiser1 = db.create_advertiser(AdvertiserCreate(
         name="Serlock Integrated Marketing",
         contact_email="sales@serlockintegrated.com",
-        website="https://www.serlockintegrated.com/"
+        website="https://www.serlockintegrated.com/",
+        tagline="Elevating Black-Owned Brands Through Strategic Marketing"
     ))
     
     creative1 = db.create_ad_creative(AdCreativeCreate(
@@ -1434,7 +1434,8 @@ The future of Black education is not just about information — it is about tran
     advertiser2 = db.create_advertiser(AdvertiserCreate(
         name="DEI Apparel & Promotional Solutions",
         contact_email="contact@deiapparel.store",
-        website="https://deiapparel.store/"
+        website="https://deiapparel.store/",
+        tagline="Custom Apparel & Promotional Products for Your Business"
     ))
     
     creative2 = db.create_ad_creative(AdCreativeCreate(
@@ -1458,7 +1459,8 @@ The future of Black education is not just about information — it is about tran
     advertiser3 = db.create_advertiser(AdvertiserCreate(
         name="BlackWave Media Group",
         contact_email="info@blackwavemediagroup.com",
-        website="https://blackwavemediagroup.com/"
+        website="https://blackwavemediagroup.com/",
+        tagline="Amplifying Black Voices in Media & Entertainment"
     ))
     
     creative3 = db.create_ad_creative(AdCreativeCreate(

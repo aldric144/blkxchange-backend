@@ -421,10 +421,12 @@ async def get_ads_for_page(page: str, placement: Optional[str] = None):
     for slot in slots:
         creative = db.get_ad_creative(slot.creative_id)
         if creative and creative.status == AdStatus.LIVE:
+            advertiser = db.get_advertiser(creative.advertiser_id)
             ads.append({
                 "id": slot.id,
                 "creative_id": creative.id,
                 "advertiser_name": creative.advertiser_name,
+                "tagline": advertiser.tagline if advertiser else None,
                 "asset_url": creative.asset_url,
                 "link_url": creative.link_url,
                 "ad_type": creative.ad_type,

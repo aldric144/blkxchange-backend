@@ -374,12 +374,14 @@ class AdvertiserCreate(BaseModel):
     name: str
     contact_email: EmailStr
     website: Optional[str] = None
+    tagline: Optional[str] = None
 
 class Advertiser(BaseModel):
     id: str
     name: str
     contact_email: EmailStr
     website: Optional[str] = None
+    tagline: Optional[str] = None
     created_at: datetime
 
 class AdCreativeCreate(BaseModel):

@@ -498,6 +498,7 @@ class InMemoryDatabase:
             name=advertiser_data.name,
             contact_email=advertiser_data.contact_email,
             website=advertiser_data.website,
+            tagline=advertiser_data.tagline,
             created_at=datetime.now()
         )
         self.advertisers[advertiser_id] = advertiser
