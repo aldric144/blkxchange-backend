@@ -1417,7 +1417,7 @@ The future of Black education is not just about information — it is about tran
         advertiser_id=advertiser1.id,
         asset_url="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1200",
         ad_type=AdType.BANNER,
-        pages=["marketplace", "professionals"],
+        pages=["marketplace", "professionals", "invest", "news", "impact", "about"],
         start_date=datetime.now(),
         end_date=datetime.now() + timedelta(days=30),
         price_tier=PriceTier.PREMIUM,
@@ -1428,7 +1428,7 @@ The future of Black education is not just about information — it is about tran
         db.create_ad_slot(AdSlotCreate(
             creative_id=creative1.id,
             page=page,
-            placement="top"
+            placement="sidebar"
         ))
     
     advertiser2 = db.create_advertiser(AdvertiserCreate(
@@ -1442,7 +1442,7 @@ The future of Black education is not just about information — it is about tran
         advertiser_id=advertiser2.id,
         asset_url="https://images.pexels.com/photos/1488463/pexels-photo-1488463.jpeg?auto=compress&cs=tinysrgb&w=1200",
         ad_type=AdType.CAROUSEL,
-        pages=["news", "about", "impact"],
+        pages=["marketplace", "professionals", "invest", "news", "impact", "about"],
         start_date=datetime.now(),
         end_date=datetime.now() + timedelta(days=60),
         price_tier=PriceTier.BASIC,
@@ -1453,7 +1453,7 @@ The future of Black education is not just about information — it is about tran
         db.create_ad_slot(AdSlotCreate(
             creative_id=creative2.id,
             page=page,
-            placement="carousel"
+            placement="sidebar"
         ))
     
     advertiser3 = db.create_advertiser(AdvertiserCreate(
@@ -1467,7 +1467,7 @@ The future of Black education is not just about information — it is about tran
         advertiser_id=advertiser3.id,
         asset_url="https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1200",
         ad_type=AdType.SPOTLIGHT,
-        pages=["invest", "professionals", "marketplace"],
+        pages=["marketplace", "professionals", "invest", "news", "impact", "about"],
         start_date=datetime.now(),
         end_date=datetime.now() + timedelta(days=90),
         price_tier=PriceTier.SPOTLIGHT,
@@ -1478,7 +1478,7 @@ The future of Black education is not just about information — it is about tran
         db.create_ad_slot(AdSlotCreate(
             creative_id=creative3.id,
             page=page,
-            placement="spotlight"
+            placement="sidebar"
         ))
     
     print("Database seeded successfully!")
