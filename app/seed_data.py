@@ -1404,8 +1404,86 @@ The future of Black education is not just about information — it is about tran
     ))
     db.update_article_status(article8.id, "published")
     
+    from datetime import timedelta
+    from app.models import AdvertiserCreate, AdCreativeCreate, AdType, PriceTier, AdSlotCreate
+    
+    advertiser1 = db.create_advertiser(AdvertiserCreate(
+        name="Serlock Integrated Marketing",
+        contact_email="sales@serlockintegrated.com",
+        website="https://www.serlockintegrated.com/"
+    ))
+    
+    creative1 = db.create_ad_creative(AdCreativeCreate(
+        advertiser_id=advertiser1.id,
+        asset_url="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        ad_type=AdType.BANNER,
+        pages=["marketplace", "professionals"],
+        start_date=datetime.now(),
+        end_date=datetime.now() + timedelta(days=30),
+        price_tier=PriceTier.PREMIUM,
+        link_url="https://www.serlockintegrated.com/"
+    ))
+    
+    for page in creative1.pages:
+        db.create_ad_slot(AdSlotCreate(
+            creative_id=creative1.id,
+            page=page,
+            placement="top"
+        ))
+    
+    advertiser2 = db.create_advertiser(AdvertiserCreate(
+        name="DEI Apparel & Promotional Solutions",
+        contact_email="contact@deiapparel.store",
+        website="https://deiapparel.store/"
+    ))
+    
+    creative2 = db.create_ad_creative(AdCreativeCreate(
+        advertiser_id=advertiser2.id,
+        asset_url="https://images.pexels.com/photos/1488463/pexels-photo-1488463.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        ad_type=AdType.CAROUSEL,
+        pages=["news", "about", "impact"],
+        start_date=datetime.now(),
+        end_date=datetime.now() + timedelta(days=60),
+        price_tier=PriceTier.BASIC,
+        link_url="https://deiapparel.store/"
+    ))
+    
+    for page in creative2.pages:
+        db.create_ad_slot(AdSlotCreate(
+            creative_id=creative2.id,
+            page=page,
+            placement="carousel"
+        ))
+    
+    advertiser3 = db.create_advertiser(AdvertiserCreate(
+        name="BlackWave Media Group",
+        contact_email="info@blackwavemediagroup.com",
+        website="https://blackwavemediagroup.com/"
+    ))
+    
+    creative3 = db.create_ad_creative(AdCreativeCreate(
+        advertiser_id=advertiser3.id,
+        asset_url="https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        ad_type=AdType.SPOTLIGHT,
+        pages=["invest", "professionals", "marketplace"],
+        start_date=datetime.now(),
+        end_date=datetime.now() + timedelta(days=90),
+        price_tier=PriceTier.SPOTLIGHT,
+        link_url="https://blackwavemediagroup.com/"
+    ))
+    
+    for page in creative3.pages:
+        db.create_ad_slot(AdSlotCreate(
+            creative_id=creative3.id,
+            page=page,
+            placement="spotlight"
+        ))
+    
     print("Database seeded successfully!")
     print(f"Created {len(db.vendors)} vendors")
     print(f"Created {len(db.products)} products")
     print(f"Created {len(db.professionals)} professionals")
     print(f"Created {len(db.articles)} articles")
+    print(f"Created {len(db.advertisers)} advertisers")
+    print(f"Created {len(db.ad_creatives)} ad creatives")
+    print(f"Created {len(db.ad_slots)} ad slots")

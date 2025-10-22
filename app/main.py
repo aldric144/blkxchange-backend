@@ -15,7 +15,9 @@ from app.models import (
     AngelInvestorCreate, AngelInvestor,
     DonationCreate, Donation,
     BlackBank, InvestImpactStats,
-    Article, ArticleCreate, ArticleCategory, ArticleStatus
+    Article, ArticleCreate, ArticleCategory, ArticleStatus,
+    Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate,
+    AdSlot, AdSlotCreate, AdStatus
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -360,3 +362,83 @@ async def update_article_status(article_id: str, status: ArticleStatus):
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     return article
+
+# Advertising Module Endpoints
+@app.post("/api/advertisers", response_model=Advertiser)
+async def create_advertiser(advertiser_data: AdvertiserCreate):
+    advertiser = db.create_advertiser(advertiser_data)
+    print(f"\n📢 New advertiser registered: {advertiser.name}")
+    return advertiser
+
+@app.get("/api/advertisers", response_model=List[Advertiser])
+async def get_advertisers():
+    return db.get_all_advertisers()
+
+@app.get("/api/advertisers/{advertiser_id}", response_model=Advertiser)
+async def get_advertiser(advertiser_id: str):
+    advertiser = db.get_advertiser(advertiser_id)
+    if not advertiser:
+        raise HTTPException(status_code=404, detail="Advertiser not found")
+    return advertiser
+
+@app.post("/api/ad-creatives", response_model=AdCreative)
+async def create_ad_creative(creative_data: AdCreativeCreate):
+    creative = db.create_ad_creative(creative_data)
+    
+    for page in creative.pages:
+        slot_data = AdSlotCreate(
+            creative_id=creative.id,
+            page=page,
+            placement=creative.ad_type.value
+        )
+        db.create_ad_slot(slot_data)
+    
+    print(f"\n🎨 New ad creative created: {creative.advertiser_name} - {creative.ad_type.value} on {', '.join(creative.pages)}")
+    return creative
+
+@app.get("/api/ad-creatives", response_model=List[AdCreative])
+async def get_ad_creatives(status: Optional[AdStatus] = None, page: Optional[str] = None):
+    return db.get_all_ad_creatives(status=status, page=page)
+
+@app.get("/api/ad-creatives/{creative_id}", response_model=AdCreative)
+async def get_ad_creative(creative_id: str):
+    creative = db.get_ad_creative(creative_id)
+    if not creative:
+        raise HTTPException(status_code=404, detail="Ad creative not found")
+    return creative
+
+@app.patch("/api/ad-creatives/{creative_id}/status", dependencies=[Depends(require_admin)])
+async def update_ad_creative_status(creative_id: str, status: AdStatus):
+    creative = db.update_ad_creative_status(creative_id, status)
+    if not creative:
+        raise HTTPException(status_code=404, detail="Ad creative not found")
+    return {"message": f"Ad creative status updated to {status}", "creative": creative}
+
+@app.get("/api/ads/{page}", response_model=List[dict])
+async def get_ads_for_page(page: str, placement: Optional[str] = None):
+    slots = db.get_ad_slots_by_page(page, placement)
+    ads = []
+    for slot in slots:
+        creative = db.get_ad_creative(slot.creative_id)
+        if creative and creative.status == AdStatus.LIVE:
+            ads.append({
+                "id": slot.id,
+                "creative_id": creative.id,
+                "advertiser_name": creative.advertiser_name,
+                "asset_url": creative.asset_url,
+                "link_url": creative.link_url,
+                "ad_type": creative.ad_type,
+                "placement": slot.placement,
+                "price_tier": creative.price_tier
+            })
+    return ads
+
+@app.post("/api/ads/{slot_id}/impression")
+async def record_ad_impression(slot_id: str):
+    db.increment_ad_impression(slot_id)
+    return {"message": "Impression recorded"}
+
+@app.post("/api/ads/{slot_id}/click")
+async def record_ad_click(slot_id: str):
+    db.increment_ad_click(slot_id)
+    return {"message": "Click recorded"}

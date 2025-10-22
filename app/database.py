@@ -13,7 +13,9 @@ from app.models import (
     AngelInvestor, AngelInvestorCreate,
     Donation, DonationCreate,
     BlackBank, InvestImpactStats,
-    Article, ArticleCreate, ArticleStatus, ArticleCategory
+    Article, ArticleCreate, ArticleStatus, ArticleCategory,
+    Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate, 
+    AdSlot, AdSlotCreate, AdStatus
 )
 
 class InMemoryDatabase:
@@ -31,6 +33,9 @@ class InMemoryDatabase:
         self.donations: Dict[str, Donation] = {}
         self.black_banks: Dict[str, BlackBank] = {}
         self.articles: Dict[str, Article] = {}
+        self.advertisers: Dict[str, Advertiser] = {}
+        self.ad_creatives: Dict[str, AdCreative] = {}
+        self.ad_slots: Dict[str, AdSlot] = {}
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -485,5 +490,100 @@ class InMemoryDatabase:
             self.articles[article_id].updated_at = datetime.now()
             return self.articles[article_id]
         return None
+    
+    def create_advertiser(self, advertiser_data: AdvertiserCreate) -> Advertiser:
+        advertiser_id = str(uuid.uuid4())
+        advertiser = Advertiser(
+            id=advertiser_id,
+            name=advertiser_data.name,
+            contact_email=advertiser_data.contact_email,
+            website=advertiser_data.website,
+            created_at=datetime.now()
+        )
+        self.advertisers[advertiser_id] = advertiser
+        return advertiser
+    
+    def get_advertiser(self, advertiser_id: str) -> Optional[Advertiser]:
+        return self.advertisers.get(advertiser_id)
+    
+    def get_all_advertisers(self) -> List[Advertiser]:
+        return list(self.advertisers.values())
+    
+    def create_ad_creative(self, creative_data: AdCreativeCreate) -> AdCreative:
+        creative_id = str(uuid.uuid4())
+        advertiser = self.get_advertiser(creative_data.advertiser_id)
+        advertiser_name = advertiser.name if advertiser else None
+        
+        creative = AdCreative(
+            id=creative_id,
+            advertiser_id=creative_data.advertiser_id,
+            advertiser_name=advertiser_name,
+            asset_url=creative_data.asset_url,
+            ad_type=creative_data.ad_type,
+            pages=creative_data.pages,
+            start_date=creative_data.start_date,
+            end_date=creative_data.end_date,
+            price_tier=creative_data.price_tier,
+            link_url=creative_data.link_url,
+            status=AdStatus.LIVE,
+            created_at=datetime.now()
+        )
+        self.ad_creatives[creative_id] = creative
+        return creative
+    
+    def get_ad_creative(self, creative_id: str) -> Optional[AdCreative]:
+        return self.ad_creatives.get(creative_id)
+    
+    def get_all_ad_creatives(self, status: Optional[AdStatus] = None, page: Optional[str] = None) -> List[AdCreative]:
+        creatives = list(self.ad_creatives.values())
+        if status:
+            creatives = [c for c in creatives if c.status == status]
+        if page:
+            creatives = [c for c in creatives if page in c.pages]
+        
+        now = datetime.now()
+        for creative in creatives:
+            if creative.end_date < now and creative.status == AdStatus.LIVE:
+                creative.status = AdStatus.EXPIRED
+        
+        return creatives
+    
+    def update_ad_creative_status(self, creative_id: str, status: AdStatus) -> Optional[AdCreative]:
+        if creative_id in self.ad_creatives:
+            self.ad_creatives[creative_id].status = status
+            return self.ad_creatives[creative_id]
+        return None
+    
+    def create_ad_slot(self, slot_data: AdSlotCreate) -> AdSlot:
+        slot_id = str(uuid.uuid4())
+        creative = self.get_ad_creative(slot_data.creative_id)
+        status = creative.status if creative else AdStatus.PENDING
+        
+        slot = AdSlot(
+            id=slot_id,
+            creative_id=slot_data.creative_id,
+            page=slot_data.page,
+            placement=slot_data.placement,
+            impressions=0,
+            clicks=0,
+            status=status,
+            created_at=datetime.now()
+        )
+        self.ad_slots[slot_id] = slot
+        return slot
+    
+    def get_ad_slots_by_page(self, page: str, placement: Optional[str] = None) -> List[AdSlot]:
+        slots = [s for s in self.ad_slots.values() if s.page == page and s.status == AdStatus.LIVE]
+        if placement:
+            slots = [s for s in slots if s.placement == placement]
+        return slots
+    
+    def increment_ad_impression(self, slot_id: str):
+        if slot_id in self.ad_slots:
+            self.ad_slots[slot_id].impressions += 1
+    
+    def increment_ad_click(self, slot_id: str):
+        if slot_id in self.ad_slots:
+            self.ad_slots[slot_id].clicks += 1
 
 db = InMemoryDatabase()

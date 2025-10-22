@@ -353,3 +353,70 @@ class Article(BaseModel):
     slug: str
     created_at: datetime
     updated_at: datetime
+
+class AdType(str, Enum):
+    BANNER = "banner"
+    SIDEBAR = "sidebar"
+    CAROUSEL = "carousel"
+    SPOTLIGHT = "spotlight"
+
+class AdStatus(str, Enum):
+    PENDING = "pending"
+    LIVE = "live"
+    EXPIRED = "expired"
+
+class PriceTier(str, Enum):
+    BASIC = "Basic"
+    PREMIUM = "Premium"
+    SPOTLIGHT = "Spotlight"
+
+class AdvertiserCreate(BaseModel):
+    name: str
+    contact_email: EmailStr
+    website: Optional[str] = None
+
+class Advertiser(BaseModel):
+    id: str
+    name: str
+    contact_email: EmailStr
+    website: Optional[str] = None
+    created_at: datetime
+
+class AdCreativeCreate(BaseModel):
+    advertiser_id: str
+    asset_url: str
+    ad_type: AdType
+    pages: List[str]
+    start_date: datetime
+    end_date: datetime
+    price_tier: PriceTier
+    link_url: Optional[str] = None
+
+class AdCreative(BaseModel):
+    id: str
+    advertiser_id: str
+    advertiser_name: Optional[str] = None
+    asset_url: str
+    ad_type: AdType
+    pages: List[str]
+    start_date: datetime
+    end_date: datetime
+    price_tier: PriceTier
+    link_url: Optional[str] = None
+    status: AdStatus
+    created_at: datetime
+
+class AdSlotCreate(BaseModel):
+    creative_id: str
+    page: str
+    placement: str
+
+class AdSlot(BaseModel):
+    id: str
+    creative_id: str
+    page: str
+    placement: str
+    impressions: int = 0
+    clicks: int = 0
+    status: AdStatus
+    created_at: datetime
