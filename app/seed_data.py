@@ -1457,9 +1457,9 @@ The future of Black education is not just about information — it is about tran
         ))
     
     advertiser3 = db.create_advertiser(AdvertiserCreate(
-        name="BlackWave Media Group",
-        contact_email="info@blackwavemediagroup.com",
-        website="https://blackwavemediagroup.com/",
+        name="Blavity Inc.",
+        contact_email="info@blavity.com",
+        website="https://blavity.com/",
         tagline="Amplifying Black Voices in Media & Entertainment"
     ))
     
@@ -1471,7 +1471,7 @@ The future of Black education is not just about information — it is about tran
         start_date=datetime.now(),
         end_date=datetime.now() + timedelta(days=90),
         price_tier=PriceTier.SPOTLIGHT,
-        link_url="https://blackwavemediagroup.com/"
+        link_url="https://blavity.com/"
     ))
     
     for page in creative3.pages:
