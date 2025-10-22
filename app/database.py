@@ -175,8 +175,8 @@ class InMemoryDatabase:
                 )
                 order_items.append(order_item)
         
-        vendor_amount = total_amount * 0.90
-        platform_amount = total_amount * 0.07
+        vendor_amount = total_amount * 0.85
+        platform_amount = total_amount * 0.12
         community_amount = total_amount * 0.03
         
         order = Order(

@@ -59,8 +59,8 @@ async def log_email_to_console(to_email: str, vendor_name: str, vendor_id: str):
     print("You will be notified once your application has been reviewed.")
     print("")
     print("What You Get as a BlkXchange™ Vendor:")
-    print("  • No Upfront Fees: Only pay when you make a sale (10% platform fee)")
-    print("  • 90% Revenue Share: You keep 90% of every sale")
+    print("  • No Upfront Fees: Only pay when you make a sale (15% platform fee)")
+    print("  • 85% Revenue Share: You keep 85% of every sale")
     print("  • Community Impact: 3% of sales support HBCUs and scholarships")
     print("  • Targeted Audience: Reach customers seeking Black-owned businesses")
     print("  • Full Dashboard: Manage products, orders, and track your impact")
@@ -215,8 +215,8 @@ async def send_vendor_welcome_email(to_email: str, vendor_name: str, vendor_id: 
                     <div class="benefits">
                         <h3 style="margin-top: 0; color: #000000;">What You Get as a BlkXchange™ Vendor:</h3>
                         <ul>
-                            <li><strong>No Upfront Fees:</strong> Only pay when you make a sale (10% platform fee)</li>
-                            <li><strong>90% Revenue Share:</strong> You keep 90% of every sale</li>
+                            <li><strong>No Upfront Fees:</strong> Only pay when you make a sale (15% platform fee)</li>
+                            <li><strong>85% Revenue Share:</strong> You keep 85% of every sale</li>
                             <li><strong>Community Impact:</strong> 3% of sales support HBCUs and scholarships</li>
                             <li><strong>Targeted Audience:</strong> Reach customers seeking Black-owned businesses</li>
                             <li><strong>Full Dashboard:</strong> Manage products, orders, and track your impact</li>
@@ -259,8 +259,8 @@ async def send_vendor_welcome_email(to_email: str, vendor_name: str, vendor_id: 
         Your vendor application has been received and is being reviewed by our team. Your agreement acceptance has been recorded. You will be notified once your application has been reviewed.
         
         What You Get as a BlkXchange™ Vendor:
-        - No Upfront Fees: Only pay when you make a sale (10% platform fee)
-        - 90% Revenue Share: You keep 90% of every sale
+        - No Upfront Fees: Only pay when you make a sale (15% platform fee)
+        - 85% Revenue Share: You keep 85% of every sale
         - Community Impact: 3% of sales support HBCUs and scholarships
         - Targeted Audience: Reach customers seeking Black-owned businesses
         - Full Dashboard: Manage products, orders, and track your impact
