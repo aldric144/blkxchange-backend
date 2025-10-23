@@ -40,6 +40,12 @@ class InMemoryDatabase:
         self.ad_slots: Dict[str, AdSlot] = {}
         self.visitor_analytics: Dict[str, VisitorAnalytics] = {}
         self.pending_professionals: Dict[str, PendingProfessional] = {}
+        
+        self.test_vendor_applications: Dict[str, VendorApplication] = {}
+        self.test_professionals: Dict[str, Professional] = {}
+        self.test_ad_creatives: Dict[str, AdCreative] = {}
+        self.test_advertisers: Dict[str, Advertiser] = {}
+        
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -751,5 +757,33 @@ class InMemoryDatabase:
         
         pending.status = PendingProfessionalStatus.REJECTED
         return True
+    
+    def get_all_test_vendor_applications(self) -> List[VendorApplication]:
+        """Get all test vendor applications"""
+        return list(self.test_vendor_applications.values())
+    
+    def get_all_test_professionals(self) -> List[Professional]:
+        """Get all test professionals"""
+        return list(self.test_professionals.values())
+    
+    def get_all_test_ad_creatives(self) -> List[AdCreative]:
+        """Get all test ad creatives"""
+        return list(self.test_ad_creatives.values())
+    
+    def purge_test_data(self) -> dict:
+        """Purge all test data and return counts"""
+        counts = {
+            "vendors": len(self.test_vendor_applications),
+            "professionals": len(self.test_professionals),
+            "ads": len(self.test_ad_creatives),
+            "advertisers": len(self.test_advertisers)
+        }
+        
+        self.test_vendor_applications.clear()
+        self.test_professionals.clear()
+        self.test_ad_creatives.clear()
+        self.test_advertisers.clear()
+        
+        return counts
 
 db = InMemoryDatabase()

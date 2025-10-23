@@ -883,3 +883,131 @@ async def bulk_import_professionals(
     )
     
     return results
+
+# Test Mode / Sandbox Endpoints
+@app.get("/api/admin/test-mode/vendors")
+async def get_test_vendors(x_admin_secret: str = Header(None)):
+    """Get all test vendor applications"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return db.get_all_test_vendor_applications()
+
+@app.get("/api/admin/test-mode/professionals")
+async def get_test_professionals(x_admin_secret: str = Header(None)):
+    """Get all test professionals"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return db.get_all_test_professionals()
+
+@app.get("/api/admin/test-mode/ads")
+async def get_test_ads(x_admin_secret: str = Header(None)):
+    """Get all test ad creatives"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return db.get_all_test_ad_creatives()
+
+@app.post("/api/admin/test-mode/vendors/manual")
+async def create_test_vendor_manual(
+    data: VendorManualCreate,
+    x_admin_secret: str = Header(None)
+):
+    """Create a test vendor (sandbox mode)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    vendor_app = VendorApplicationCreate(
+        business_name=data.business_name,
+        contact_name=data.owner_name,
+        email=data.email,
+        phone=data.phone,
+        address=data.address,
+        website=data.website,
+        category=data.category,
+        description=data.description,
+        price_range=PriceRange.UNDER_25,
+        fulfillment_method=FulfillmentMethod.SHIPPING,
+        image_urls=[data.logo_url] if data.logo_url else [],
+        agreement_accepted=True
+    )
+    
+    vendor = db.create_vendor_application(vendor_app)
+    vendor.status = data.status
+    db.test_vendor_applications[vendor.id] = vendor
+    return vendor
+
+@app.post("/api/admin/test-mode/professionals/manual")
+async def create_test_professional_manual(
+    data: ProfessionalManualCreate,
+    x_admin_secret: str = Header(None)
+):
+    """Create a test professional (sandbox mode)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    professional_data = ProfessionalCreate(
+        email=data.email,
+        name=data.name,
+        title=data.tagline or data.business_name or data.name,
+        category=data.category,
+        bio=data.bio,
+        credentials=data.credentials,
+        hourly_rate=None,
+        phone=data.phone,
+        image_url=data.image_url,
+        zip=data.zip
+    )
+    
+    professional = db.create_professional(professional_data)
+    db.test_professionals[professional.id] = professional
+    return professional
+
+@app.post("/api/admin/test-mode/ads/manual")
+async def create_test_ad_manual(
+    data: AdManualCreate,
+    x_admin_secret: str = Header(None)
+):
+    """Create a test ad (sandbox mode)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    advertiser_data = AdvertiserCreate(
+        name=data.advertiser_name,
+        contact_email="admin@blkxchange.com",
+        website=data.target_url,
+        tagline=data.tagline
+    )
+    advertiser = db.create_advertiser(advertiser_data)
+    db.test_advertisers[advertiser.id] = advertiser
+    
+    from datetime import datetime, timedelta
+    start_date = data.start_date or datetime.now()
+    end_date = data.end_date or (datetime.now() + timedelta(days=30))
+    
+    ad_data = AdCreativeCreate(
+        advertiser_id=advertiser.id,
+        asset_url=data.asset_url,
+        ad_type=data.ad_type,
+        pages=data.pages,
+        start_date=start_date,
+        end_date=end_date,
+        price_tier=PriceTier.BASIC,
+        link_url=data.target_url
+    )
+    
+    ad = db.create_ad_creative(ad_data)
+    if data.status == AdStatus.LIVE:
+        db.update_ad_creative_status(ad.id, AdStatus.LIVE)
+    db.test_ad_creatives[ad.id] = ad
+    return ad
+
+@app.delete("/api/admin/test-mode/purge")
+async def purge_test_data(x_admin_secret: str = Header(None)):
+    """Purge all test data"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    counts = db.purge_test_data()
+    return {
+        "message": "Test data purged successfully",
+        "deleted": counts
+    }
