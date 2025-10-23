@@ -17,7 +17,8 @@ from app.models import (
     BlackBank, InvestImpactStats,
     Article, ArticleCreate, ArticleCategory, ArticleStatus,
     Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate,
-    AdSlot, AdSlotCreate, AdStatus
+    AdSlot, AdSlotCreate, AdStatus,
+    PendingProfessionalCreate, PendingProfessional, PendingProfessionalStatus
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -215,6 +216,49 @@ async def geocode_location(
         status_code=400,
         detail="Please provide either a ZIP code or a city name"
     )
+
+@app.post("/api/professionals/submit", response_model=PendingProfessional)
+async def submit_professional(data: PendingProfessionalCreate):
+    """Submit a professional for review"""
+    return db.create_pending_professional(data)
+
+@app.get("/api/professionals/pending", response_model=List[PendingProfessional])
+async def get_pending_professionals(
+    status: Optional[PendingProfessionalStatus] = None,
+    x_admin_secret: str = Header(None)
+):
+    """Get all pending professionals (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return db.get_all_pending_professionals(status)
+
+@app.post("/api/admin/approve-professional/{professional_id}", response_model=Professional)
+async def approve_pending_professional(
+    professional_id: str,
+    x_admin_secret: str = Header(None)
+):
+    """Approve a pending professional and create live listing (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    professional = db.approve_pending_professional(professional_id, "admin")
+    if not professional:
+        raise HTTPException(status_code=404, detail="Professional not found or already processed")
+    return professional
+
+@app.post("/api/admin/reject-professional/{professional_id}")
+async def reject_pending_professional(
+    professional_id: str,
+    x_admin_secret: str = Header(None)
+):
+    """Reject a pending professional submission (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    success = db.reject_pending_professional(professional_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Professional not found or already processed")
+    return {"message": "Professional submission rejected"}
 
 @app.post("/api/orders", response_model=Order)
 async def create_order(order: OrderCreate):

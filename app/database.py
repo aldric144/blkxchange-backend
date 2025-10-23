@@ -16,7 +16,8 @@ from app.models import (
     Article, ArticleCreate, ArticleStatus, ArticleCategory,
     Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate, 
     AdSlot, AdSlotCreate, AdStatus,
-    VisitorAnalytics
+    VisitorAnalytics,
+    PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus
 )
 
 class InMemoryDatabase:
@@ -38,6 +39,7 @@ class InMemoryDatabase:
         self.ad_creatives: Dict[str, AdCreative] = {}
         self.ad_slots: Dict[str, AdSlot] = {}
         self.visitor_analytics: Dict[str, VisitorAnalytics] = {}
+        self.pending_professionals: Dict[str, PendingProfessional] = {}
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -680,5 +682,74 @@ class InMemoryDatabase:
         if current_month in self.visitor_analytics:
             return self.visitor_analytics[current_month].visitor_count
         return 0
+    
+    def create_pending_professional(self, data: PendingProfessionalCreate) -> PendingProfessional:
+        """Create a new pending professional submission"""
+        professional_id = str(uuid.uuid4())
+        pending = PendingProfessional(
+            id=professional_id,
+            name=data.name,
+            category=data.category,
+            tagline=data.tagline,
+            description=data.description,
+            website=data.website,
+            logo_url=data.logo_url,
+            zip=data.zip,
+            email=data.email,
+            agreement_accepted=data.agreement_accepted,
+            status=PendingProfessionalStatus.PENDING,
+            submitted_at=datetime.now(),
+            approved_by=None,
+            approved_at=None
+        )
+        self.pending_professionals[professional_id] = pending
+        return pending
+    
+    def get_pending_professional(self, professional_id: str) -> Optional[PendingProfessional]:
+        """Get a pending professional by ID"""
+        return self.pending_professionals.get(professional_id)
+    
+    def get_all_pending_professionals(self, status: Optional[PendingProfessionalStatus] = None) -> List[PendingProfessional]:
+        """Get all pending professionals, optionally filtered by status"""
+        professionals = list(self.pending_professionals.values())
+        if status:
+            professionals = [p for p in professionals if p.status == status]
+        return sorted(professionals, key=lambda x: x.submitted_at, reverse=True)
+    
+    def approve_pending_professional(self, professional_id: str, approved_by: str) -> Optional[Professional]:
+        """Approve a pending professional and create a live professional listing"""
+        pending = self.pending_professionals.get(professional_id)
+        if not pending or pending.status != PendingProfessionalStatus.PENDING:
+            return None
+        
+        pending.status = PendingProfessionalStatus.APPROVED
+        pending.approved_by = approved_by
+        pending.approved_at = datetime.now()
+        
+        # Create live professional
+        professional_create = ProfessionalCreate(
+            email=pending.email,
+            name=pending.name,
+            title=pending.tagline or pending.name,
+            category=pending.category,
+            bio=pending.description,
+            credentials="Community Submitted",
+            hourly_rate=None,
+            phone=None,
+            image_url=pending.logo_url,
+            zip=pending.zip
+        )
+        
+        professional = self.create_professional(professional_create)
+        return professional
+    
+    def reject_pending_professional(self, professional_id: str) -> bool:
+        """Reject a pending professional submission"""
+        pending = self.pending_professionals.get(professional_id)
+        if not pending or pending.status != PendingProfessionalStatus.PENDING:
+            return False
+        
+        pending.status = PendingProfessionalStatus.REJECTED
+        return True
 
 db = InMemoryDatabase()

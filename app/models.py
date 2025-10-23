@@ -183,6 +183,38 @@ class ProfessionalNearby(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
+class PendingProfessionalStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+class PendingProfessionalCreate(BaseModel):
+    name: str
+    category: ProfessionalCategory
+    tagline: Optional[str] = None
+    description: str
+    website: Optional[str] = None
+    logo_url: Optional[str] = None
+    zip: str
+    email: EmailStr
+    agreement_accepted: bool
+
+class PendingProfessional(BaseModel):
+    id: str
+    name: str
+    category: ProfessionalCategory
+    tagline: Optional[str] = None
+    description: str
+    website: Optional[str] = None
+    logo_url: Optional[str] = None
+    zip: str
+    email: EmailStr
+    agreement_accepted: bool
+    status: PendingProfessionalStatus
+    submitted_at: datetime
+    approved_by: Optional[str] = None
+    approved_at: Optional[datetime] = None
+
 class OrderItemCreate(BaseModel):
     product_id: str
     quantity: int
