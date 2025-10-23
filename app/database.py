@@ -53,7 +53,9 @@ class InMemoryDatabase:
             "scholarship_donations": 0.0,
             "nonprofit_donations": 0.0
         }
+        self.admin_users: Dict[str, dict] = {}
         self._seed_black_banks()
+        self._seed_admin_users()
     
     def create_vendor(self, vendor_data: VendorCreate) -> Vendor:
         vendor_id = str(uuid.uuid4())
@@ -785,5 +787,68 @@ class InMemoryDatabase:
         self.test_advertisers.clear()
         
         return counts
+    
+    def _seed_admin_users(self):
+        """Create default admin users"""
+        from app.auth import get_password_hash
+        from app.models import AdminUserInDB
+        
+        # Create primary admin
+        admin_id1 = str(uuid.uuid4())
+        admin1 = AdminUserInDB(
+            id=admin_id1,
+            email="aldrictmarshall3@gmail.com",
+            full_name="Dr. Aldric Marshall",
+            hashed_password=get_password_hash("BlkXchange2025!"),
+            is_active=True,
+            created_at=datetime.now()
+        )
+        self.admin_users[admin_id1] = admin1
+        
+        # Create backup admin
+        admin_id2 = str(uuid.uuid4())
+        admin2 = AdminUserInDB(
+            id=admin_id2,
+            email="klove144@bellsouth.net",
+            full_name="Backup Admin",
+            hashed_password=get_password_hash("BlkXchange2025!"),
+            is_active=True,
+            created_at=datetime.now()
+        )
+        self.admin_users[admin_id2] = admin2
+    
+    def get_admin_user_by_email(self, email: str):
+        """Get admin user by email"""
+        for user in self.admin_users.values():
+            if user.email == email:
+                return user
+        return None
+    
+    def create_admin_user(self, user_data):
+        """Create a new admin user"""
+        from app.auth import get_password_hash
+        from app.models import AdminUserInDB
+        
+        user_id = str(uuid.uuid4())
+        user = AdminUserInDB(
+            id=user_id,
+            email=user_data.email,
+            full_name=user_data.full_name,
+            hashed_password=get_password_hash(user_data.password),
+            is_active=True,
+            created_at=datetime.now()
+        )
+        self.admin_users[user_id] = user
+        return user
+    
+    def update_admin_password(self, email: str, new_password: str) -> bool:
+        """Update admin user password"""
+        from app.auth import get_password_hash
+        
+        user = self.get_admin_user_by_email(email)
+        if user:
+            user.hashed_password = get_password_hash(new_password)
+            return True
+        return False
 
 db = InMemoryDatabase()

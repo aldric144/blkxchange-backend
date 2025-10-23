@@ -554,3 +554,29 @@ class ProfessionalManualCreate(BaseModel):
     image_url: Optional[str] = None
     credentials: str = "Admin Verified"
     status: str = "approved"
+
+# Admin User Authentication Models
+class AdminUserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: str
+
+class AdminUser(BaseModel):
+    id: str
+    email: EmailStr
+    full_name: str
+    is_active: bool = True
+    created_at: datetime
+
+class AdminUserInDB(AdminUser):
+    hashed_password: str
+
+class AdminLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class AdminToken(BaseModel):
+    token: str
+    token_type: str = "bearer"
+    expires_in: int  # seconds
+    email: str

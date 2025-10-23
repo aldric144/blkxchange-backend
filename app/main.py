@@ -20,21 +20,41 @@ from app.models import (
     AdSlot, AdSlotCreate, AdStatus, AdType, PriceTier,
     PendingProfessionalCreate, PendingProfessional, PendingProfessionalStatus,
     VendorManualCreate, ProductManualCreate, AdManualCreate, ProfessionalManualCreate,
-    PriceRange, FulfillmentMethod
+    PriceRange, FulfillmentMethod,
+    AdminLogin, AdminToken, AdminUserCreate
 )
 from app.database import db
 from app.seed_data import seed_database
 from app.email import send_vendor_welcome_email, send_bulk_import_confirmation
+from app.auth import verify_password, create_access_token, verify_admin_token
+from datetime import timedelta
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET_KEY", "changeme")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-async def require_admin(x_admin_secret: Optional[str] = Header(None)):
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    return True
+async def require_admin(
+    x_admin_secret: Optional[str] = Header(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Verify admin access via either admin secret or JWT token"""
+    if authorization:
+        if authorization.startswith("Bearer "):
+            token = authorization.replace("Bearer ", "")
+            email = verify_admin_token(token)
+            if email:
+                user = db.get_admin_user_by_email(email)
+                if user and user.is_active:
+                    return True
+    
+    if x_admin_secret == ADMIN_SECRET:
+        return True
+    
+    raise HTTPException(
+        status_code=401, 
+        detail="Unauthorized: Invalid admin password. Please reload the page and enter the correct password."
+    )
 
 @app.on_event("startup")
 async def startup_event():
@@ -52,6 +72,55 @@ app.add_middleware(
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok"}
+
+# Admin Authentication Endpoints
+@app.post("/api/admin/login", response_model=AdminToken)
+async def admin_login(login_data: AdminLogin):
+    """Admin login endpoint - returns JWT token"""
+    user = db.get_admin_user_by_email(login_data.email)
+    
+    if not user or not verify_password(login_data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is inactive")
+    
+    access_token = create_access_token(
+        data={"sub": user.email, "name": user.full_name},
+        expires_delta=timedelta(days=7)
+    )
+    
+    return AdminToken(
+        token=access_token,
+        token_type="bearer",
+        expires_in=7 * 24 * 60 * 60,  # 7 days in seconds
+        email=user.email
+    )
+
+@app.post("/api/admin/create-user", response_model=dict)
+async def create_admin_user(user_data: AdminUserCreate, x_admin_secret: str = Header(None)):
+    """Create a new admin user (requires admin secret)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    existing_user = db.get_admin_user_by_email(user_data.email)
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User with this email already exists")
+    
+    user = db.create_admin_user(user_data)
+    return {"message": "Admin user created successfully", "email": user.email}
+
+@app.post("/api/admin/reset-password")
+async def reset_admin_password(email: str, new_password: str, x_admin_secret: str = Header(None)):
+    """Reset admin password (requires admin secret)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    success = db.update_admin_password(email, new_password)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Password reset successfully"}
 
 @app.post("/api/vendors", response_model=Vendor)
 async def create_vendor(vendor: VendorCreate):

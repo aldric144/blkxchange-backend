@@ -11,6 +11,9 @@ fastapi = {extras = ["standard"], version = "^0.119.0"}
 psycopg = {extras = ["binary"], version = "^3.2.11"}
 aiosmtplib = "^5.0.0"
 httpx = "^0.28.1"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.20"
 
 
 [build-system]
