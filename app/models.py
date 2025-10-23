@@ -505,3 +505,52 @@ class VisitorAnalytics(BaseModel):
     visitor_count: int
     created_at: datetime
     updated_at: datetime
+
+class VendorManualCreate(BaseModel):
+    business_name: str
+    owner_name: str
+    email: EmailStr
+    phone: str
+    description: str
+    category: ProductCategory
+    website: Optional[str] = None
+    logo_url: Optional[str] = None
+    address: str
+    zip: str
+    status: VendorApplicationStatus = VendorApplicationStatus.APPROVED
+
+class ProductManualCreate(BaseModel):
+    vendor_id: str
+    name: str
+    category: ProductCategory
+    price: float
+    description: str
+    sku: Optional[str] = None
+    image_urls: List[str] = []
+    quantity: int = 0
+    status: ProductStatus = ProductStatus.APPROVED
+
+class AdManualCreate(BaseModel):
+    advertiser_name: str
+    tagline: Optional[str] = None
+    asset_url: str
+    target_url: str
+    ad_type: AdType
+    pages: List[str] = ["marketplace"]
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    status: AdStatus = AdStatus.LIVE
+
+class ProfessionalManualCreate(BaseModel):
+    name: str
+    category: ProfessionalCategory
+    business_name: Optional[str] = None
+    tagline: Optional[str] = None
+    bio: str
+    email: EmailStr
+    website: Optional[str] = None
+    phone: Optional[str] = None
+    zip: str
+    image_url: Optional[str] = None
+    credentials: str = "Admin Verified"
+    status: str = "approved"

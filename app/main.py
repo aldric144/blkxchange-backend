@@ -17,8 +17,10 @@ from app.models import (
     BlackBank, InvestImpactStats,
     Article, ArticleCreate, ArticleCategory, ArticleStatus,
     Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate,
-    AdSlot, AdSlotCreate, AdStatus,
-    PendingProfessionalCreate, PendingProfessional, PendingProfessionalStatus
+    AdSlot, AdSlotCreate, AdStatus, AdType, PriceTier,
+    PendingProfessionalCreate, PendingProfessional, PendingProfessionalStatus,
+    VendorManualCreate, ProductManualCreate, AdManualCreate, ProfessionalManualCreate,
+    PriceRange, FulfillmentMethod
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -569,3 +571,118 @@ async def record_ad_impression(slot_id: str):
 async def record_ad_click(slot_id: str):
     db.increment_ad_click(slot_id)
     return {"message": "Click recorded"}
+
+@app.post("/api/admin/vendors/manual", response_model=VendorApplication)
+async def create_vendor_manual(
+    data: VendorManualCreate,
+    x_admin_secret: str = Header(None)
+):
+    """Manually create a vendor (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    vendor_app = VendorApplicationCreate(
+        business_name=data.business_name,
+        contact_name=data.owner_name,
+        email=data.email,
+        phone=data.phone,
+        address=data.address,
+        website=data.website,
+        category=data.category,
+        description=data.description,
+        price_range=PriceRange.UNDER_25,
+        fulfillment_method=FulfillmentMethod.SHIPPING,
+        image_urls=[data.logo_url] if data.logo_url else [],
+        agreement_accepted=True
+    )
+    
+    vendor = db.create_vendor_application(vendor_app)
+    vendor.status = data.status
+    return vendor
+
+@app.post("/api/admin/products/manual", response_model=ProductEnhanced)
+async def create_product_manual(
+    data: ProductManualCreate,
+    x_admin_secret: str = Header(None)
+):
+    """Manually create a product (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    import uuid
+    product_data = ProductCreateEnhanced(
+        vendor_id=data.vendor_id,
+        name=data.name,
+        description=data.description,
+        price=data.price,
+        category=data.category,
+        quantity=data.quantity,
+        image_urls=data.image_urls
+    )
+    
+    product = db.create_product_enhanced(product_data)
+    if data.status == ProductStatus.APPROVED:
+        db.update_product_enhanced_status(product.id, ProductStatus.APPROVED)
+    return product
+
+@app.post("/api/admin/ads/manual", response_model=AdCreative)
+async def create_ad_manual(
+    data: AdManualCreate,
+    x_admin_secret: str = Header(None)
+):
+    """Manually create an ad (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    advertiser_data = AdvertiserCreate(
+        name=data.advertiser_name,
+        contact_email="admin@blkxchange.com",
+        website=data.target_url,
+        tagline=data.tagline
+    )
+    advertiser = db.create_advertiser(advertiser_data)
+    
+    from datetime import datetime, timedelta
+    start_date = data.start_date or datetime.now()
+    end_date = data.end_date or (datetime.now() + timedelta(days=30))
+    
+    ad_data = AdCreativeCreate(
+        advertiser_id=advertiser.id,
+        asset_url=data.asset_url,
+        ad_type=data.ad_type,
+        pages=data.pages,
+        start_date=start_date,
+        end_date=end_date,
+        price_tier=PriceTier.BASIC,
+        link_url=data.target_url
+    )
+    
+    ad = db.create_ad_creative(ad_data)
+    if data.status == AdStatus.LIVE:
+        db.update_ad_creative_status(ad.id, AdStatus.LIVE)
+    return ad
+
+@app.post("/api/admin/professionals/manual", response_model=Professional)
+async def create_professional_manual(
+    data: ProfessionalManualCreate,
+    x_admin_secret: str = Header(None)
+):
+    """Manually create a professional (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    professional_data = ProfessionalCreate(
+        email=data.email,
+        name=data.name,
+        title=data.tagline or data.business_name or data.name,
+        category=data.category,
+        bio=data.bio,
+        credentials=data.credentials,
+        hourly_rate=None,
+        phone=data.phone,
+        image_url=data.image_url,
+        zip=data.zip
+    )
+    
+    professional = db.create_professional(professional_data)
+    return professional
