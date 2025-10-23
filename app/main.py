@@ -189,6 +189,33 @@ async def get_professionals_nearby(
     
     return nearby
 
+@app.get("/api/geocode")
+async def geocode_location(
+    zip: Optional[str] = None,
+    city: Optional[str] = None,
+    state: Optional[str] = None
+):
+    """
+    Geocode a ZIP code or city to get latitude/longitude coordinates.
+    """
+    from .geocoding import geocode_zip_code, geocode_city
+    
+    if zip:
+        coords = await geocode_zip_code(zip)
+        if coords:
+            latitude, longitude = coords
+            return {"latitude": latitude, "longitude": longitude}
+    elif city:
+        coords = await geocode_city(city, state)
+        if coords:
+            latitude, longitude = coords
+            return {"latitude": latitude, "longitude": longitude}
+    
+    raise HTTPException(
+        status_code=400,
+        detail="Please provide either a ZIP code or a city name"
+    )
+
 @app.post("/api/orders", response_model=Order)
 async def create_order(order: OrderCreate):
     return db.create_order(order)
