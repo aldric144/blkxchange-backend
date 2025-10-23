@@ -208,6 +208,16 @@ async def get_order(order_id: str):
 async def get_impact_stats():
     return db.get_impact_stats()
 
+@app.post("/api/visitor-count")
+async def increment_visitor_count():
+    analytics = db.increment_visitor_count()
+    return {"visitor_count": analytics.visitor_count, "month": analytics.month}
+
+@app.get("/api/visitor-count")
+async def get_visitor_count():
+    visitor_count = db.get_current_month_visitors()
+    return {"visitor_count": visitor_count}
+
 # Vendor Application Endpoints
 @app.post("/api/vendor-applications", response_model=VendorApplication)
 async def create_vendor_application(application: VendorApplicationCreate):

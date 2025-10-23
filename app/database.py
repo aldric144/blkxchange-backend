@@ -15,7 +15,8 @@ from app.models import (
     BlackBank, InvestImpactStats,
     Article, ArticleCreate, ArticleStatus, ArticleCategory,
     Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate, 
-    AdSlot, AdSlotCreate, AdStatus
+    AdSlot, AdSlotCreate, AdStatus,
+    VisitorAnalytics
 )
 
 class InMemoryDatabase:
@@ -36,6 +37,7 @@ class InMemoryDatabase:
         self.advertisers: Dict[str, Advertiser] = {}
         self.ad_creatives: Dict[str, AdCreative] = {}
         self.ad_slots: Dict[str, AdSlot] = {}
+        self.visitor_analytics: Dict[str, VisitorAnalytics] = {}
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -647,5 +649,36 @@ class InMemoryDatabase:
     def increment_ad_click(self, slot_id: str):
         if slot_id in self.ad_slots:
             self.ad_slots[slot_id].clicks += 1
+    
+    def increment_visitor_count(self) -> VisitorAnalytics:
+        """Increment visitor count for current month"""
+        from datetime import datetime
+        current_month = datetime.now().strftime("%Y-%m")
+        
+        if current_month in self.visitor_analytics:
+            analytics = self.visitor_analytics[current_month]
+            analytics.visitor_count += 1
+            analytics.updated_at = datetime.now()
+        else:
+            analytics_id = str(uuid.uuid4())
+            analytics = VisitorAnalytics(
+                id=analytics_id,
+                month=current_month,
+                visitor_count=1,
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )
+            self.visitor_analytics[current_month] = analytics
+        
+        return analytics
+    
+    def get_current_month_visitors(self) -> int:
+        """Get visitor count for current month"""
+        from datetime import datetime
+        current_month = datetime.now().strftime("%Y-%m")
+        
+        if current_month in self.visitor_analytics:
+            return self.visitor_analytics[current_month].visitor_count
+        return 0
 
 db = InMemoryDatabase()

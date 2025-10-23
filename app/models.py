@@ -466,3 +466,10 @@ class AdSlot(BaseModel):
     clicks: int = 0
     status: AdStatus
     created_at: datetime
+
+class VisitorAnalytics(BaseModel):
+    id: str
+    month: str  # Format: "YYYY-MM"
+    visitor_count: int
+    created_at: datetime
+    updated_at: datetime
