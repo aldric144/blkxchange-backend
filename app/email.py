@@ -317,3 +317,346 @@ async def send_vendor_welcome_email(to_email: str, vendor_name: str, vendor_id: 
             "success": False,
             "error": str(e)
         }
+
+async def send_bulk_import_confirmation(
+    admin_email: str,
+    category: str,
+    successful: int,
+    skipped: int,
+    failed: int,
+    errors: list
+):
+    """
+    Send a confirmation email to admin after bulk import completion.
+    """
+    try:
+        if not USE_ETHEREAL:
+            return await log_bulk_import_to_console(admin_email, category, successful, skipped, failed, errors)
+        
+        account = await create_ethereal_account()
+        
+        if not account:
+            logger.error("Could not create Ethereal account")
+            return None
+        
+        smtp_host = account['smtp']['host']
+        smtp_port = account['smtp']['port']
+        smtp_secure = account['smtp']['secure']
+        smtp_user = account['user']
+        smtp_pass = account['pass']
+        
+        from datetime import datetime
+        date_str = datetime.now().strftime("%B %d, %Y")
+        
+        message = MIMEMultipart('alternative')
+        message['Subject'] = f'Bulk Import Completed — {category.title()} ({date_str})'
+        message['From'] = 'BlkXchange™ <no-reply@blkxchange.com>'
+        message['To'] = admin_email
+        
+        admin_url = f"https://blkxchangemarketplace-kytxrr7p.devinapps.com/admin/{category.lower()}"
+        
+        error_list_html = ""
+        if errors:
+            error_items = "".join([f"<li>{error}</li>" for error in errors[:10]])
+            if len(errors) > 10:
+                error_items += f"<li><em>... and {len(errors) - 10} more errors</em></li>"
+            error_list_html = f"""
+            <div class="errors">
+                <h3 style="margin-top: 0; color: #DC2626;">❌ Errors ({failed}):</h3>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    {error_items}
+                </ul>
+            </div>
+            """
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: 'Inter', Arial, sans-serif;
+                    background-color: #F8F8F6;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .container {{
+                    max-width: 600px;
+                    margin: 40px auto;
+                    background-color: #FFFFFF;
+                    border: 2px solid #C5A14E;
+                    border-radius: 8px;
+                    overflow: hidden;
+                }}
+                .header {{
+                    background: linear-gradient(135deg, #000000 0%, #1A1A1A 100%);
+                    color: #C5A14E;
+                    padding: 40px 20px;
+                    text-align: center;
+                }}
+                .header h1 {{
+                    margin: 0;
+                    font-family: 'Playfair Display', serif;
+                    font-size: 32px;
+                    font-weight: bold;
+                }}
+                .content {{
+                    padding: 40px 30px;
+                    color: #1A1A1A;
+                }}
+                .content h2 {{
+                    color: #000000;
+                    font-size: 24px;
+                    margin-top: 0;
+                }}
+                .content p {{
+                    line-height: 1.6;
+                    font-size: 16px;
+                    color: #333333;
+                }}
+                .stats {{
+                    background-color: #F8F8F6;
+                    padding: 20px;
+                    border-radius: 5px;
+                    margin: 20px 0;
+                }}
+                .stat-row {{
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 0;
+                    border-bottom: 1px solid #E5E5E5;
+                }}
+                .stat-row:last-child {{
+                    border-bottom: none;
+                }}
+                .stat-label {{
+                    font-weight: bold;
+                    color: #333333;
+                }}
+                .stat-value {{
+                    color: #000000;
+                    font-size: 18px;
+                    font-weight: bold;
+                }}
+                .stat-value.success {{
+                    color: #10B981;
+                }}
+                .stat-value.warning {{
+                    color: #F59E0B;
+                }}
+                .stat-value.error {{
+                    color: #DC2626;
+                }}
+                .cta-button {{
+                    display: inline-block;
+                    background-color: #C5A14E;
+                    color: #000000;
+                    padding: 15px 40px;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    font-size: 16px;
+                    margin: 20px 0;
+                }}
+                .cta-button:hover {{
+                    background-color: #B39145;
+                }}
+                .errors {{
+                    background-color: #FEE2E2;
+                    padding: 20px;
+                    border-radius: 5px;
+                    margin: 20px 0;
+                    border-left: 4px solid #DC2626;
+                }}
+                .errors ul {{
+                    margin: 10px 0;
+                    padding-left: 20px;
+                }}
+                .errors li {{
+                    margin: 5px 0;
+                    color: #991B1B;
+                    font-size: 14px;
+                }}
+                .footer {{
+                    background-color: #1A1A1A;
+                    color: #C5A14E;
+                    padding: 30px 20px;
+                    text-align: center;
+                    font-size: 14px;
+                }}
+                .footer p {{
+                    margin: 5px 0;
+                    color: #999999;
+                }}
+                .tagline {{
+                    color: #C5A14E;
+                    font-style: italic;
+                    margin-top: 15px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>BlkXchange™</h1>
+                    <p style="margin: 10px 0 0 0; color: #F8F8F6;">Admin Dashboard</p>
+                </div>
+                
+                <div class="content">
+                    <h2>Bulk Import Completed ✅</h2>
+                    
+                    <p>Hello Dr. Marshall,</p>
+                    
+                    <p>Your bulk import for <strong>{category.title()}</strong> has been completed successfully.</p>
+                    
+                    <div class="stats">
+                        <div class="stat-row">
+                            <span class="stat-label">✅ Added:</span>
+                            <span class="stat-value success">{successful} records</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">⚠️ Skipped:</span>
+                            <span class="stat-value warning">{skipped} duplicates</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">❌ Errors:</span>
+                            <span class="stat-value error">{failed}</span>
+                        </div>
+                    </div>
+                    
+                    {error_list_html}
+                    
+                    <p>You can review imported records at:</p>
+                    
+                    <div style="text-align: center;">
+                        <a href="{admin_url}" class="cta-button">View {category.title()} Dashboard</a>
+                    </div>
+                    
+                    <p>All entries have been approved and synced to the live site.</p>
+                    
+                    <p><strong>— The BlkXchange™ System</strong></p>
+                </div>
+                
+                <div class="footer">
+                    <p><strong>BlkXchange™</strong></p>
+                    <p class="tagline">Empower. Exchange. Elevate.</p>
+                    <p style="margin-top: 20px;">© 2025 BlkXchange™. All rights reserved.</p>
+                    <p>This is an automated message. Please do not reply directly to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        text_content = f"""
+        Bulk Import Completed — {category.title()} ({date_str})
+        
+        Hello Dr. Marshall,
+        
+        Your bulk import for {category.title()} has been completed successfully.
+        
+        ✅ Added: {successful} records
+        ⚠️ Skipped: {skipped} duplicates
+        ❌ Errors: {failed}
+        
+        {"Errors:" if errors else ""}
+        {chr(10).join([f"  - {error}" for error in errors[:10]])}
+        {"  ... and more errors" if len(errors) > 10 else ""}
+        
+        You can review imported records at:
+        {admin_url}
+        
+        All entries have been approved and synced to the live site.
+        
+        — The BlkXchange™ System
+        
+        ---
+        BlkXchange™
+        Empower. Exchange. Elevate.
+        © 2025 BlkXchange™. All rights reserved.
+        """
+        
+        part1 = MIMEText(text_content, 'plain')
+        part2 = MIMEText(html_content, 'html')
+        
+        message.attach(part1)
+        message.attach(part2)
+        
+        await aiosmtplib.send(
+            message,
+            hostname=smtp_host,
+            port=smtp_port,
+            username=smtp_user,
+            password=smtp_pass,
+            use_tls=smtp_secure
+        )
+        
+        preview_url = f"https://ethereal.email/message/{message['Message-ID']}" if 'Message-ID' in message else None
+        
+        logger.info(f"✅ Bulk import confirmation email sent to {admin_email}")
+        logger.info(f"📧 Preview URL: {preview_url or 'Check Ethereal inbox'}")
+        
+        return {
+            "success": True,
+            "preview_url": preview_url,
+            "ethereal_user": smtp_user,
+            "ethereal_pass": smtp_pass,
+            "ethereal_inbox": "https://ethereal.email/login"
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error sending bulk import confirmation: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+async def log_bulk_import_to_console(
+    admin_email: str,
+    category: str,
+    successful: int,
+    skipped: int,
+    failed: int,
+    errors: list
+):
+    """
+    Log bulk import confirmation to console instead of sending (for MVP testing).
+    """
+    from datetime import datetime
+    date_str = datetime.now().strftime("%B %d, %Y")
+    
+    print("\n" + "="*80)
+    print("📧 BULK IMPORT CONFIRMATION EMAIL (Console Mode)")
+    print("="*80)
+    print(f"To: {admin_email}")
+    print(f"From: BlkXchange™ <no-reply@blkxchange.com>")
+    print(f"Subject: Bulk Import Completed — {category.title()} ({date_str})")
+    print("\n" + "-"*80)
+    print("Hello Dr. Marshall,")
+    print("")
+    print(f"Your bulk import for {category.title()} has been completed successfully.")
+    print("")
+    print(f"✅ Added: {successful} records")
+    print(f"⚠️ Skipped: {skipped} duplicates")
+    print(f"❌ Errors: {failed}")
+    print("")
+    if errors:
+        print("Errors:")
+        for error in errors[:10]:
+            print(f"  - {error}")
+        if len(errors) > 10:
+            print(f"  ... and {len(errors) - 10} more errors")
+        print("")
+    print(f"You can review imported records at:")
+    print(f"https://blkxchangemarketplace-kytxrr7p.devinapps.com/admin/{category.lower()}")
+    print("")
+    print("All entries have been approved and synced to the live site.")
+    print("")
+    print("— The BlkXchange™ System")
+    print("="*80 + "\n")
+    
+    return {
+        "success": True,
+        "mode": "console_log",
+        "message": "Email logged to console (MVP mode)"
+    }

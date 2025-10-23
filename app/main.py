@@ -24,7 +24,7 @@ from app.models import (
 )
 from app.database import db
 from app.seed_data import seed_database
-from app.email import send_vendor_welcome_email
+from app.email import send_vendor_welcome_email, send_bulk_import_confirmation
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
 
@@ -744,6 +744,16 @@ async def bulk_import_vendors(
             results["failed"] += 1
             results["errors"].append(f"Row {results['successful'] + results['failed']}: {str(e)}")
     
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@blkxchange.com")
+    await send_bulk_import_confirmation(
+        admin_email=admin_email,
+        category="vendors",
+        successful=results["successful"],
+        skipped=results["skipped"],
+        failed=results["failed"],
+        errors=results["errors"]
+    )
+    
     return results
 
 @app.post("/api/admin/products/import")
@@ -804,6 +814,16 @@ async def bulk_import_products(
             results["failed"] += 1
             results["errors"].append(f"Row {results['successful'] + results['failed']}: {str(e)}")
     
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@blkxchange.com")
+    await send_bulk_import_confirmation(
+        admin_email=admin_email,
+        category="products",
+        successful=results["successful"],
+        skipped=results["skipped"],
+        failed=results["failed"],
+        errors=results["errors"]
+    )
+    
     return results
 
 @app.post("/api/admin/professionals/import")
@@ -851,5 +871,15 @@ async def bulk_import_professionals(
         except Exception as e:
             results["failed"] += 1
             results["errors"].append(f"Row {results['successful'] + results['failed']}: {str(e)}")
+    
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@blkxchange.com")
+    await send_bulk_import_confirmation(
+        admin_email=admin_email,
+        category="professionals",
+        successful=results["successful"],
+        skipped=results["skipped"],
+        failed=results["failed"],
+        errors=results["errors"]
+    )
     
     return results
