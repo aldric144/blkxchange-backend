@@ -140,7 +140,14 @@ class InMemoryDatabase:
             verified=False,
             rating=0.0,
             reviews_count=0,
-            created_at=datetime.now()
+            created_at=datetime.now(),
+            street=professional_data.street,
+            city=professional_data.city,
+            state=professional_data.state,
+            zip=professional_data.zip,
+            country=professional_data.country,
+            latitude=professional_data.latitude,
+            longitude=professional_data.longitude
         )
         self.professionals[professional_id] = professional
         return professional
@@ -153,6 +160,60 @@ class InMemoryDatabase:
         if category:
             professionals = [p for p in professionals if p.category == category]
         return professionals
+    
+    def get_professionals_nearby(self, latitude: float, longitude: float, radius_miles: float = 25.0, category: Optional[str] = None) -> List[dict]:
+        """
+        Get professionals within a specified radius using Haversine distance formula.
+        Returns list of professionals with distance_miles calculated.
+        """
+        import math
+        
+        def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+            """Calculate distance between two points on Earth in miles."""
+            R = 3959  # Earth's radius in miles
+            
+            lat1_rad = math.radians(lat1)
+            lat2_rad = math.radians(lat2)
+            delta_lat = math.radians(lat2 - lat1)
+            delta_lon = math.radians(lon2 - lon1)
+            
+            a = math.sin(delta_lat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            
+            return R * c
+        
+        nearby_professionals = []
+        
+        for professional in self.professionals.values():
+            if professional.latitude is None or professional.longitude is None:
+                continue
+            
+            if category and professional.category != category:
+                continue
+            
+            distance = haversine_distance(latitude, longitude, professional.latitude, professional.longitude)
+            
+            if distance <= radius_miles:
+                nearby_professionals.append({
+                    "id": professional.id,
+                    "name": professional.name,
+                    "title": professional.title,
+                    "category": professional.category,
+                    "city": professional.city,
+                    "state": professional.state,
+                    "zip": professional.zip,
+                    "distance_miles": round(distance, 2),
+                    "image_url": professional.image_url,
+                    "hourly_rate": professional.hourly_rate,
+                    "verified": professional.verified,
+                    "rating": professional.rating,
+                    "latitude": professional.latitude,
+                    "longitude": professional.longitude
+                })
+        
+        nearby_professionals.sort(key=lambda x: x["distance_miles"])
+        
+        return nearby_professionals
     
     def create_order(self, order_data: OrderCreate) -> Order:
         order_id = str(uuid.uuid4())

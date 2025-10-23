@@ -511,7 +511,12 @@ def seed_database():
         credentials="MD, Board Certified in Family Medicine",
         hourly_rate=200.00,
         phone="555-0201",
-        image_url="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500"
+        image_url="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=500",
+        city="Miami",
+        state="FL",
+        zip="33401",
+        latitude=25.7617,
+        longitude=-80.1918
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -523,7 +528,12 @@ def seed_database():
         credentials="JD, Licensed to practice in NY, NJ, and Federal Courts",
         hourly_rate=350.00,
         phone="555-0202",
-        image_url="https://images.unsplash.com/photo-1556157382-97eda2d62296?w=500"
+        image_url="https://images.unsplash.com/photo-1556157382-97eda2d62296?w=500",
+        city="Atlanta",
+        state="GA",
+        zip="30303",
+        latitude=33.7490,
+        longitude=-84.3880
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -535,7 +545,12 @@ def seed_database():
         credentials="CFP, MBA in Finance",
         hourly_rate=175.00,
         phone="555-0203",
-        image_url="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500"
+        image_url="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500",
+        city="Chicago",
+        state="IL",
+        zip="60611",
+        latitude=41.8781,
+        longitude=-87.6298
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -547,7 +562,12 @@ def seed_database():
         credentials="ICF Certified Coach, 20+ years business experience",
         hourly_rate=150.00,
         phone="555-0204",
-        image_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500"
+        image_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500",
+        city="Dallas",
+        state="TX",
+        zip="75201",
+        latitude=32.7767,
+        longitude=-96.7970
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -559,7 +579,12 @@ def seed_database():
         credentials="PhD in Organizational Psychology, SHRM-SCP",
         hourly_rate=300.00,
         phone="555-0205",
-        image_url="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500"
+        image_url="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500",
+        city="Miami",
+        state="FL",
+        zip="33401",
+        latitude=25.7617,
+        longitude=-80.1918
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -571,7 +596,12 @@ def seed_database():
         credentials="MD, Board Certified Pediatrics, FAAP",
         hourly_rate=225.00,
         phone="555-0301",
-        image_url="https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=500"
+        image_url="https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=500",
+        city="Atlanta",
+        state="GA",
+        zip="30303",
+        latitude=33.7490,
+        longitude=-84.3880
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -583,7 +613,12 @@ def seed_database():
         credentials="PhD in Clinical Psychology, Licensed Psychologist",
         hourly_rate=180.00,
         phone="555-0302",
-        image_url="https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=500"
+        image_url="https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=500",
+        city="Chicago",
+        state="IL",
+        zip="60611",
+        latitude=41.8781,
+        longitude=-87.6298
     ))
     
     db.create_professional(ProfessionalCreate(
@@ -595,7 +630,12 @@ def seed_database():
         credentials="DDS, Member of National Dental Association",
         hourly_rate=195.00,
         phone="555-0303",
-        image_url="https://images.pexels.com/photos/6303761/pexels-photo-6303761.jpeg?auto=compress&cs=tinysrgb&w=500"
+        image_url="https://images.pexels.com/photos/6303761/pexels-photo-6303761.jpeg?auto=compress&cs=tinysrgb&w=500",
+        city="Dallas",
+        state="TX",
+        zip="75201",
+        latitude=32.7767,
+        longitude=-96.7970
     ))
     
     db.create_professional(ProfessionalCreate(

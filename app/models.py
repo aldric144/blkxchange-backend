@@ -131,6 +131,13 @@ class ProfessionalCreate(BaseModel):
     hourly_rate: Optional[float] = None
     phone: Optional[str] = None
     image_url: Optional[str] = None
+    street: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+    country: str = "USA"
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 class Professional(BaseModel):
     id: str
@@ -147,6 +154,29 @@ class Professional(BaseModel):
     rating: float = 0.0
     reviews_count: int = 0
     created_at: datetime
+    street: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+    country: str = "USA"
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+class ProfessionalNearby(BaseModel):
+    id: str
+    name: str
+    title: str
+    category: ProfessionalCategory
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+    distance_miles: float
+    image_url: Optional[str] = None
+    hourly_rate: Optional[float] = None
+    verified: bool = False
+    rating: float = 0.0
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 class OrderItemCreate(BaseModel):
     product_id: str

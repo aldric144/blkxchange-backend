@@ -145,6 +145,50 @@ async def get_professional(professional_id: str):
         raise HTTPException(status_code=404, detail="Professional not found")
     return professional
 
+@app.get("/api/professionals/nearby/search")
+async def get_professionals_nearby(
+    lat: Optional[float] = None,
+    lng: Optional[float] = None,
+    zip: Optional[str] = None,
+    city: Optional[str] = None,
+    state: Optional[str] = None,
+    radius: float = 25.0,
+    category: Optional[ProfessionalCategory] = None
+):
+    """
+    Find professionals near a location by coordinates, ZIP code, or city.
+    Priority: lat/lng > zip > city
+    """
+    from .geocoding import geocode_zip_code, geocode_city
+    
+    latitude = lat
+    longitude = lng
+    
+    if latitude is None or longitude is None:
+        if zip:
+            coords = await geocode_zip_code(zip)
+            if coords:
+                latitude, longitude = coords
+        elif city:
+            coords = await geocode_city(city, state)
+            if coords:
+                latitude, longitude = coords
+    
+    if latitude is None or longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Please provide either lat/lng coordinates, a ZIP code, or a city name"
+        )
+    
+    nearby = db.get_professionals_nearby(
+        latitude=latitude,
+        longitude=longitude,
+        radius_miles=radius,
+        category=category
+    )
+    
+    return nearby
+
 @app.post("/api/orders", response_model=Order)
 async def create_order(order: OrderCreate):
     return db.create_order(order)
