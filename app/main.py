@@ -686,3 +686,170 @@ async def create_professional_manual(
     
     professional = db.create_professional(professional_data)
     return professional
+
+# Bulk Import Endpoints
+@app.post("/api/admin/vendors/import")
+async def bulk_import_vendors(
+    data: dict,
+    x_admin_secret: str = Header(None)
+):
+    """Bulk import vendors from CSV data (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    csv_data = data.get("data", [])
+    results = {
+        "successful": 0,
+        "skipped": 0,
+        "failed": 0,
+        "errors": []
+    }
+    
+    for row in csv_data:
+        try:
+            existing_apps = db.get_all_vendor_applications()
+            if any(app.email == row.get("email") for app in existing_apps):
+                results["skipped"] += 1
+                continue
+            
+            # Create vendor application
+            vendor_app = VendorApplicationCreate(
+                business_name=row.get("business_name", ""),
+                contact_name=row.get("owner_name", ""),
+                email=row.get("email", ""),
+                phone=row.get("phone", ""),
+                address=row.get("address", ""),
+                website=row.get("website"),
+                category=row.get("category", "apparel_accessories"),
+                description=row.get("description", ""),
+                price_range=PriceRange.UNDER_25,
+                fulfillment_method=FulfillmentMethod.SHIPPING,
+                image_urls=[row.get("logo_url")] if row.get("logo_url") else [],
+                agreement_accepted=True
+            )
+            
+            vendor = db.create_vendor_application(vendor_app)
+            
+            status_str = row.get("status", "pending").lower()
+            if status_str == "approved":
+                vendor.status = VendorApplicationStatus.APPROVED
+            elif status_str == "rejected":
+                vendor.status = VendorApplicationStatus.REJECTED
+            else:
+                vendor.status = VendorApplicationStatus.PENDING
+            
+            results["successful"] += 1
+            
+        except Exception as e:
+            results["failed"] += 1
+            results["errors"].append(f"Row {results['successful'] + results['failed']}: {str(e)}")
+    
+    return results
+
+@app.post("/api/admin/products/import")
+async def bulk_import_products(
+    data: dict,
+    x_admin_secret: str = Header(None)
+):
+    """Bulk import products from CSV data (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    csv_data = data.get("data", [])
+    results = {
+        "successful": 0,
+        "skipped": 0,
+        "failed": 0,
+        "errors": []
+    }
+    
+    for row in csv_data:
+        try:
+            vendor_email = row.get("vendor_email", "")
+            vendor_apps = db.get_all_vendor_applications()
+            vendor_app = next((app for app in vendor_apps if app.email == vendor_email), None)
+            
+            if not vendor_app:
+                results["failed"] += 1
+                results["errors"].append(f"Vendor not found for email: {vendor_email}")
+                continue
+            
+            existing_products = db.get_all_products_enhanced(vendor_id=vendor_app.id)
+            product_name = row.get("product_name", "")
+            if any(p.name == product_name for p in existing_products):
+                results["skipped"] += 1
+                continue
+            
+            product_data = ProductCreateEnhanced(
+                vendor_id=vendor_app.id,
+                name=product_name,
+                description=row.get("description", ""),
+                price=float(row.get("price", 0)),
+                category=row.get("category", "apparel_accessories"),
+                quantity=int(row.get("quantity", 0)),
+                image_urls=[row.get("image_url")] if row.get("image_url") else []
+            )
+            
+            product = db.create_product_enhanced(product_data)
+            
+            status_str = row.get("status", "pending").lower()
+            if status_str == "approved":
+                db.update_product_enhanced_status(product.id, ProductStatus.APPROVED)
+            elif status_str == "rejected":
+                db.update_product_enhanced_status(product.id, ProductStatus.REJECTED)
+            
+            results["successful"] += 1
+            
+        except Exception as e:
+            results["failed"] += 1
+            results["errors"].append(f"Row {results['successful'] + results['failed']}: {str(e)}")
+    
+    return results
+
+@app.post("/api/admin/professionals/import")
+async def bulk_import_professionals(
+    data: dict,
+    x_admin_secret: str = Header(None)
+):
+    """Bulk import professionals from CSV data (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    csv_data = data.get("data", [])
+    results = {
+        "successful": 0,
+        "skipped": 0,
+        "failed": 0,
+        "errors": []
+    }
+    
+    for row in csv_data:
+        try:
+            existing_professionals = db.get_all_professionals()
+            email = row.get("email", "")
+            if any(p.email == email for p in existing_professionals):
+                results["skipped"] += 1
+                continue
+            
+            # Create professional
+            professional_data = ProfessionalCreate(
+                email=email,
+                name=row.get("name", ""),
+                title=row.get("tagline") or row.get("business_name") or row.get("name", ""),
+                category=row.get("category", "coaching_consulting"),
+                bio=row.get("bio", ""),
+                credentials="Admin Verified",
+                hourly_rate=None,
+                phone=row.get("phone"),
+                image_url=row.get("image_url"),
+                zip=row.get("zip", "")
+            )
+            
+            professional = db.create_professional(professional_data)
+            results["successful"] += 1
+            
+        except Exception as e:
+            results["failed"] += 1
+            results["errors"].append(f"Row {results['successful'] + results['failed']}: {str(e)}")
+    
+    return results
