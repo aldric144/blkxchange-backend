@@ -580,3 +580,18 @@ class AdminToken(BaseModel):
     token_type: str = "bearer"
     expires_in: int  # seconds
     email: str
+
+class AdminForgotPassword(BaseModel):
+    email: EmailStr
+
+class AdminResetPassword(BaseModel):
+    token: str
+    new_password: str
+
+class PasswordResetToken(BaseModel):
+    id: str
+    email: EmailStr
+    token: str
+    expires_at: datetime
+    used: bool = False
+    created_at: datetime

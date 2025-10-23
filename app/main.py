@@ -21,7 +21,7 @@ from app.models import (
     PendingProfessionalCreate, PendingProfessional, PendingProfessionalStatus,
     VendorManualCreate, ProductManualCreate, AdManualCreate, ProfessionalManualCreate,
     PriceRange, FulfillmentMethod,
-    AdminLogin, AdminToken, AdminUserCreate
+    AdminLogin, AdminToken, AdminUserCreate, AdminForgotPassword, AdminResetPassword
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -110,15 +110,55 @@ async def create_admin_user(user_data: AdminUserCreate, x_admin_secret: str = He
     user = db.create_admin_user(user_data)
     return {"message": "Admin user created successfully", "email": user.email}
 
-@app.post("/api/admin/reset-password")
-async def reset_admin_password(email: str, new_password: str, x_admin_secret: str = Header(None)):
-    """Reset admin password (requires admin secret)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+@app.post("/api/admin/forgot-password")
+async def admin_forgot_password(data: AdminForgotPassword):
+    """Send password reset email to admin user"""
+    import secrets
+    from datetime import datetime, timedelta
     
-    success = db.update_admin_password(email, new_password)
+    user = db.get_admin_user_by_email(data.email)
+    if not user:
+        return {"message": "If an account exists with this email, a reset link has been sent."}
+    
+    reset_token = secrets.token_urlsafe(32)
+    expires_at = datetime.utcnow() + timedelta(minutes=15)
+    
+    db.create_password_reset_token(user.email, reset_token, expires_at)
+    
+    reset_url = f"{FRONTEND_URL}/admin/reset-password?token={reset_token}"
+    
+    print("\n" + "="*80)
+    print("📧 PASSWORD RESET EMAIL")
+    print("="*80)
+    print(f"To: {user.email}")
+    print(f"Subject: Reset Your BlkXchange™ Admin Password")
+    print(f"\nReset Link: {reset_url}")
+    print(f"Valid for: 15 minutes")
+    print("="*80 + "\n")
+    
+    return {"message": "If an account exists with this email, a reset link has been sent."}
+
+@app.post("/api/admin/reset-password")
+async def admin_reset_password(data: AdminResetPassword):
+    """Reset admin password using token"""
+    from datetime import datetime
+    
+    token_data = db.get_password_reset_token(data.token)
+    
+    if not token_data:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    
+    if token_data.used:
+        raise HTTPException(status_code=400, detail="Reset token has already been used")
+    
+    if datetime.utcnow() > token_data.expires_at:
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+    
+    success = db.update_admin_password(token_data.email, data.new_password)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    db.mark_reset_token_used(data.token)
     
     return {"message": "Password reset successfully"}
 

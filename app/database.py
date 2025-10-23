@@ -54,6 +54,7 @@ class InMemoryDatabase:
             "nonprofit_donations": 0.0
         }
         self.admin_users: Dict[str, dict] = {}
+        self.password_reset_tokens: Dict[str, dict] = {}
         self._seed_black_banks()
         self._seed_admin_users()
     
@@ -848,6 +849,31 @@ class InMemoryDatabase:
         user = self.get_admin_user_by_email(email)
         if user:
             user.hashed_password = get_password_hash(new_password)
+            return True
+        return False
+    
+    def create_password_reset_token(self, email: str, token: str, expires_at: datetime) -> dict:
+        """Create a password reset token"""
+        token_id = str(uuid.uuid4())
+        token_data = {
+            "id": token_id,
+            "email": email,
+            "token": token,
+            "expires_at": expires_at,
+            "used": False,
+            "created_at": datetime.now()
+        }
+        self.password_reset_tokens[token] = token_data
+        return token_data
+    
+    def get_password_reset_token(self, token: str) -> Optional[dict]:
+        """Get password reset token data"""
+        return self.password_reset_tokens.get(token)
+    
+    def mark_reset_token_used(self, token: str) -> bool:
+        """Mark a reset token as used"""
+        if token in self.password_reset_tokens:
+            self.password_reset_tokens[token]["used"] = True
             return True
         return False
 
