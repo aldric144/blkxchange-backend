@@ -35,6 +35,11 @@ class ProfessionalCategory(str, Enum):
     TECHNOLOGY_INNOVATION = "technology_innovation"
     TRADES_HOME = "trades_home"
     TRANSPORTATION_LOGISTICS = "transportation_logistics"
+    ARTS_CULTURE = "arts_culture"
+    BLACK_MEDIA = "black_media"
+    FAITH_RESILIENCE = "faith_resilience"
+    HBCUS_EDUCATION = "hbcus_education"
+    TRAVEL_HERITAGE = "travel_heritage"
     OTHER = "other"
 
 class CulturalCategory(str, Enum):
