@@ -1262,6 +1262,66 @@ def seed_database():
         image_url="https://images.pexels.com/photos/5669621/pexels-photo-5669621.jpeg?auto=compress&cs=tinysrgb&w=500"
     ))
     
+    db.create_professional(ProfessionalCreate(
+        email="malik@heritagecreatives.com",
+        name="Malik Johnson",
+        title="Founder, Heritage Creatives",
+        category=ProfessionalCategory.ARTS_CULTURE,
+        bio="Empowering youth through art and storytelling workshops celebrating Black history. Art that tells our story.",
+        credentials="MFA Visual Arts",
+        hourly_rate=120.00,
+        phone="555-4010",
+        image_url="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=500"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="jasmine@nubianvoices.com",
+        name="Jasmine Reed",
+        title="Editor-in-Chief, Nubian Voices Magazine",
+        category=ProfessionalCategory.BLACK_MEDIA,
+        bio="Elevating Black journalism and digital storytelling for a global audience. Amplifying Black brilliance.",
+        credentials="BA Journalism",
+        hourly_rate=150.00,
+        phone="555-4011",
+        image_url="https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=500"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="pastor.brooks@faithforward.org",
+        name="Pastor David Brooks",
+        title="Founder, Faith Forward Network",
+        category=ProfessionalCategory.FAITH_RESILIENCE,
+        bio="Providing trauma-informed spiritual counseling and community healing programs. Faith that heals generations.",
+        credentials="M.Div., Certified Chaplain",
+        hourly_rate=100.00,
+        phone="555-4012",
+        image_url="https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=500"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="dr.thompson@hbcuscholars.org",
+        name="Dr. Angela Thompson",
+        title="Director, HBCU Scholars Collective",
+        category=ProfessionalCategory.HBCUS_EDUCATION,
+        bio="Connecting students to scholarships and mentorship. Building the next generation of HBCU leaders.",
+        credentials="PhD Education",
+        hourly_rate=200.00,
+        phone="555-4013",
+        image_url="https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=500"
+    ))
+    
+    db.create_professional(ProfessionalCreate(
+        email="trey@diasporajourneys.com",
+        name="Marcus 'Trey' Williams",
+        title="Founder, Diaspora Journeys",
+        category=ProfessionalCategory.TRAVEL_HERITAGE,
+        bio="Curating heritage tours across Africa and the Caribbean for families and educators. Discover where your story began.",
+        credentials="BA Tourism Mgmt",
+        hourly_rate=175.00,
+        phone="555-4014",
+        image_url="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=500"
+    ))
+    
     article1 = db.create_article(ArticleCreate(
         title="Black Tech Entrepreneur Raises $50M for AI Healthcare Platform",
         author="Marcus Williams",
