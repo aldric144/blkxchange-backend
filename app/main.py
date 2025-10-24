@@ -1378,3 +1378,42 @@ async def export_data(
         )
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use 'csv' or 'json'")
+
+@app.delete("/api/admin/professionals/{professional_id}")
+async def delete_professional(
+    professional_id: str,
+    admin: bool = Depends(require_admin)
+):
+    """Delete a professional"""
+    professional = db.get_professional(professional_id)
+    if not professional:
+        raise HTTPException(status_code=404, detail="Professional not found")
+    
+    db.delete_professional(professional_id)
+    return {"message": "Professional deleted successfully"}
+
+@app.delete("/api/admin/products/{product_id}")
+async def delete_product_admin(
+    product_id: str,
+    admin: bool = Depends(require_admin)
+):
+    """Delete a product"""
+    product = db.get_product_enhanced(product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    db.delete_product_enhanced(product_id)
+    return {"message": "Product deleted successfully"}
+
+@app.delete("/api/admin/ads/{ad_id}")
+async def delete_ad(
+    ad_id: str,
+    admin: bool = Depends(require_admin)
+):
+    """Delete an ad"""
+    ad = db.get_ad_creative(ad_id)
+    if not ad:
+        raise HTTPException(status_code=404, detail="Ad not found")
+    
+    db.delete_ad_creative(ad_id)
+    return {"message": "Ad deleted successfully"}
