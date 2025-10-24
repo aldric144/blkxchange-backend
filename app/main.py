@@ -684,11 +684,9 @@ async def record_ad_click(slot_id: str):
 @app.post("/api/admin/vendors/manual", response_model=VendorApplication)
 async def create_vendor_manual(
     data: VendorManualCreate,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Manually create a vendor (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     vendor_app = VendorApplicationCreate(
         business_name=data.business_name,
@@ -712,11 +710,9 @@ async def create_vendor_manual(
 @app.post("/api/admin/products/manual", response_model=ProductEnhanced)
 async def create_product_manual(
     data: ProductManualCreate,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Manually create a product (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     import uuid
     product_data = ProductCreateEnhanced(
@@ -737,11 +733,9 @@ async def create_product_manual(
 @app.post("/api/admin/ads/manual", response_model=AdCreative)
 async def create_ad_manual(
     data: AdManualCreate,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Manually create an ad (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     advertiser_data = AdvertiserCreate(
         name=data.advertiser_name,
@@ -774,11 +768,9 @@ async def create_ad_manual(
 @app.post("/api/admin/professionals/manual", response_model=Professional)
 async def create_professional_manual(
     data: ProfessionalManualCreate,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Manually create a professional (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     professional_data = ProfessionalCreate(
         email=data.email,
@@ -800,11 +792,9 @@ async def create_professional_manual(
 @app.post("/api/admin/vendors/import")
 async def bulk_import_vendors(
     data: dict,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Bulk import vendors from CSV data (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     csv_data = data.get("data", [])
     results = {
@@ -868,11 +858,9 @@ async def bulk_import_vendors(
 @app.post("/api/admin/products/import")
 async def bulk_import_products(
     data: dict,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Bulk import products from CSV data (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     csv_data = data.get("data", [])
     results = {
@@ -938,11 +926,9 @@ async def bulk_import_products(
 @app.post("/api/admin/professionals/import")
 async def bulk_import_professionals(
     data: dict,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Bulk import professionals from CSV data (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     csv_data = data.get("data", [])
     results = {
@@ -995,34 +981,26 @@ async def bulk_import_professionals(
 
 # Test Mode / Sandbox Endpoints
 @app.get("/api/admin/test-mode/vendors")
-async def get_test_vendors(x_admin_secret: str = Header(None)):
+async def get_test_vendors(admin: bool = Depends(require_admin)):
     """Get all test vendor applications"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     return db.get_all_test_vendor_applications()
 
 @app.get("/api/admin/test-mode/professionals")
-async def get_test_professionals(x_admin_secret: str = Header(None)):
+async def get_test_professionals(admin: bool = Depends(require_admin)):
     """Get all test professionals"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     return db.get_all_test_professionals()
 
 @app.get("/api/admin/test-mode/ads")
-async def get_test_ads(x_admin_secret: str = Header(None)):
+async def get_test_ads(admin: bool = Depends(require_admin)):
     """Get all test ad creatives"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     return db.get_all_test_ad_creatives()
 
 @app.post("/api/admin/test-mode/vendors/manual")
 async def create_test_vendor_manual(
     data: VendorManualCreate,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Create a test vendor (sandbox mode)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     vendor_app = VendorApplicationCreate(
         business_name=data.business_name,
@@ -1047,11 +1025,9 @@ async def create_test_vendor_manual(
 @app.post("/api/admin/test-mode/professionals/manual")
 async def create_test_professional_manual(
     data: ProfessionalManualCreate,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Create a test professional (sandbox mode)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     professional_data = ProfessionalCreate(
         email=data.email,
@@ -1073,11 +1049,9 @@ async def create_test_professional_manual(
 @app.post("/api/admin/test-mode/ads/manual")
 async def create_test_ad_manual(
     data: AdManualCreate,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Create a test ad (sandbox mode)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     advertiser_data = AdvertiserCreate(
         name=data.advertiser_name,
@@ -1110,10 +1084,8 @@ async def create_test_ad_manual(
     return ad
 
 @app.delete("/api/admin/test-mode/purge")
-async def purge_test_data(x_admin_secret: str = Header(None)):
+async def purge_test_data(admin: bool = Depends(require_admin)):
     """Purge all test data"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     
     counts = db.purge_test_data()
     return {
