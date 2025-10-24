@@ -15,17 +15,17 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB (increased from 2MB)
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 IMAGE_SIZES = {
-    "logo": (600, 600),
+    "logo": (300, 300),
     "product": (600, 600),
     "ad": (600, 600),
-    "profile": (600, 600),
+    "profile": (300, 300),
 }
 
 COMPRESSION_TARGETS = {
-    "logo": 300,
+    "logo": 200,
     "product": 400,
     "ad": 500,
-    "profile": 300,
+    "profile": 200,
 }
 
 
@@ -63,7 +63,7 @@ def optimize_image(
     target_size: Optional[Tuple[int, int]] = None
 ) -> bytes:
     """
-    Optimize and resize image
+    Optimize and resize image with smart padding for aspect ratio mismatches
     
     Args:
         image_content: Raw image bytes
@@ -75,6 +75,7 @@ def optimize_image(
     """
     img = Image.open(io.BytesIO(image_content))
     
+    # Convert RGBA/LA/P to RGB with white background
     if img.mode in ('RGBA', 'LA', 'P'):
         background = Image.new('RGB', img.size, (255, 255, 255))
         if img.mode == 'P':
@@ -85,7 +86,22 @@ def optimize_image(
     if target_size is None:
         target_size = IMAGE_SIZES.get(image_type, (600, 600))
     
-    img.thumbnail(target_size, Image.Resampling.LANCZOS)
+    img_aspect = img.width / img.height
+    target_aspect = target_size[0] / target_size[1]
+    
+    if img_aspect > target_aspect:
+        new_width = target_size[0]
+        new_height = int(target_size[0] / img_aspect)
+    else:
+        new_height = target_size[1]
+        new_width = int(target_size[1] * img_aspect)
+    
+    img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    
+    final_img = Image.new('RGB', target_size, (255, 255, 255))
+    paste_x = (target_size[0] - new_width) // 2
+    paste_y = (target_size[1] - new_height) // 2
+    final_img.paste(img, (paste_x, paste_y))
     
     target_kb = COMPRESSION_TARGETS.get(image_type, 400)
     quality = 85
@@ -94,7 +110,7 @@ def optimize_image(
     while quality > 20:
         output.seek(0)
         output.truncate()
-        img.save(output, format='JPEG', quality=quality, optimize=True)
+        final_img.save(output, format='JPEG', quality=quality, optimize=True)
         size_kb = len(output.getvalue()) / 1024
         
         if size_kb <= target_kb:

@@ -98,6 +98,7 @@ class Vendor(BaseModel):
     business_name: str
     business_description: str
     phone: Optional[str] = None
+    website: Optional[str] = None
     stripe_account_id: Optional[str] = None
     verified: bool = False
     total_sales: float = 0.0
@@ -116,6 +117,8 @@ class Product(BaseModel):
     id: str
     vendor_id: str
     vendor_name: Optional[str] = None
+    vendor_email: Optional[str] = None
+    vendor_website: Optional[str] = None
     name: str
     description: str
     price: float

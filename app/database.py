@@ -91,10 +91,14 @@ class InMemoryDatabase:
         product_id = str(uuid.uuid4())
         vendor = self.get_vendor(vendor_id)
         vendor_name = vendor.name if vendor else None
+        vendor_email = vendor.email if vendor else None
+        vendor_website = vendor.website if vendor else None
         product = Product(
             id=product_id,
             vendor_id=vendor_id,
             vendor_name=vendor_name,
+            vendor_email=vendor_email,
+            vendor_website=vendor_website,
             name=product_data.name,
             description=product_data.description,
             price=product_data.price,
