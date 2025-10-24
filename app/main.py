@@ -1152,3 +1152,229 @@ async def purge_test_data(admin: bool = Depends(require_admin)):
         "message": "Test data purged successfully",
         "deleted": counts
     }
+
+@app.put("/api/admin/vendors/{vendor_id}")
+async def update_vendor(
+    vendor_id: str,
+    update_data: dict,
+    admin_email: str = Header(None, alias="X-Admin-Email"),
+    admin: bool = Depends(require_admin)
+):
+    """Update vendor with version tracking"""
+    vendor = db.get_vendor(vendor_id)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    
+    from app.models import VersionHistoryCreate, EntityType
+    version_data = VersionHistoryCreate(
+        entity_type=EntityType.VENDOR,
+        entity_id=vendor_id,
+        data_snapshot=vendor.dict(),
+        edited_by=admin_email or "admin",
+        edited_by_email=admin_email or "admin@blkxchange.com",
+        change_description="Vendor updated"
+    )
+    db.create_version_history(version_data)
+    
+    updated_vendor = db.update_vendor_enhanced(vendor_id, update_data)
+    return updated_vendor
+
+@app.put("/api/admin/professionals/{professional_id}")
+async def update_professional(
+    professional_id: str,
+    update_data: dict,
+    admin_email: str = Header(None, alias="X-Admin-Email"),
+    admin: bool = Depends(require_admin)
+):
+    """Update professional with version tracking"""
+    professional = db.get_professional(professional_id)
+    if not professional:
+        raise HTTPException(status_code=404, detail="Professional not found")
+    
+    from app.models import VersionHistoryCreate, EntityType
+    version_data = VersionHistoryCreate(
+        entity_type=EntityType.PROFESSIONAL,
+        entity_id=professional_id,
+        data_snapshot=professional.dict(),
+        edited_by=admin_email or "admin",
+        edited_by_email=admin_email or "admin@blkxchange.com",
+        change_description="Professional updated"
+    )
+    db.create_version_history(version_data)
+    
+    updated_professional = db.update_professional_enhanced(professional_id, update_data)
+    return updated_professional
+
+@app.put("/api/admin/products/{product_id}")
+async def update_product_admin(
+    product_id: str,
+    update_data: dict,
+    admin_email: str = Header(None, alias="X-Admin-Email"),
+    admin: bool = Depends(require_admin)
+):
+    """Update product with version tracking"""
+    product = db.get_product_enhanced(product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    from app.models import VersionHistoryCreate, EntityType
+    version_data = VersionHistoryCreate(
+        entity_type=EntityType.PRODUCT,
+        entity_id=product_id,
+        data_snapshot=product.dict(),
+        edited_by=admin_email or "admin",
+        edited_by_email=admin_email or "admin@blkxchange.com",
+        change_description="Product updated"
+    )
+    db.create_version_history(version_data)
+    
+    updated_product = db.update_product_enhanced(product_id, update_data)
+    return updated_product
+
+@app.put("/api/admin/ads/{ad_id}")
+async def update_ad(
+    ad_id: str,
+    update_data: dict,
+    admin_email: str = Header(None, alias="X-Admin-Email"),
+    admin: bool = Depends(require_admin)
+):
+    """Update ad with version tracking"""
+    ad = db.get_ad_creative(ad_id)
+    if not ad:
+        raise HTTPException(status_code=404, detail="Ad not found")
+    
+    from app.models import VersionHistoryCreate, EntityType
+    version_data = VersionHistoryCreate(
+        entity_type=EntityType.AD,
+        entity_id=ad_id,
+        data_snapshot=ad.dict(),
+        edited_by=admin_email or "admin",
+        edited_by_email=admin_email or "admin@blkxchange.com",
+        change_description="Ad updated"
+    )
+    db.create_version_history(version_data)
+    
+    updated_ad = db.update_ad_creative_enhanced(ad_id, update_data)
+    return updated_ad
+
+@app.get("/api/admin/version-history/{entity_type}/{entity_id}")
+async def get_version_history(
+    entity_type: str,
+    entity_id: str,
+    admin: bool = Depends(require_admin)
+):
+    """Get version history for an entity"""
+    from app.models import EntityType
+    try:
+        entity_type_enum = EntityType(entity_type)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid entity type")
+    
+    history = db.get_version_history(entity_type_enum, entity_id)
+    return history
+
+@app.post("/api/admin/rollback/{entity_type}/{entity_id}/{version_number}")
+async def rollback_to_version(
+    entity_type: str,
+    entity_id: str,
+    version_number: int,
+    admin_email: str = Header(None, alias="X-Admin-Email"),
+    admin: bool = Depends(require_admin)
+):
+    """Rollback entity to a specific version"""
+    from app.models import EntityType
+    try:
+        entity_type_enum = EntityType(entity_type)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid entity type")
+    
+    snapshot = db.rollback_to_version(entity_type_enum, entity_id, version_number)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Version not found")
+    
+    if entity_type_enum == EntityType.VENDOR:
+        updated = db.update_vendor_enhanced(entity_id, snapshot)
+    elif entity_type_enum == EntityType.PROFESSIONAL:
+        updated = db.update_professional_enhanced(entity_id, snapshot)
+    elif entity_type_enum == EntityType.PRODUCT:
+        updated = db.update_product_enhanced(entity_id, snapshot)
+    elif entity_type_enum == EntityType.AD:
+        updated = db.update_ad_creative_enhanced(entity_id, snapshot)
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported entity type")
+    
+    from app.models import VersionHistoryCreate
+    version_data = VersionHistoryCreate(
+        entity_type=entity_type_enum,
+        entity_id=entity_id,
+        data_snapshot=snapshot,
+        edited_by=admin_email or "admin",
+        edited_by_email=admin_email or "admin@blkxchange.com",
+        change_description=f"Rolled back to version {version_number}"
+    )
+    db.create_version_history(version_data)
+    
+    return {"message": "Rollback successful", "data": updated}
+
+@app.get("/api/admin/search")
+async def global_search(
+    q: str,
+    admin: bool = Depends(require_admin)
+):
+    """Global search across all entities"""
+    if not q or len(q) < 2:
+        raise HTTPException(status_code=400, detail="Query must be at least 2 characters")
+    
+    results = db.global_search(q)
+    return results
+
+@app.get("/api/admin/metrics")
+async def get_admin_metrics(admin: bool = Depends(require_admin)):
+    """Get admin dashboard metrics"""
+    metrics = db.get_admin_metrics()
+    return metrics
+
+@app.get("/api/admin/export/{section}")
+async def export_data(
+    section: str,
+    format: str = "csv",
+    admin: bool = Depends(require_admin)
+):
+    """Export data in CSV or JSON format"""
+    import csv
+    import io
+    from fastapi.responses import StreamingResponse
+    
+    if section == "vendors":
+        data = db.get_all_vendors()
+    elif section == "professionals":
+        data = db.get_all_professionals()
+    elif section == "products":
+        data = db.get_all_products_enhanced()
+    elif section == "ads":
+        data = db.get_all_ad_creatives()
+    else:
+        raise HTTPException(status_code=400, detail="Invalid section")
+    
+    if format == "json":
+        return [item.dict() for item in data]
+    elif format == "csv":
+        if not data:
+            raise HTTPException(status_code=404, detail="No data to export")
+        
+        output = io.StringIO()
+        first_item = data[0].dict()
+        writer = csv.DictWriter(output, fieldnames=first_item.keys())
+        writer.writeheader()
+        
+        for item in data:
+            writer.writerow(item.dict())
+        
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={section}.csv"}
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Invalid format. Use 'csv' or 'json'")

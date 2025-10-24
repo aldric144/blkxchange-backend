@@ -17,7 +17,8 @@ from app.models import (
     Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate, 
     AdSlot, AdSlotCreate, AdStatus,
     VisitorAnalytics,
-    PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus
+    PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus,
+    VersionHistory, VersionHistoryCreate, EntityType, AdminMetrics, SearchResult
 )
 
 class InMemoryDatabase:
@@ -55,6 +56,7 @@ class InMemoryDatabase:
         }
         self.admin_users: Dict[str, dict] = {}
         self.password_reset_tokens: Dict[str, dict] = {}
+        self.version_history: Dict[str, List[VersionHistory]] = {}
         self._seed_black_banks()
         self._seed_admin_users()
     
@@ -876,5 +878,155 @@ class InMemoryDatabase:
             self.password_reset_tokens[token]["used"] = True
             return True
         return False
+    
+    def create_version_history(self, version_data: VersionHistoryCreate) -> VersionHistory:
+        """Create a version history entry"""
+        version_id = str(uuid.uuid4())
+        key = f"{version_data.entity_type}:{version_data.entity_id}"
+        
+        if key not in self.version_history:
+            self.version_history[key] = []
+        
+        version_number = len(self.version_history[key]) + 1
+        
+        version = VersionHistory(
+            id=version_id,
+            entity_type=version_data.entity_type,
+            entity_id=version_data.entity_id,
+            version_number=version_number,
+            data_snapshot=version_data.data_snapshot,
+            edited_by=version_data.edited_by,
+            edited_by_email=version_data.edited_by_email,
+            edited_at=datetime.now(),
+            change_description=version_data.change_description
+        )
+        
+        self.version_history[key].append(version)
+        
+        if len(self.version_history[key]) > 5:
+            self.version_history[key] = self.version_history[key][-5:]
+        
+        return version
+    
+    def get_version_history(self, entity_type: EntityType, entity_id: str) -> List[VersionHistory]:
+        """Get version history for an entity"""
+        key = f"{entity_type}:{entity_id}"
+        return self.version_history.get(key, [])
+    
+    def rollback_to_version(self, entity_type: EntityType, entity_id: str, version_number: int) -> Optional[dict]:
+        """Get data snapshot from a specific version"""
+        key = f"{entity_type}:{entity_id}"
+        if key in self.version_history:
+            for version in self.version_history[key]:
+                if version.version_number == version_number:
+                    return version.data_snapshot
+        return None
+    
+    def update_vendor_enhanced(self, vendor_id: str, update_data: dict) -> Optional[Vendor]:
+        """Update vendor with version tracking"""
+        if vendor_id in self.vendors:
+            vendor = self.vendors[vendor_id]
+            for key, value in update_data.items():
+                if hasattr(vendor, key) and value is not None:
+                    setattr(vendor, key, value)
+            return vendor
+        return None
+    
+    def update_professional_enhanced(self, professional_id: str, update_data: dict) -> Optional[Professional]:
+        """Update professional with version tracking"""
+        if professional_id in self.professionals:
+            professional = self.professionals[professional_id]
+            for key, value in update_data.items():
+                if hasattr(professional, key) and value is not None:
+                    setattr(professional, key, value)
+            return professional
+        return None
+    
+    def update_ad_creative_enhanced(self, ad_id: str, update_data: dict) -> Optional[AdCreative]:
+        """Update ad creative with version tracking"""
+        if ad_id in self.ad_creatives:
+            ad = self.ad_creatives[ad_id]
+            for key, value in update_data.items():
+                if hasattr(ad, key) and value is not None:
+                    setattr(ad, key, value)
+            return ad
+        return None
+    
+    def get_admin_metrics(self) -> AdminMetrics:
+        """Get admin dashboard metrics"""
+        return AdminMetrics(
+            total_vendors=len(self.vendors),
+            total_professionals=len(self.professionals),
+            total_products=len(self.products_enhanced),
+            total_ads=len(self.ad_creatives),
+            total_visitors=self.get_current_month_visitors(),
+            pending_vendors=len([v for v in self.vendor_applications.values() if v.status == VendorApplicationStatus.PENDING]),
+            pending_professionals=len([p for p in self.pending_professionals.values() if p.status == PendingProfessionalStatus.PENDING]),
+            pending_products=len([p for p in self.products_enhanced.values() if p.status == ProductStatus.PENDING]),
+            last_updated=datetime.now()
+        )
+    
+    def global_search(self, query: str) -> List[SearchResult]:
+        """Search across all entities"""
+        results = []
+        query_lower = query.lower()
+        
+        for vendor in self.vendors.values():
+            if (query_lower in vendor.name.lower() or 
+                query_lower in vendor.business_name.lower() or 
+                query_lower in vendor.email.lower()):
+                results.append(SearchResult(
+                    id=vendor.id,
+                    type=EntityType.VENDOR,
+                    name=vendor.business_name,
+                    email=vendor.email,
+                    category=None,
+                    status="active",
+                    created_at=vendor.created_at
+                ))
+        
+        # Search professionals
+        for prof in self.professionals.values():
+            if (query_lower in prof.name.lower() or 
+                query_lower in prof.email.lower() or 
+                query_lower in prof.title.lower() or
+                query_lower in prof.bio.lower()):
+                results.append(SearchResult(
+                    id=prof.id,
+                    type=EntityType.PROFESSIONAL,
+                    name=prof.name,
+                    email=prof.email,
+                    category=prof.category,
+                    status="active",
+                    created_at=prof.created_at
+                ))
+        
+        for product in self.products_enhanced.values():
+            if (query_lower in product.name.lower() or 
+                query_lower in product.description.lower()):
+                results.append(SearchResult(
+                    id=product.id,
+                    type=EntityType.PRODUCT,
+                    name=product.name,
+                    email=None,
+                    category=product.category,
+                    status=product.status.value,
+                    created_at=product.created_at
+                ))
+        
+        for ad in self.ad_creatives.values():
+            if (query_lower in ad.asset_url.lower() or 
+                (ad.advertiser_name and query_lower in ad.advertiser_name.lower())):
+                results.append(SearchResult(
+                    id=ad.id,
+                    type=EntityType.AD,
+                    name=ad.advertiser_name or ad.asset_url,
+                    email=None,
+                    category=ad.ad_type.value,
+                    status=ad.status.value,
+                    created_at=ad.created_at
+                ))
+        
+        return results
 
 db = InMemoryDatabase()

@@ -595,3 +595,55 @@ class PasswordResetToken(BaseModel):
     expires_at: datetime
     used: bool = False
     created_at: datetime
+
+class AdminRole(str, Enum):
+    SUPER_ADMIN = "super_admin"
+    EDITOR = "editor"
+    REVIEWER = "reviewer"
+    VENDOR = "vendor"
+    PROFESSIONAL = "professional"
+
+class EntityType(str, Enum):
+    VENDOR = "vendor"
+    PROFESSIONAL = "professional"
+    PRODUCT = "product"
+    AD = "ad"
+
+class VersionHistory(BaseModel):
+    id: str
+    entity_type: EntityType
+    entity_id: str
+    version_number: int
+    data_snapshot: dict
+    edited_by: str
+    edited_by_email: str
+    edited_at: datetime
+    change_description: Optional[str] = None
+
+class VersionHistoryCreate(BaseModel):
+    entity_type: EntityType
+    entity_id: str
+    data_snapshot: dict
+    edited_by: str
+    edited_by_email: str
+    change_description: Optional[str] = None
+
+class AdminMetrics(BaseModel):
+    total_vendors: int
+    total_professionals: int
+    total_products: int
+    total_ads: int
+    total_visitors: int
+    pending_vendors: int
+    pending_professionals: int
+    pending_products: int
+    last_updated: datetime
+
+class SearchResult(BaseModel):
+    id: str
+    type: EntityType
+    name: str
+    email: Optional[str] = None
+    category: Optional[str] = None
+    status: Optional[str] = None
+    created_at: datetime
