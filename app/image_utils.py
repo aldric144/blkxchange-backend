@@ -11,14 +11,14 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 
 UPLOAD_DIR = Path("/home/ubuntu/blkxchange/blkxchange-backend/uploads")
-MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB (increased from 2MB)
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 IMAGE_SIZES = {
-    "logo": (512, 512),
-    "product": (800, 800),
-    "ad": (1200, 600),
-    "profile": (512, 512),
+    "logo": (600, 600),
+    "product": (600, 600),
+    "ad": (600, 600),
+    "profile": (600, 600),
 }
 
 COMPRESSION_TARGETS = {
@@ -43,7 +43,7 @@ def validate_image(file_content: bytes, filename: str) -> Tuple[bool, Optional[s
     Returns: (is_valid, error_message)
     """
     if len(file_content) > MAX_FILE_SIZE:
-        return False, "File exceeds 2MB limit"
+        return False, "File exceeds 5MB limit"
     
     ext = Path(filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
@@ -83,12 +83,12 @@ def optimize_image(
         img = background
     
     if target_size is None:
-        target_size = IMAGE_SIZES.get(image_type, (800, 800))
+        target_size = IMAGE_SIZES.get(image_type, (600, 600))
     
     img.thumbnail(target_size, Image.Resampling.LANCZOS)
     
     target_kb = COMPRESSION_TARGETS.get(image_type, 400)
-    quality = 95
+    quality = 85
     
     output = io.BytesIO()
     while quality > 20:
@@ -219,14 +219,13 @@ def process_and_save_image(
         return False, None, error
     
     try:
+        ensure_upload_dirs()
+        
         optimized = optimize_image(file_content, image_type)
         
         final_image = add_watermark(optimized, is_verified)
         
         url_path = save_image(final_image, section, test_mode, filename)
-        
-        if is_verified:
-            clean_path = save_image(optimized, f"{section}_clean", test_mode, filename)
         
         return True, url_path, None
         

@@ -1152,3 +1152,46 @@ async def purge_test_data(admin: bool = Depends(require_admin)):
         "message": "Test data purged successfully",
         "deleted": counts
     }
+
+@app.post("/api/checkout/session")
+async def create_checkout_session(cart_data: dict):
+    """
+    Mock Stripe checkout session endpoint
+    Returns a test session ID for future Stripe integration
+    """
+    import os
+    stripe_secret = os.getenv("STRIPE_SECRET_KEY")
+    
+    if not stripe_secret:
+        return {
+            "success": False,
+            "message": "Stripe integration not configured. Set STRIPE_SECRET_KEY in environment variables.",
+            "session_id": None
+        }
+    
+    return {
+        "success": True,
+        "session_id": "mock_session_" + str(int(datetime.now().timestamp())),
+        "message": "Mock checkout session created. Replace with real Stripe integration."
+    }
+
+@app.post("/api/checkout/complete")
+async def complete_checkout(session_id: str):
+    """
+    Mock Stripe checkout completion endpoint
+    Returns mock success response
+    """
+    import os
+    stripe_secret = os.getenv("STRIPE_SECRET_KEY")
+    
+    if not stripe_secret:
+        return {
+            "success": False,
+            "message": "Stripe integration not configured."
+        }
+    
+    return {
+        "success": True,
+        "message": "Mock checkout completed successfully. Replace with real Stripe webhook handling.",
+        "order_id": "mock_order_" + str(int(datetime.now().timestamp()))
+    }
