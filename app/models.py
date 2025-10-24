@@ -195,6 +195,9 @@ class PendingProfessionalCreate(BaseModel):
     description: str
     website: Optional[str] = None
     logo_url: Optional[str] = None
+    address: str
+    city: str
+    state: str
     zip: str
     email: EmailStr
     agreement_accepted: bool
@@ -207,7 +210,12 @@ class PendingProfessional(BaseModel):
     description: str
     website: Optional[str] = None
     logo_url: Optional[str] = None
+    address: str
+    city: str
+    state: str
     zip: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     email: EmailStr
     agreement_accepted: bool
     status: PendingProfessionalStatus
@@ -260,6 +268,9 @@ class VendorApplicationCreate(BaseModel):
     email: EmailStr
     phone: str
     address: str
+    city: str
+    state: str
+    zip: str
     website: Optional[str] = None
     category: ProductCategory
     description: str
@@ -275,6 +286,11 @@ class VendorApplication(BaseModel):
     email: EmailStr
     phone: str
     address: str
+    city: str
+    state: str
+    zip: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     website: Optional[str] = None
     category: ProductCategory
     description: str

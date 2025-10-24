@@ -306,6 +306,11 @@ class InMemoryDatabase:
             email=application_data.email,
             phone=application_data.phone,
             address=application_data.address,
+            city=application_data.city,
+            state=application_data.state,
+            zip=application_data.zip,
+            latitude=None,
+            longitude=None,
             website=application_data.website,
             category=application_data.category,
             description=application_data.description,
@@ -319,6 +324,15 @@ class InMemoryDatabase:
         )
         self.vendor_applications[application_id] = application
         return application
+    
+    def update_vendor_application_coordinates(self, application_id: str, latitude: float, longitude: float) -> bool:
+        """Update the geocoded coordinates for a vendor application"""
+        application = self.vendor_applications.get(application_id)
+        if application:
+            application.latitude = latitude
+            application.longitude = longitude
+            return True
+        return False
     
     def get_vendor_application(self, application_id: str) -> Optional[VendorApplication]:
         return self.vendor_applications.get(application_id)
@@ -703,7 +717,12 @@ class InMemoryDatabase:
             description=data.description,
             website=data.website,
             logo_url=data.logo_url,
+            address=data.address,
+            city=data.city,
+            state=data.state,
             zip=data.zip,
+            latitude=None,
+            longitude=None,
             email=data.email,
             agreement_accepted=data.agreement_accepted,
             status=PendingProfessionalStatus.PENDING,
@@ -713,6 +732,15 @@ class InMemoryDatabase:
         )
         self.pending_professionals[professional_id] = pending
         return pending
+    
+    def update_pending_professional_coordinates(self, professional_id: str, latitude: float, longitude: float) -> bool:
+        """Update the geocoded coordinates for a pending professional"""
+        pending = self.pending_professionals.get(professional_id)
+        if pending:
+            pending.latitude = latitude
+            pending.longitude = longitude
+            return True
+        return False
     
     def get_pending_professional(self, professional_id: str) -> Optional[PendingProfessional]:
         """Get a pending professional by ID"""

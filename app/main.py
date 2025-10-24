@@ -390,8 +390,22 @@ async def geocode_location(
 
 @app.post("/api/professionals/submit", response_model=PendingProfessional)
 async def submit_professional(data: PendingProfessionalCreate):
-    """Submit a professional for review"""
-    return db.create_pending_professional(data)
+    """Submit a professional for review with automatic geocoding"""
+    coords = await geocode_address(
+        street=data.address,
+        city=data.city,
+        state=data.state,
+        zip_code=data.zip
+    )
+    
+    professional = db.create_pending_professional(data)
+    
+    if coords and professional:
+        db.update_pending_professional_coordinates(professional.id, coords[0], coords[1])
+        professional.latitude = coords[0]
+        professional.longitude = coords[1]
+    
+    return professional
 
 @app.get("/api/professionals/pending", response_model=List[PendingProfessional])
 async def get_pending_professionals(
@@ -465,10 +479,26 @@ async def get_visitor_count():
 async def create_vendor_application(application: VendorApplicationCreate):
     if not application.agreement_accepted:
         raise HTTPException(status_code=400, detail="Vendor agreement must be accepted")
+    
+    coords = await geocode_address(
+        street=application.address,
+        city=application.city,
+        state=application.state,
+        zip_code=application.zip
+    )
+    
     new_application = db.create_vendor_application(application)
+    
+    if coords and new_application:
+        db.update_vendor_application_coordinates(new_application.id, coords[0], coords[1])
+        new_application.latitude = coords[0]
+        new_application.longitude = coords[1]
+    
     print("\n" + "="*80)
     print("📥 New vendor application submitted")
     print(f"Business: {new_application.business_name} | Contact: {new_application.contact_name} | Email: {new_application.email}")
+    if coords:
+        print(f"📍 Geocoded location: {coords[0]}, {coords[1]}")
     print("- Sending confirmation email to applicant (console/Ethereal)")
     print("- Sending notification email to admin (console/Ethereal)")
     print("="*80 + "\n")
