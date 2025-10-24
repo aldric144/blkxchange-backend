@@ -174,6 +174,23 @@ class InMemoryDatabase:
             professionals = [p for p in professionals if p.category == category]
         return professionals
     
+    def update_professional(self, professional_id: str, update_data: dict) -> Optional[Professional]:
+        professional = self.professionals.get(professional_id)
+        if not professional:
+            return None
+        
+        for key, value in update_data.items():
+            if hasattr(professional, key) and value is not None:
+                setattr(professional, key, value)
+        
+        return professional
+    
+    def delete_professional(self, professional_id: str) -> bool:
+        if professional_id in self.professionals:
+            del self.professionals[professional_id]
+            return True
+        return False
+    
     def get_professionals_nearby(self, latitude: float, longitude: float, radius_miles: float = 25.0, category: Optional[str] = None) -> List[dict]:
         """
         Get professionals within a specified radius using Haversine distance formula.
@@ -642,6 +659,23 @@ class InMemoryDatabase:
             self.ad_creatives[creative_id].status = status
             return self.ad_creatives[creative_id]
         return None
+    
+    def update_ad_creative(self, creative_id: str, update_data: dict) -> Optional[AdCreative]:
+        creative = self.ad_creatives.get(creative_id)
+        if not creative:
+            return None
+        
+        for key, value in update_data.items():
+            if hasattr(creative, key) and value is not None:
+                setattr(creative, key, value)
+        
+        return creative
+    
+    def delete_ad_creative(self, creative_id: str) -> bool:
+        if creative_id in self.ad_creatives:
+            del self.ad_creatives[creative_id]
+            return True
+        return False
     
     def create_ad_slot(self, slot_data: AdSlotCreate) -> AdSlot:
         slot_id = str(uuid.uuid4())

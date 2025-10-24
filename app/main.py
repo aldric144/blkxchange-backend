@@ -445,6 +445,35 @@ async def reject_pending_professional(
         raise HTTPException(status_code=404, detail="Professional not found or already processed")
     return {"message": "Professional submission rejected"}
 
+@app.put("/api/professionals/{professional_id}", response_model=Professional)
+async def update_professional(
+    professional_id: str,
+    professional_data: dict,
+    x_admin_secret: str = Header(None)
+):
+    """Update a professional (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    professional = db.update_professional(professional_id, professional_data)
+    if not professional:
+        raise HTTPException(status_code=404, detail="Professional not found")
+    return professional
+
+@app.delete("/api/professionals/{professional_id}")
+async def delete_professional(
+    professional_id: str,
+    x_admin_secret: str = Header(None)
+):
+    """Delete a professional (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    success = db.delete_professional(professional_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Professional not found")
+    return {"message": "Professional deleted successfully"}
+
 @app.post("/api/orders", response_model=Order)
 async def create_order(order: OrderCreate):
     return db.create_order(order)
@@ -739,6 +768,35 @@ async def update_ad_creative_status(creative_id: str, status: AdStatus):
     if not creative:
         raise HTTPException(status_code=404, detail="Ad creative not found")
     return {"message": f"Ad creative status updated to {status}", "creative": creative}
+
+@app.put("/api/ad-creatives/{creative_id}")
+async def update_ad_creative(
+    creative_id: str,
+    update_data: dict,
+    x_admin_secret: str = Header(None)
+):
+    """Update an ad creative (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    creative = db.update_ad_creative(creative_id, update_data)
+    if not creative:
+        raise HTTPException(status_code=404, detail="Ad creative not found")
+    return creative
+
+@app.delete("/api/ad-creatives/{creative_id}")
+async def delete_ad_creative(
+    creative_id: str,
+    x_admin_secret: str = Header(None)
+):
+    """Delete an ad creative (admin only)"""
+    if x_admin_secret != ADMIN_SECRET:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    success = db.delete_ad_creative(creative_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Ad creative not found")
+    return {"message": "Ad creative deleted successfully"}
 
 @app.get("/api/ads/{page}", response_model=List[dict])
 async def get_ads_for_page(page: str, placement: Optional[str] = None):
