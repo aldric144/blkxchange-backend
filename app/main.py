@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, Depends, UploadFile, File, Form
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List
@@ -27,6 +29,7 @@ from app.database import db
 from app.seed_data import seed_database
 from app.email import send_vendor_welcome_email, send_bulk_import_confirmation
 from app.auth import verify_password, create_access_token, verify_admin_token
+from app.image_utils import process_and_save_image
 from datetime import timedelta
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
@@ -69,9 +72,66 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+from pathlib import Path
+UPLOAD_DIR = Path("/home/ubuntu/blkxchange/blkxchange-backend/uploads")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok"}
+
+@app.post("/api/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    section: str = Form(...),
+    image_type: str = Form(...),
+    is_verified: bool = Form(False),
+    test_mode: bool = Form(False),
+    admin: bool = Depends(require_admin)
+):
+
+    """
+    Upload and process an image
+    
+    Args:
+        file: Image file to upload
+        section: Section (vendors, professionals, products, ads)
+        image_type: Type for optimization (logo, product, ad, profile)
+        is_verified: Whether to add verified watermark
+        test_mode: Whether to save in test directory
+    
+    Returns:
+        {"success": true, "url": "/uploads/live/vendors/..."}
+    """
+    try:
+        content = await file.read()
+        
+        success, url_path, error = process_and_save_image(
+            file_content=content,
+            filename=file.filename,
+            section=section,
+            image_type=image_type,
+            is_verified=is_verified,
+            test_mode=test_mode
+        )
+        
+        if not success:
+            raise HTTPException(status_code=400, detail=error)
+        
+        backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+        full_url = f"{backend_url}{url_path}"
+        
+        return {
+            "success": True,
+            "url": full_url,
+            "path": url_path
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 # Admin Authentication Endpoints
 @app.post("/api/admin/login", response_model=AdminToken)
