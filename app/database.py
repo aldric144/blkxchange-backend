@@ -149,6 +149,7 @@ class InMemoryDatabase:
             credentials=professional_data.credentials,
             hourly_rate=professional_data.hourly_rate,
             phone=professional_data.phone,
+            website=professional_data.website,
             image_url=professional_data.image_url,
             verified=False,
             rating=0.0,

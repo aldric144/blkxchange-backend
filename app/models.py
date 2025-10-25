@@ -135,6 +135,7 @@ class ProfessionalCreate(BaseModel):
     credentials: str
     hourly_rate: Optional[float] = None
     phone: Optional[str] = None
+    website: Optional[str] = None
     image_url: Optional[str] = None
     street: Optional[str] = None
     city: Optional[str] = None
