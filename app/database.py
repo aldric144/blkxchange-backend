@@ -17,7 +17,8 @@ from app.models import (
     Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate, 
     AdSlot, AdSlotCreate, AdStatus,
     VisitorAnalytics,
-    PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus
+    PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus,
+    MembershipTier
 )
 
 class InMemoryDatabase:
@@ -259,6 +260,190 @@ class InMemoryDatabase:
         nearby_professionals.sort(key=lambda x: (tier_order.get(x["membership_tier"], 3), x["distance_miles"]))
         
         return nearby_professionals
+    
+    def get_directory_nearby(self, latitude: float, longitude: float, radius_miles: float = 25.0, entity_type: Optional[str] = None, category: Optional[str] = None) -> List[dict]:
+        """
+        Get both professionals and vendors within a specified radius.
+        entity_type: 'professional', 'vendor', or None for both
+        Returns unified list with type indicator.
+        """
+        import math
+        
+        def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+            """Calculate distance between two points on Earth in miles."""
+            R = 3959  # Earth's radius in miles
+            
+            lat1_rad = math.radians(lat1)
+            lat2_rad = math.radians(lat2)
+            delta_lat = math.radians(lat2 - lat1)
+            delta_lon = math.radians(lon2 - lon1)
+            
+            a = math.sin(delta_lat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            
+            return R * c
+        
+        nearby_listings = []
+        
+        # Add professionals
+        if entity_type is None or entity_type == 'professional':
+            for professional in self.professionals.values():
+                if professional.latitude is None or professional.longitude is None:
+                    continue
+                
+                if category and professional.category != category:
+                    continue
+                
+                distance = haversine_distance(latitude, longitude, professional.latitude, professional.longitude)
+                
+                if distance <= radius_miles:
+                    nearby_listings.append({
+                        "id": professional.id,
+                        "name": professional.name,
+                        "title": professional.title,
+                        "category": professional.category,
+                        "type": "professional",
+                        "city": professional.city,
+                        "state": professional.state,
+                        "zip": professional.zip,
+                        "distance_miles": round(distance, 2),
+                        "email": professional.email,
+                        "phone": professional.phone,
+                        "website": professional.website,
+                        "image_url": professional.image_url,
+                        "hourly_rate": professional.hourly_rate,
+                        "verified": professional.verified,
+                        "membership_tier": professional.membership_tier,
+                        "rating": professional.rating,
+                        "latitude": professional.latitude,
+                        "longitude": professional.longitude
+                    })
+        
+        if entity_type is None or entity_type == 'vendor':
+            for vendor in self.vendors.values():
+                if vendor.latitude is None or vendor.longitude is None:
+                    continue
+                
+                
+                distance = haversine_distance(latitude, longitude, vendor.latitude, vendor.longitude)
+                
+                if distance <= radius_miles:
+                    nearby_listings.append({
+                        "id": vendor.id,
+                        "name": vendor.business_name,
+                        "title": vendor.business_description[:100] if vendor.business_description else "",
+                        "category": "vendor",
+                        "type": "vendor",
+                        "city": vendor.city if hasattr(vendor, 'city') else None,
+                        "state": vendor.state if hasattr(vendor, 'state') else None,
+                        "zip": vendor.zip if hasattr(vendor, 'zip') else None,
+                        "distance_miles": round(distance, 2),
+                        "email": vendor.email,
+                        "phone": vendor.phone,
+                        "website": None,
+                        "image_url": None,
+                        "hourly_rate": None,
+                        "verified": vendor.verified if hasattr(vendor, 'verified') else False,
+                        "membership_tier": vendor.membership_tier if hasattr(vendor, 'membership_tier') else MembershipTier.BASIC,
+                        "rating": 0.0,
+                        "latitude": vendor.latitude,
+                        "longitude": vendor.longitude
+                    })
+        
+        tier_order = {MembershipTier.ELITE: 0, MembershipTier.FEATURED: 1, MembershipTier.BASIC: 2}
+        nearby_listings.sort(key=lambda x: (tier_order.get(x["membership_tier"], 3), x["distance_miles"]))
+        
+        return nearby_listings
+    
+    def geocode_all_professionals(self) -> dict:
+        """Geocode all professionals missing coordinates."""
+        from app.geocoding import geocode_address
+        import asyncio
+        
+        updated_count = 0
+        failed_count = 0
+        
+        async def geocode_professional(prof):
+            nonlocal updated_count, failed_count
+            
+            if prof.latitude is not None and prof.longitude is not None:
+                return
+            
+            if not prof.zip and not prof.city:
+                failed_count += 1
+                return
+            
+            coords = await geocode_address(
+                city=prof.city,
+                state=prof.state,
+                zip_code=prof.zip
+            )
+            
+            if coords:
+                prof.latitude, prof.longitude = coords
+                updated_count += 1
+            else:
+                failed_count += 1
+        
+        async def geocode_all():
+            tasks = [geocode_professional(prof) for prof in self.professionals.values()]
+            await asyncio.gather(*tasks)
+        
+        asyncio.run(geocode_all())
+        
+        return {
+            "total": len(self.professionals),
+            "updated": updated_count,
+            "failed": failed_count,
+            "already_geocoded": len(self.professionals) - updated_count - failed_count
+        }
+    
+    def geocode_all_vendors(self) -> dict:
+        """Geocode all vendors missing coordinates."""
+        from app.geocoding import geocode_address
+        import asyncio
+        
+        updated_count = 0
+        failed_count = 0
+        
+        async def geocode_vendor(vendor):
+            nonlocal updated_count, failed_count
+            
+            if vendor.latitude is not None and vendor.longitude is not None:
+                return
+            
+            zip_code = vendor.zip if hasattr(vendor, 'zip') else None
+            city = vendor.city if hasattr(vendor, 'city') else None
+            state = vendor.state if hasattr(vendor, 'state') else None
+            
+            if not zip_code and not city:
+                failed_count += 1
+                return
+            
+            coords = await geocode_address(
+                city=city,
+                state=state,
+                zip_code=zip_code
+            )
+            
+            if coords:
+                vendor.latitude, vendor.longitude = coords
+                updated_count += 1
+            else:
+                failed_count += 1
+        
+        async def geocode_all():
+            tasks = [geocode_vendor(vendor) for vendor in self.vendors.values()]
+            await asyncio.gather(*tasks)
+        
+        asyncio.run(geocode_all())
+        
+        return {
+            "total": len(self.vendors),
+            "updated": updated_count,
+            "failed": failed_count,
+            "already_geocoded": len(self.vendors) - updated_count - failed_count
+        }
     
     def create_order(self, order_data: OrderCreate) -> Order:
         order_id = str(uuid.uuid4())

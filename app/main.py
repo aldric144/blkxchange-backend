@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Header, Depends, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Header, Depends, UploadFile, File, Form, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
@@ -395,6 +395,8 @@ async def geocode_location(
 @app.post("/api/professionals/submit", response_model=PendingProfessional)
 async def submit_professional(data: PendingProfessionalCreate):
     """Submit a professional for review with automatic geocoding"""
+    from .geocoding import geocode_address
+    
     coords = await geocode_address(
         street=data.address,
         city=data.city,
@@ -512,6 +514,8 @@ async def get_visitor_count():
 async def create_vendor_application(application: VendorApplicationCreate):
     if not application.agreement_accepted:
         raise HTTPException(status_code=400, detail="Vendor agreement must be accepted")
+    
+    from .geocoding import geocode_address
     
     coords = await geocode_address(
         street=application.address,
@@ -1450,3 +1454,61 @@ async def get_professional_leads(professional_id: str):
     """Get all leads matched to a professional"""
     leads = db.get_professional_leads(professional_id)
     return [{"match": match, "lead": lead} for match, lead in leads]
+
+@app.get("/api/directory/nearby")
+async def get_directory_nearby(
+    lat: Optional[float] = None,
+    lng: Optional[float] = None,
+    zip: Optional[str] = None,
+    city: Optional[str] = None,
+    state: Optional[str] = None,
+    radius: float = 25.0,
+    entity_type: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """
+    Find professionals and vendors near a location.
+    entity_type: 'professional', 'vendor', or None for both
+    """
+    from .geocoding import geocode_zip_code, geocode_city
+    
+    latitude = lat
+    longitude = lng
+    
+    if latitude is None or longitude is None:
+        if zip:
+            coords = await geocode_zip_code(zip)
+            if coords:
+                latitude, longitude = coords
+        elif city:
+            coords = await geocode_city(city, state)
+            if coords:
+                latitude, longitude = coords
+    
+    if latitude is None or longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Please provide either lat/lng coordinates, a ZIP code, or a city name"
+        )
+    
+    nearby = db.get_directory_nearby(
+        latitude=latitude,
+        longitude=longitude,
+        radius_miles=radius,
+        entity_type=entity_type,
+        category=category
+    )
+    
+    return nearby
+
+@app.post("/api/admin/geocode/sync")
+async def sync_geocoding(admin: bool = Depends(require_admin)):
+    """Geocode all professionals and vendors missing coordinates"""
+    prof_results = db.geocode_all_professionals()
+    vendor_results = db.geocode_all_vendors()
+    
+    return {
+        "professionals": prof_results,
+        "vendors": vendor_results,
+        "message": f"Geocoding complete. Professionals: {prof_results['updated']} updated, Vendors: {vendor_results['updated']} updated"
+    }
