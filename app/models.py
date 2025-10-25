@@ -100,6 +100,7 @@ class Vendor(BaseModel):
     phone: Optional[str] = None
     stripe_account_id: Optional[str] = None
     verified: bool = False
+    verified_documents: Optional[str] = None
     total_sales: float = 0.0
     community_contribution: float = 0.0
     created_at: datetime
@@ -158,6 +159,7 @@ class Professional(BaseModel):
     website: Optional[str] = None
     image_url: Optional[str] = None
     verified: bool = False
+    verified_documents: Optional[str] = None
     rating: float = 0.0
     reviews_count: int = 0
     created_at: datetime

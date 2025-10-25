@@ -69,6 +69,7 @@ class InMemoryDatabase:
             phone=vendor_data.phone,
             stripe_account_id=vendor_data.stripe_account_id,
             verified=False,
+            verified_documents=None,
             total_sales=0.0,
             community_contribution=0.0,
             created_at=datetime.now()
@@ -152,6 +153,7 @@ class InMemoryDatabase:
             website=professional_data.website,
             image_url=professional_data.image_url,
             verified=False,
+            verified_documents=None,
             rating=0.0,
             reviews_count=0,
             created_at=datetime.now(),
