@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Header, Depends, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Header, Depends, UploadFile, File, Form, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
@@ -391,6 +391,28 @@ async def geocode_location(
         status_code=400,
         detail="Please provide either a ZIP code or a city name"
     )
+
+@app.get("/api/listings/new-count")
+async def get_new_listings_count():
+    """
+    Get count of new vendors and professionals added in the last 7 days.
+    Returns: {"vendors": int, "professionals": int, "total": int}
+    """
+    from datetime import datetime, timedelta
+    
+    seven_days_ago = datetime.now() - timedelta(days=7)
+    
+    vendor_count = db.count_new_vendors_since(seven_days_ago)
+    
+    professional_count = db.count_new_professionals_since(seven_days_ago)
+    
+    total = vendor_count + professional_count
+    
+    return {
+        "vendors": vendor_count,
+        "professionals": professional_count,
+        "total": total
+    }
 
 @app.post("/api/professionals/submit", response_model=PendingProfessional)
 async def submit_professional(data: PendingProfessionalCreate):

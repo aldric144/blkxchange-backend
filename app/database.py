@@ -260,6 +260,20 @@ class InMemoryDatabase:
         
         return nearby_professionals
     
+    def count_new_professionals_since(self, since_date: datetime) -> int:
+        count = 0
+        for professional in self.professionals.values():
+            if professional.created_at and professional.created_at >= since_date:
+                count += 1
+        return count
+    
+    def count_new_vendors_since(self, since_date: datetime) -> int:
+        count = 0
+        for application in self.vendor_applications.values():
+            if application.status == "approved" and application.created_at >= since_date:
+                count += 1
+        return count
+    
     def create_order(self, order_data: OrderCreate) -> Order:
         order_id = str(uuid.uuid4())
         
