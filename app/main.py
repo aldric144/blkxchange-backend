@@ -23,7 +23,11 @@ from app.models import (
     PendingProfessionalCreate, PendingProfessional, PendingProfessionalStatus,
     VendorManualCreate, ProductManualCreate, AdManualCreate, ProfessionalManualCreate,
     PriceRange, FulfillmentMethod,
-    AdminLogin, AdminToken, AdminUserCreate, AdminForgotPassword, AdminResetPassword
+    AdminLogin, AdminToken, AdminUserCreate, AdminForgotPassword, AdminResetPassword,
+    ForumPostCreate, ForumPost, ForumCommentCreate, ForumComment, ForumCategory,
+    EventCreate, Event, EventRSVPCreate, EventRSVP,
+    QuestionCreate, Question, AnswerCreate, Answer,
+    LeadCreate, Lead, LeadMatch
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -1285,3 +1289,164 @@ async def complete_checkout(session_id: str):
         "message": "Mock checkout completed successfully. Replace with real Stripe webhook handling.",
         "order_id": "mock_order_" + str(int(datetime.now().timestamp()))
     }
+
+@app.post("/api/analytics/track")
+async def track_analytics(request: Request):
+    """
+    Track analytics event (view, click, lead)
+    """
+    data = await request.json()
+    entity_type = data.get("entity_type")
+    entity_id = data.get("entity_id")
+    event_type = data.get("event_type")
+    visitor_ip = request.client.host if request.client else None
+    
+    event_id = db.track_analytics_event(entity_type, entity_id, event_type, visitor_ip)
+    
+    return {"success": True, "event_id": event_id}
+
+@app.get("/api/analytics/summary/{entity_type}/{entity_id}")
+async def get_analytics(entity_type: str, entity_id: str, days: int = 30):
+    """
+    Get analytics summary for an entity (professional or vendor)
+    """
+    summary = db.get_analytics_summary(entity_id, entity_type, days)
+    return summary
+
+@app.post("/api/forum/posts")
+async def create_forum_post(post_data: ForumPostCreate):
+    """Create a new forum post"""
+    post = db.create_forum_post(post_data)
+    return post
+
+@app.get("/api/forum/posts")
+async def get_forum_posts(category: Optional[str] = None):
+    """Get all forum posts, optionally filtered by category"""
+    posts = db.get_all_forum_posts(category)
+    return posts
+
+@app.get("/api/forum/posts/{post_id}")
+async def get_forum_post(post_id: str):
+    """Get a specific forum post"""
+    post = db.get_forum_post(post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return post
+
+@app.post("/api/forum/comments")
+async def create_forum_comment(comment_data: ForumCommentCreate):
+    """Create a new comment on a forum post"""
+    comment = db.create_forum_comment(comment_data)
+    return comment
+
+@app.get("/api/forum/posts/{post_id}/comments")
+async def get_forum_comments(post_id: str):
+    """Get all comments for a specific post"""
+    comments = db.get_forum_comments(post_id)
+    return comments
+
+@app.post("/api/events")
+async def create_event(event_data: EventCreate):
+    """Create a new event"""
+    event = db.create_event(event_data)
+    return event
+
+@app.get("/api/events")
+async def get_events(upcoming_only: bool = True):
+    """Get all events"""
+    events = db.get_all_events(upcoming_only)
+    return events
+
+@app.get("/api/events/{event_id}")
+async def get_event(event_id: str):
+    """Get a specific event"""
+    event = db.get_event(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
+
+@app.post("/api/events/rsvp")
+async def create_event_rsvp(rsvp_data: EventRSVPCreate):
+    """RSVP to an event"""
+    rsvp = db.create_event_rsvp(rsvp_data)
+    if not rsvp:
+        raise HTTPException(status_code=400, detail="Already RSVP'd or event is full")
+    return rsvp
+
+@app.get("/api/events/{event_id}/rsvps")
+async def get_event_rsvps(event_id: str):
+    """Get all RSVPs for an event"""
+    rsvps = db.get_event_rsvps(event_id)
+    return rsvps
+
+@app.post("/api/questions")
+async def create_question(question_data: QuestionCreate):
+    """Create a new question"""
+    question = db.create_question(question_data)
+    return question
+
+@app.get("/api/questions")
+async def get_questions(category: Optional[str] = None):
+    """Get all questions, optionally filtered by category"""
+    questions = db.get_all_questions(category)
+    return questions
+
+@app.get("/api/questions/{question_id}")
+async def get_question(question_id: str):
+    """Get a specific question"""
+    question = db.get_question(question_id)
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    return question
+
+@app.post("/api/answers")
+async def create_answer(answer_data: AnswerCreate):
+    """Create a new answer"""
+    answer = db.create_answer(answer_data)
+    return answer
+
+@app.get("/api/questions/{question_id}/answers")
+async def get_answers(question_id: str):
+    """Get all answers for a question"""
+    answers = db.get_answers(question_id)
+    return answers
+
+@app.post("/api/answers/{answer_id}/accept")
+async def accept_answer(answer_id: str):
+    """Mark an answer as accepted"""
+    success = db.accept_answer(answer_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Answer not found")
+    return {"success": True}
+
+@app.post("/api/leads")
+async def create_lead(lead_data: LeadCreate):
+    """Create a new lead (service request)"""
+    lead = db.create_lead(lead_data)
+    return lead
+
+@app.get("/api/leads")
+async def get_leads(status: Optional[str] = None):
+    """Get all leads, optionally filtered by status"""
+    leads = db.get_all_leads(status)
+    return leads
+
+@app.get("/api/leads/{lead_id}")
+async def get_lead(lead_id: str):
+    """Get a specific lead"""
+    lead = db.get_lead(lead_id)
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    return lead
+
+@app.get("/api/leads/{lead_id}/matches")
+async def get_lead_matches(lead_id: str):
+    """Get all matched professionals for a lead"""
+    matches = db.get_lead_matches(lead_id)
+    return [{"match": match, "professional": prof} for match, prof in matches]
+
+@app.get("/api/professionals/{professional_id}/leads")
+async def get_professional_leads(professional_id: str):
+    """Get all leads matched to a professional"""
+    leads = db.get_professional_leads(professional_id)
+    return [{"match": match, "lead": lead} for match, lead in leads]

@@ -76,6 +76,11 @@ class PriceRange(str, Enum):
     RANGE_50_100 = "$50-$100"
     OVER_100 = ">$100"
 
+class MembershipTier(str, Enum):
+    BASIC = "basic"
+    FEATURED = "featured"
+    ELITE = "elite"
+
 class User(BaseModel):
     id: str
     email: EmailStr
@@ -101,6 +106,8 @@ class Vendor(BaseModel):
     stripe_account_id: Optional[str] = None
     verified: bool = False
     verified_documents: Optional[str] = None
+    membership_tier: MembershipTier = MembershipTier.BASIC
+    subscription_id: Optional[str] = None
     total_sales: float = 0.0
     community_contribution: float = 0.0
     created_at: datetime
@@ -160,6 +167,8 @@ class Professional(BaseModel):
     image_url: Optional[str] = None
     verified: bool = False
     verified_documents: Optional[str] = None
+    membership_tier: MembershipTier = MembershipTier.BASIC
+    subscription_id: Optional[str] = None
     rating: float = 0.0
     reviews_count: int = 0
     created_at: datetime
@@ -616,4 +625,183 @@ class PasswordResetToken(BaseModel):
     token: str
     expires_at: datetime
     used: bool = False
+    created_at: datetime
+
+class AnalyticsEvent(BaseModel):
+    id: str
+    entity_type: str
+    entity_id: str
+    event_type: str
+    visitor_ip: Optional[str] = None
+    visitor_location: Optional[dict] = None
+    created_at: datetime
+
+class AnalyticsSummary(BaseModel):
+    entity_id: str
+    entity_type: str
+    total_views: int
+    total_clicks: int
+    total_leads: int
+    unique_visitors: int
+    top_locations: List[dict]
+    period_start: datetime
+    period_end: datetime
+
+
+class ForumCategory(str, Enum):
+    BUSINESS = "business"
+    TECHNOLOGY = "technology"
+    FINANCE = "finance"
+    CULTURE = "culture"
+    HEALTH = "health"
+    EDUCATION = "education"
+    GENERAL = "general"
+
+class ForumPostCreate(BaseModel):
+    title: str
+    content: str
+    category: ForumCategory
+    author_name: str
+    author_email: EmailStr
+
+class ForumPost(BaseModel):
+    id: str
+    title: str
+    content: str
+    category: ForumCategory
+    author_name: str
+    author_email: str
+    views: int = 0
+    likes: int = 0
+    comment_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+class ForumCommentCreate(BaseModel):
+    post_id: str
+    content: str
+    author_name: str
+    author_email: EmailStr
+
+class ForumComment(BaseModel):
+    id: str
+    post_id: str
+    content: str
+    author_name: str
+    author_email: str
+    likes: int = 0
+    created_at: datetime
+
+class EventCreate(BaseModel):
+    title: str
+    description: str
+    location: str
+    event_date: datetime
+    organizer_name: str
+    organizer_email: EmailStr
+    image_url: Optional[str] = None
+    max_attendees: Optional[int] = None
+
+class Event(BaseModel):
+    id: str
+    title: str
+    description: str
+    location: str
+    event_date: datetime
+    organizer_name: str
+    organizer_email: str
+    image_url: Optional[str] = None
+    max_attendees: Optional[int] = None
+    rsvp_count: int = 0
+    created_at: datetime
+
+class EventRSVPCreate(BaseModel):
+    event_id: str
+    attendee_name: str
+    attendee_email: EmailStr
+
+class EventRSVP(BaseModel):
+    id: str
+    event_id: str
+    attendee_name: str
+    attendee_email: str
+    created_at: datetime
+
+class QuestionCreate(BaseModel):
+    title: str
+    content: str
+    category: ForumCategory
+    author_name: str
+    author_email: EmailStr
+
+class Question(BaseModel):
+    id: str
+    title: str
+    content: str
+    category: ForumCategory
+    author_name: str
+    author_email: str
+    views: int = 0
+    upvotes: int = 0
+    answer_count: int = 0
+    has_accepted_answer: bool = False
+    created_at: datetime
+
+class AnswerCreate(BaseModel):
+    question_id: str
+    content: str
+    author_name: str
+    author_email: EmailStr
+
+class Answer(BaseModel):
+    id: str
+    question_id: str
+    content: str
+    author_name: str
+    author_email: str
+    upvotes: int = 0
+    is_accepted: bool = False
+    created_at: datetime
+
+class LeadCreate(BaseModel):
+    title: str
+    description: str
+    category: ProfessionalCategory
+    budget_range: str
+    location: str
+    city: Optional[str] = None
+    state: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    contact_name: str
+    contact_email: EmailStr
+    contact_phone: Optional[str] = None
+    deadline: Optional[datetime] = None
+
+class Lead(BaseModel):
+    id: str
+    title: str
+    description: str
+    category: ProfessionalCategory
+    budget_range: str
+    location: str
+    city: Optional[str] = None
+    state: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    contact_name: str
+    contact_email: str
+    contact_phone: Optional[str] = None
+    deadline: Optional[datetime] = None
+    status: str = "open"
+    match_count: int = 0
+    created_at: datetime
+
+class LeadMatch(BaseModel):
+    id: str
+    lead_id: str
+    professional_id: str
+    match_score: float
+    notified: bool = False
+    responded: bool = False
     created_at: datetime

@@ -70,6 +70,8 @@ class InMemoryDatabase:
             stripe_account_id=vendor_data.stripe_account_id,
             verified=False,
             verified_documents=None,
+            membership_tier=MembershipTier.BASIC,
+            subscription_id=None,
             total_sales=0.0,
             community_contribution=0.0,
             created_at=datetime.now()
@@ -154,6 +156,8 @@ class InMemoryDatabase:
             image_url=professional_data.image_url,
             verified=False,
             verified_documents=None,
+            membership_tier=MembershipTier.BASIC,
+            subscription_id=None,
             rating=0.0,
             reviews_count=0,
             created_at=datetime.now(),
@@ -175,6 +179,10 @@ class InMemoryDatabase:
         professionals = list(self.professionals.values())
         if category:
             professionals = [p for p in professionals if p.category == category]
+        
+        tier_order = {MembershipTier.ELITE: 0, MembershipTier.FEATURED: 1, MembershipTier.BASIC: 2}
+        professionals.sort(key=lambda p: (tier_order.get(p.membership_tier, 3), -p.rating))
+        
         return professionals
     
     def update_professional(self, professional_id: str, update_data: dict) -> Optional[Professional]:
@@ -241,12 +249,14 @@ class InMemoryDatabase:
                     "image_url": professional.image_url,
                     "hourly_rate": professional.hourly_rate,
                     "verified": professional.verified,
+                    "membership_tier": professional.membership_tier,
                     "rating": professional.rating,
                     "latitude": professional.latitude,
                     "longitude": professional.longitude
                 })
         
-        nearby_professionals.sort(key=lambda x: x["distance_miles"])
+        tier_order = {MembershipTier.ELITE: 0, MembershipTier.FEATURED: 1, MembershipTier.BASIC: 2}
+        nearby_professionals.sort(key=lambda x: (tier_order.get(x["membership_tier"], 3), x["distance_miles"]))
         
         return nearby_professionals
     
@@ -943,5 +953,425 @@ class InMemoryDatabase:
             self.password_reset_tokens[token]["used"] = True
             return True
         return False
+    
+    def track_analytics_event(self, entity_type: str, entity_id: str, event_type: str, visitor_ip: Optional[str] = None) -> str:
+        """Track an analytics event (view, click, lead)"""
+        from app.models import AnalyticsEvent
+        
+        event_id = str(uuid.uuid4())
+        event = AnalyticsEvent(
+            id=event_id,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            event_type=event_type,
+            visitor_ip=visitor_ip,
+            visitor_location=None,
+            created_at=datetime.now()
+        )
+        
+        if not hasattr(self, 'analytics_events'):
+            self.analytics_events: Dict[str, AnalyticsEvent] = {}
+        
+        self.analytics_events[event_id] = event
+        return event_id
+    
+    def get_analytics_summary(self, entity_id: str, entity_type: str, days: int = 30) -> dict:
+        """Get analytics summary for an entity"""
+        if not hasattr(self, 'analytics_events'):
+            self.analytics_events: Dict[str, AnalyticsEvent] = {}
+        
+        period_start = datetime.now() - timedelta(days=days)
+        period_end = datetime.now()
+        
+        events = [e for e in self.analytics_events.values() 
+                 if e.entity_id == entity_id 
+                 and e.entity_type == entity_type
+                 and e.created_at >= period_start]
+        
+        views = [e for e in events if e.event_type == 'view']
+        clicks = [e for e in events if e.event_type == 'click']
+        leads = [e for e in events if e.event_type == 'lead']
+        
+        unique_ips = set(e.visitor_ip for e in events if e.visitor_ip)
+        
+        location_counts = {}
+        for event in events:
+            if event.visitor_location and 'city' in event.visitor_location:
+                loc = f"{event.visitor_location.get('city', 'Unknown')}, {event.visitor_location.get('state', 'Unknown')}"
+                location_counts[loc] = location_counts.get(loc, 0) + 1
+        
+        top_locations = [{"location": loc, "count": count} 
+                        for loc, count in sorted(location_counts.items(), key=lambda x: x[1], reverse=True)[:10]]
+        
+        return {
+            "entity_id": entity_id,
+            "entity_type": entity_type,
+            "total_views": len(views),
+            "total_clicks": len(clicks),
+            "total_leads": len(leads),
+            "unique_visitors": len(unique_ips),
+            "top_locations": top_locations,
+            "period_start": period_start.isoformat(),
+            "period_end": period_end.isoformat()
+        }
+    
+    def create_forum_post(self, post_data: 'ForumPostCreate') -> 'ForumPost':
+        from app.models import ForumPost
+        post_id = str(uuid.uuid4())
+        post = ForumPost(
+            id=post_id,
+            title=post_data.title,
+            content=post_data.content,
+            category=post_data.category,
+            author_name=post_data.author_name,
+            author_email=post_data.author_email,
+            views=0,
+            likes=0,
+            comment_count=0,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        if not hasattr(self, 'forum_posts'):
+            self.forum_posts: Dict[str, 'ForumPost'] = {}
+        self.forum_posts[post_id] = post
+        return post
+    
+    def get_forum_post(self, post_id: str) -> Optional['ForumPost']:
+        if not hasattr(self, 'forum_posts'):
+            self.forum_posts: Dict[str, 'ForumPost'] = {}
+        post = self.forum_posts.get(post_id)
+        if post:
+            post.views += 1
+        return post
+    
+    def get_all_forum_posts(self, category: Optional[str] = None) -> List['ForumPost']:
+        if not hasattr(self, 'forum_posts'):
+            self.forum_posts: Dict[str, 'ForumPost'] = {}
+        posts = list(self.forum_posts.values())
+        if category and category != 'all':
+            posts = [p for p in posts if p.category == category]
+        posts.sort(key=lambda x: x.created_at, reverse=True)
+        return posts
+    
+    def create_forum_comment(self, comment_data: 'ForumCommentCreate') -> 'ForumComment':
+        from app.models import ForumComment
+        comment_id = str(uuid.uuid4())
+        comment = ForumComment(
+            id=comment_id,
+            post_id=comment_data.post_id,
+            content=comment_data.content,
+            author_name=comment_data.author_name,
+            author_email=comment_data.author_email,
+            likes=0,
+            created_at=datetime.now()
+        )
+        if not hasattr(self, 'forum_comments'):
+            self.forum_comments: Dict[str, 'ForumComment'] = {}
+        self.forum_comments[comment_id] = comment
+        
+        if hasattr(self, 'forum_posts') and comment_data.post_id in self.forum_posts:
+            self.forum_posts[comment_data.post_id].comment_count += 1
+        
+        return comment
+    
+    def get_forum_comments(self, post_id: str) -> List['ForumComment']:
+        if not hasattr(self, 'forum_comments'):
+            self.forum_comments: Dict[str, 'ForumComment'] = {}
+        comments = [c for c in self.forum_comments.values() if c.post_id == post_id]
+        comments.sort(key=lambda x: x.created_at)
+        return comments
+    
+    def create_event(self, event_data: 'EventCreate') -> 'Event':
+        from app.models import Event
+        event_id = str(uuid.uuid4())
+        event = Event(
+            id=event_id,
+            title=event_data.title,
+            description=event_data.description,
+            location=event_data.location,
+            event_date=event_data.event_date,
+            organizer_name=event_data.organizer_name,
+            organizer_email=event_data.organizer_email,
+            image_url=event_data.image_url,
+            max_attendees=event_data.max_attendees,
+            rsvp_count=0,
+            created_at=datetime.now()
+        )
+        if not hasattr(self, 'events'):
+            self.events: Dict[str, 'Event'] = {}
+        self.events[event_id] = event
+        return event
+    
+    def get_event(self, event_id: str) -> Optional['Event']:
+        if not hasattr(self, 'events'):
+            self.events: Dict[str, 'Event'] = {}
+        return self.events.get(event_id)
+    
+    def get_all_events(self, upcoming_only: bool = True) -> List['Event']:
+        if not hasattr(self, 'events'):
+            self.events: Dict[str, 'Event'] = {}
+        events = list(self.events.values())
+        if upcoming_only:
+            now = datetime.now()
+            events = [e for e in events if e.event_date > now]
+        events.sort(key=lambda x: x.event_date)
+        return events
+    
+    def create_event_rsvp(self, rsvp_data: 'EventRSVPCreate') -> Optional['EventRSVP']:
+        from app.models import EventRSVP
+        
+        if not hasattr(self, 'event_rsvps'):
+            self.event_rsvps: Dict[str, 'EventRSVP'] = {}
+        
+        existing_rsvp = next((r for r in self.event_rsvps.values() 
+                             if r.event_id == rsvp_data.event_id and r.attendee_email == rsvp_data.attendee_email), None)
+        if existing_rsvp:
+            return None
+        
+        if hasattr(self, 'events') and rsvp_data.event_id in self.events:
+            event = self.events[rsvp_data.event_id]
+            if event.max_attendees and event.rsvp_count >= event.max_attendees:
+                return None
+        
+        rsvp_id = str(uuid.uuid4())
+        rsvp = EventRSVP(
+            id=rsvp_id,
+            event_id=rsvp_data.event_id,
+            attendee_name=rsvp_data.attendee_name,
+            attendee_email=rsvp_data.attendee_email,
+            created_at=datetime.now()
+        )
+        self.event_rsvps[rsvp_id] = rsvp
+        
+        if hasattr(self, 'events') and rsvp_data.event_id in self.events:
+            self.events[rsvp_data.event_id].rsvp_count += 1
+        
+        return rsvp
+    
+    def get_event_rsvps(self, event_id: str) -> List['EventRSVP']:
+        if not hasattr(self, 'event_rsvps'):
+            self.event_rsvps: Dict[str, 'EventRSVP'] = {}
+        return [r for r in self.event_rsvps.values() if r.event_id == event_id]
+    
+    def create_question(self, question_data: 'QuestionCreate') -> 'Question':
+        from app.models import Question
+        question_id = str(uuid.uuid4())
+        question = Question(
+            id=question_id,
+            title=question_data.title,
+            content=question_data.content,
+            category=question_data.category,
+            author_name=question_data.author_name,
+            author_email=question_data.author_email,
+            views=0,
+            upvotes=0,
+            answer_count=0,
+            has_accepted_answer=False,
+            created_at=datetime.now()
+        )
+        if not hasattr(self, 'questions'):
+            self.questions: Dict[str, 'Question'] = {}
+        self.questions[question_id] = question
+        return question
+    
+    def get_question(self, question_id: str) -> Optional['Question']:
+        if not hasattr(self, 'questions'):
+            self.questions: Dict[str, 'Question'] = {}
+        question = self.questions.get(question_id)
+        if question:
+            question.views += 1
+        return question
+    
+    def get_all_questions(self, category: Optional[str] = None) -> List['Question']:
+        if not hasattr(self, 'questions'):
+            self.questions: Dict[str, 'Question'] = {}
+        questions = list(self.questions.values())
+        if category and category != 'all':
+            questions = [q for q in questions if q.category == category]
+        questions.sort(key=lambda x: x.created_at, reverse=True)
+        return questions
+    
+    def create_answer(self, answer_data: 'AnswerCreate') -> 'Answer':
+        from app.models import Answer
+        answer_id = str(uuid.uuid4())
+        answer = Answer(
+            id=answer_id,
+            question_id=answer_data.question_id,
+            content=answer_data.content,
+            author_name=answer_data.author_name,
+            author_email=answer_data.author_email,
+            upvotes=0,
+            is_accepted=False,
+            created_at=datetime.now()
+        )
+        if not hasattr(self, 'answers'):
+            self.answers: Dict[str, 'Answer'] = {}
+        self.answers[answer_id] = answer
+        
+        if hasattr(self, 'questions') and answer_data.question_id in self.questions:
+            self.questions[answer_data.question_id].answer_count += 1
+        
+        return answer
+    
+    def get_answers(self, question_id: str) -> List['Answer']:
+        if not hasattr(self, 'answers'):
+            self.answers: Dict[str, 'Answer'] = {}
+        answers = [a for a in self.answers.values() if a.question_id == question_id]
+        answers.sort(key=lambda x: (not x.is_accepted, -x.upvotes, x.created_at))
+        return answers
+    
+    def accept_answer(self, answer_id: str) -> bool:
+        if not hasattr(self, 'answers'):
+            self.answers: Dict[str, 'Answer'] = {}
+        answer = self.answers.get(answer_id)
+        if not answer:
+            return False
+        
+        answer.is_accepted = True
+        
+        if hasattr(self, 'questions') and answer.question_id in self.questions:
+            self.questions[answer.question_id].has_accepted_answer = True
+        
+        return True
+    
+    def create_lead(self, lead_data: 'LeadCreate') -> 'Lead':
+        from app.models import Lead
+        lead_id = str(uuid.uuid4())
+        lead = Lead(
+            id=lead_id,
+            title=lead_data.title,
+            description=lead_data.description,
+            category=lead_data.category,
+            budget_range=lead_data.budget_range,
+            location=lead_data.location,
+            city=lead_data.city,
+            state=lead_data.state,
+            latitude=lead_data.latitude,
+            longitude=lead_data.longitude,
+            contact_name=lead_data.contact_name,
+            contact_email=lead_data.contact_email,
+            contact_phone=lead_data.contact_phone,
+            deadline=lead_data.deadline,
+            status="open",
+            match_count=0,
+            created_at=datetime.now()
+        )
+        if not hasattr(self, 'leads'):
+            self.leads: Dict[str, 'Lead'] = {}
+        self.leads[lead_id] = lead
+        
+        self._match_lead_to_professionals(lead)
+        
+        return lead
+    
+    def _match_lead_to_professionals(self, lead: 'Lead'):
+        from app.models import LeadMatch
+        import math
+        
+        if not hasattr(self, 'lead_matches'):
+            self.lead_matches: Dict[str, 'LeadMatch'] = {}
+        
+        professionals = [p for p in self.professionals.values() if p.category == lead.category]
+        
+        for prof in professionals:
+            match_score = 100.0
+            
+            if lead.latitude and lead.longitude and prof.latitude and prof.longitude:
+                def haversine_distance(lat1, lon1, lat2, lon2):
+                    R = 3959
+                    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+                    delta_phi = math.radians(lat2 - lat1)
+                    delta_lambda = math.radians(lon2 - lon1)
+                    a = math.sin(delta_phi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda/2)**2
+                    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+                    return R * c
+                
+                distance = haversine_distance(lead.latitude, lead.longitude, prof.latitude, prof.longitude)
+                
+                if distance > 100:
+                    match_score -= 50
+                elif distance > 50:
+                    match_score -= 30
+                elif distance > 25:
+                    match_score -= 15
+            
+            if prof.verified:
+                match_score += 10
+            
+            if prof.membership_tier == MembershipTier.ELITE:
+                match_score += 15
+            elif prof.membership_tier == MembershipTier.FEATURED:
+                match_score += 10
+            
+            if prof.rating >= 4.5:
+                match_score += 10
+            elif prof.rating >= 4.0:
+                match_score += 5
+            
+            if match_score >= 50:
+                match_id = str(uuid.uuid4())
+                match = LeadMatch(
+                    id=match_id,
+                    lead_id=lead.id,
+                    professional_id=prof.id,
+                    match_score=match_score,
+                    notified=False,
+                    responded=False,
+                    created_at=datetime.now()
+                )
+                self.lead_matches[match_id] = match
+                lead.match_count += 1
+    
+    def get_lead(self, lead_id: str) -> Optional['Lead']:
+        if not hasattr(self, 'leads'):
+            self.leads: Dict[str, 'Lead'] = {}
+        return self.leads.get(lead_id)
+    
+    def get_all_leads(self, status: Optional[str] = None) -> List['Lead']:
+        if not hasattr(self, 'leads'):
+            self.leads: Dict[str, 'Lead'] = {}
+        leads = list(self.leads.values())
+        if status:
+            leads = [l for l in leads if l.status == status]
+        leads.sort(key=lambda x: x.created_at, reverse=True)
+        return leads
+    
+    def get_lead_matches(self, lead_id: str) -> List[tuple['LeadMatch', 'Professional']]:
+        if not hasattr(self, 'lead_matches'):
+            self.lead_matches: Dict[str, 'LeadMatch'] = {}
+        
+        matches = [m for m in self.lead_matches.values() if m.lead_id == lead_id]
+        matches.sort(key=lambda x: x.match_score, reverse=True)
+        
+        result = []
+        for match in matches:
+            prof = self.professionals.get(match.professional_id)
+            if prof:
+                result.append((match, prof))
+        
+        return result
+    
+    def get_professional_leads(self, professional_id: str) -> List[tuple['LeadMatch', 'Lead']]:
+        if not hasattr(self, 'lead_matches'):
+            self.lead_matches: Dict[str, 'LeadMatch'] = {}
+        if not hasattr(self, 'leads'):
+            self.leads: Dict[str, 'Lead'] = {}
+        
+        matches = [m for m in self.lead_matches.values() if m.professional_id == professional_id]
+        matches.sort(key=lambda x: x.match_score, reverse=True)
+        
+        result = []
+        for match in matches:
+            lead = self.leads.get(match.lead_id)
+            if lead and lead.status == "open":
+                result.append((match, lead))
+        
+        return result
+    
+    def mark_lead_match_notified(self, match_id: str):
+        if not hasattr(self, 'lead_matches'):
+            self.lead_matches: Dict[str, 'LeadMatch'] = {}
+        if match_id in self.lead_matches:
+            self.lead_matches[match_id].notified = True
 
 db = InMemoryDatabase()
