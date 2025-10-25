@@ -155,6 +155,7 @@ class Professional(BaseModel):
     credentials: str
     hourly_rate: Optional[float] = None
     phone: Optional[str] = None
+    website: Optional[str] = None
     image_url: Optional[str] = None
     verified: bool = False
     rating: float = 0.0
@@ -177,6 +178,8 @@ class ProfessionalNearby(BaseModel):
     state: Optional[str] = None
     zip: Optional[str] = None
     distance_miles: float
+    email: Optional[str] = None
+    website: Optional[str] = None
     image_url: Optional[str] = None
     hourly_rate: Optional[float] = None
     verified: bool = False

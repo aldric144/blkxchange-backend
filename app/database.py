@@ -234,6 +234,8 @@ class InMemoryDatabase:
                     "state": professional.state,
                     "zip": professional.zip,
                     "distance_miles": round(distance, 2),
+                    "email": professional.email,
+                    "website": professional.website,
                     "image_url": professional.image_url,
                     "hourly_rate": professional.hourly_rate,
                     "verified": professional.verified,
