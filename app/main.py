@@ -929,6 +929,7 @@ async def create_professional_manual(
         credentials=data.credentials,
         hourly_rate=None,
         phone=data.phone,
+        website=data.website,
         image_url=data.image_url,
         zip=data.zip
     )
@@ -1186,6 +1187,7 @@ async def create_test_professional_manual(
         credentials=data.credentials,
         hourly_rate=None,
         phone=data.phone,
+        website=data.website,
         image_url=data.image_url,
         zip=data.zip
     )
