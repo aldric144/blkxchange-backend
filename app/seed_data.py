@@ -4,10 +4,23 @@ from app.models import (
     VendorCreate, ProductCreate, ProfessionalCreate,
     ProductCategory, ProfessionalCategory,
     ArticleCreate, ArticleCategory,
-    AdvertiserCreate, AdCreativeCreate, AdType, PriceTier, AdSlotCreate
+    AdvertiserCreate, AdCreativeCreate, AdType, PriceTier, AdSlotCreate,
+    AdminUserCreate
 )
 
 def seed_database():
+    from app.auth import get_password_hash
+    
+    if not db.get_admin_user_by_email("admin@blkxchange.com"):
+        admin_user = AdminUserCreate(
+            email="admin@blkxchange.com",
+            password="admin123",
+            full_name="Dr. Aldric Marshall",
+            role="super_admin"
+        )
+        db.create_admin_user(admin_user)
+        print("✅ Default admin user created: admin@blkxchange.com / admin123")
+    
     vendor1 = db.create_vendor(VendorCreate(
         email="maya@soulfulthreads.com",
         name="Maya Johnson",

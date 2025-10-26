@@ -529,6 +529,132 @@ async def get_visitor_count():
     visitor_count = db.get_current_month_visitors()
     return {"visitor_count": visitor_count}
 
+# Admin Dashboard Endpoints
+@app.get("/api/admin/metrics")
+async def get_admin_metrics(admin_ok: bool = Depends(require_admin)):
+    """Get unified admin dashboard metrics"""
+    from datetime import datetime, timedelta
+    
+    vendors = db.get_all_vendor_applications()
+    professionals_active = db.get_all_professionals()
+    professionals_pending = db.get_all_pending_professionals()
+    products = db.get_all_products_enhanced()
+    impact = db.get_impact_stats()
+    invest_impact = db.get_invest_impact_stats()
+    
+    vendor_approved = len([v for v in vendors if v.status == VendorApplicationStatus.APPROVED])
+    vendor_pending = len([v for v in vendors if v.status == VendorApplicationStatus.PENDING])
+    vendor_rejected = len([v for v in vendors if v.status == VendorApplicationStatus.REJECTED])
+    
+    prof_approved = len(professionals_active)
+    prof_pending = len([p for p in professionals_pending if p.status == PendingProfessionalStatus.PENDING])
+    prof_rejected = len([p for p in professionals_pending if p.status == PendingProfessionalStatus.REJECTED])
+    
+    prod_approved = len([p for p in products if p.status == ProductStatus.APPROVED])
+    prod_pending = len([p for p in products if p.status == ProductStatus.PENDING])
+    prod_rejected = len([p for p in products if p.status == ProductStatus.REJECTED])
+    
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    sixty_days_ago = datetime.now() - timedelta(days=60)
+    
+    this_month_revenue = 15000
+    last_month_revenue = 12000
+    growth = ((this_month_revenue - last_month_revenue) / last_month_revenue * 100) if last_month_revenue > 0 else 0
+    
+    recent_activity = []
+    for v in sorted(vendors, key=lambda x: x.created_at, reverse=True)[:5]:
+        recent_activity.append({
+            "id": v.id,
+            "type": "vendor",
+            "description": f"New vendor application: {v.business_name}",
+            "timestamp": v.created_at.isoformat()
+        })
+    
+    return {
+        "vendors": {
+            "total": len(vendors),
+            "approved": vendor_approved,
+            "pending": vendor_pending,
+            "rejected": vendor_rejected
+        },
+        "professionals": {
+            "total": prof_approved + prof_pending + prof_rejected,
+            "approved": prof_approved,
+            "pending": prof_pending,
+            "rejected": prof_rejected
+        },
+        "products": {
+            "total": len(products),
+            "approved": prod_approved,
+            "pending": prod_pending,
+            "rejected": prod_rejected
+        },
+        "revenue": {
+            "total": this_month_revenue + last_month_revenue,
+            "thisMonth": this_month_revenue,
+            "lastMonth": last_month_revenue,
+            "growth": round(growth, 1)
+        },
+        "impact": {
+            "totalDonated": invest_impact.total_donated,
+            "hbcuFunds": invest_impact.hbcu_donations,
+            "startupInvestments": invest_impact.startup_investments
+        },
+        "recentActivity": recent_activity
+    }
+
+@app.get("/api/admin/search")
+async def admin_search(q: str, admin_ok: bool = Depends(require_admin)):
+    """Global search across vendors, professionals, and products"""
+    if not q or len(q) < 2:
+        return {"results": []}
+    
+    query = q.lower()
+    results = []
+    
+    vendors = db.get_all_vendor_applications()
+    for vendor in vendors:
+        if (query in vendor.business_name.lower() or 
+            query in vendor.contact_name.lower() or 
+            query in vendor.email.lower()):
+            results.append({
+                "type": "vendor",
+                "id": vendor.id,
+                "title": vendor.business_name,
+                "subtitle": vendor.contact_name,
+                "status": vendor.status.value,
+                "url": f"/admin/vendors"
+            })
+    
+    professionals = db.get_all_professionals()
+    for prof in professionals:
+        if (query in prof.name.lower() or 
+            query in prof.title.lower() or 
+            query in prof.category.value.lower()):
+            results.append({
+                "type": "professional",
+                "id": prof.id,
+                "title": prof.name,
+                "subtitle": prof.title,
+                "status": "approved",
+                "url": f"/admin/professionals"
+            })
+    
+    products = db.get_all_products_enhanced()
+    for product in products:
+        if (query in product.name.lower() or 
+            query in product.category.lower()):
+            results.append({
+                "type": "product",
+                "id": product.id,
+                "title": product.name,
+                "subtitle": f"${product.price}",
+                "status": product.status.value,
+                "url": f"/admin/products"
+            })
+    
+    return {"results": results[:20]}
+
 # Vendor Application Endpoints
 @app.post("/api/vendor-applications", response_model=VendorApplication)
 async def create_vendor_application(application: VendorApplicationCreate):

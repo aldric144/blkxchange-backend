@@ -17,7 +17,8 @@ from app.models import (
     Advertiser, AdvertiserCreate, AdCreative, AdCreativeCreate, 
     AdSlot, AdSlotCreate, AdStatus,
     VisitorAnalytics,
-    PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus
+    PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus,
+    MembershipTier
 )
 
 class InMemoryDatabase:
