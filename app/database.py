@@ -91,6 +91,23 @@ class InMemoryDatabase:
             self.vendors[vendor_id].total_sales += amount
             self.vendors[vendor_id].community_contribution += community_amount
     
+    def update_vendor(self, vendor_id: str, vendor_data: dict) -> Optional[Vendor]:
+        """Update vendor information"""
+        if vendor_id not in self.vendors:
+            return None
+        vendor = self.vendors[vendor_id]
+        for key, value in vendor_data.items():
+            if hasattr(vendor, key):
+                setattr(vendor, key, value)
+        return vendor
+    
+    def delete_vendor(self, vendor_id: str) -> bool:
+        """Delete a vendor"""
+        if vendor_id in self.vendors:
+            del self.vendors[vendor_id]
+            return True
+        return False
+    
     def create_product(self, vendor_id: str, product_data: ProductCreate) -> Product:
         product_id = str(uuid.uuid4())
         vendor = self.get_vendor(vendor_id)
@@ -909,6 +926,17 @@ class InMemoryDatabase:
             created_at=datetime.now()
         )
         self.admin_users[admin_id2] = admin2
+        
+        admin_id3 = str(uuid.uuid4())
+        admin3 = AdminUserInDB(
+            id=admin_id3,
+            email="admin@blkxchange.com",
+            full_name="BlkXchange 360 Admin",
+            hashed_password=get_password_hash("admin123"),
+            is_active=True,
+            created_at=datetime.now()
+        )
+        self.admin_users[admin_id3] = admin3
     
     def get_admin_user_by_email(self, email: str):
         """Get admin user by email"""
@@ -1388,5 +1416,270 @@ class InMemoryDatabase:
             self.lead_matches: Dict[str, 'LeadMatch'] = {}
         if match_id in self.lead_matches:
             self.lead_matches[match_id].notified = True
+    
+    def create_blk360_subscription(self, subscription_data: 'Blk360SubscriptionCreate') -> 'Blk360Subscription':
+        if not hasattr(self, 'blk360_subscriptions'):
+            self.blk360_subscriptions: Dict[str, 'Blk360Subscription'] = {}
+        
+        from app.models import Blk360Subscription, SubscriptionStatus
+        subscription_id = str(uuid.uuid4())
+        subscription = Blk360Subscription(
+            id=subscription_id,
+            user_email=subscription_data.user_email,
+            tier=subscription_data.tier,
+            status=SubscriptionStatus.ACTIVE,
+            stripe_customer_id=subscription_data.stripe_customer_id,
+            stripe_subscription_id=subscription_data.stripe_subscription_id,
+            current_period_start=datetime.now(),
+            current_period_end=None,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.blk360_subscriptions[subscription_id] = subscription
+        return subscription
+    
+    def get_blk360_subscription_by_email(self, email: str) -> Optional['Blk360Subscription']:
+        if not hasattr(self, 'blk360_subscriptions'):
+            self.blk360_subscriptions: Dict[str, 'Blk360Subscription'] = {}
+        for sub in self.blk360_subscriptions.values():
+            if sub.user_email == email:
+                return sub
+        return None
+    
+    def get_all_blk360_subscriptions(self) -> List['Blk360Subscription']:
+        if not hasattr(self, 'blk360_subscriptions'):
+            self.blk360_subscriptions: Dict[str, 'Blk360Subscription'] = {}
+        return list(self.blk360_subscriptions.values())
+    
+    def create_blk360_wealth_module(self, module_data: 'Blk360WealthModuleCreate') -> 'Blk360WealthModule':
+        if not hasattr(self, 'blk360_wealth_modules'):
+            self.blk360_wealth_modules: Dict[str, 'Blk360WealthModule'] = {}
+        
+        from app.models import Blk360WealthModule
+        module_id = str(uuid.uuid4())
+        module = Blk360WealthModule(
+            id=module_id,
+            title=module_data.title,
+            category=module_data.category,
+            description=module_data.description,
+            video_url=module_data.video_url,
+            article_url=module_data.article_url,
+            pdf_url=module_data.pdf_url,
+            thumbnail_url=module_data.thumbnail_url,
+            access_level=module_data.access_level,
+            published=module_data.published,
+            views=0,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.blk360_wealth_modules[module_id] = module
+        return module
+    
+    def get_all_blk360_wealth_modules(self, published_only: bool = True) -> List['Blk360WealthModule']:
+        if not hasattr(self, 'blk360_wealth_modules'):
+            self.blk360_wealth_modules: Dict[str, 'Blk360WealthModule'] = {}
+        modules = list(self.blk360_wealth_modules.values())
+        if published_only:
+            modules = [m for m in modules if m.published]
+        return modules
+    
+    def update_blk360_wealth_module(self, module_id: str, module_data: 'Blk360WealthModuleCreate') -> Optional['Blk360WealthModule']:
+        if not hasattr(self, 'blk360_wealth_modules'):
+            self.blk360_wealth_modules: Dict[str, 'Blk360WealthModule'] = {}
+        if module_id in self.blk360_wealth_modules:
+            module = self.blk360_wealth_modules[module_id]
+            module.title = module_data.title
+            module.category = module_data.category
+            module.description = module_data.description
+            module.video_url = module_data.video_url
+            module.article_url = module_data.article_url
+            module.pdf_url = module_data.pdf_url
+            module.thumbnail_url = module_data.thumbnail_url
+            module.access_level = module_data.access_level
+            module.published = module_data.published
+            module.updated_at = datetime.now()
+            return module
+        return None
+    
+    def delete_blk360_wealth_module(self, module_id: str) -> bool:
+        if not hasattr(self, 'blk360_wealth_modules'):
+            self.blk360_wealth_modules: Dict[str, 'Blk360WealthModule'] = {}
+        if module_id in self.blk360_wealth_modules:
+            del self.blk360_wealth_modules[module_id]
+            return True
+        return False
+    
+    def create_blk360_legacy_entry(self, entry_data: 'Blk360LegacyEntryCreate') -> 'Blk360LegacyEntry':
+        if not hasattr(self, 'blk360_legacy_entries'):
+            self.blk360_legacy_entries: Dict[str, 'Blk360LegacyEntry'] = {}
+        
+        from app.models import Blk360LegacyEntry, LegacyEntryStatus
+        entry_id = str(uuid.uuid4())
+        entry = Blk360LegacyEntry(
+            id=entry_id,
+            user_email=entry_data.user_email,
+            title=entry_data.title,
+            honoree_name=entry_data.honoree_name,
+            photo_url=entry_data.photo_url,
+            story=entry_data.story,
+            category=entry_data.category,
+            status=LegacyEntryStatus.PENDING,
+            featured=False,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.blk360_legacy_entries[entry_id] = entry
+        return entry
+    
+    def get_all_blk360_legacy_entries(self, status: Optional['LegacyEntryStatus'] = None) -> List['Blk360LegacyEntry']:
+        if not hasattr(self, 'blk360_legacy_entries'):
+            self.blk360_legacy_entries: Dict[str, 'Blk360LegacyEntry'] = {}
+        entries = list(self.blk360_legacy_entries.values())
+        if status:
+            entries = [e for e in entries if e.status == status]
+        return entries
+    
+    def update_blk360_legacy_entry_status(self, entry_id: str, status: 'LegacyEntryStatus', featured: bool = False) -> Optional['Blk360LegacyEntry']:
+        if not hasattr(self, 'blk360_legacy_entries'):
+            self.blk360_legacy_entries: Dict[str, 'Blk360LegacyEntry'] = {}
+        if entry_id in self.blk360_legacy_entries:
+            self.blk360_legacy_entries[entry_id].status = status
+            self.blk360_legacy_entries[entry_id].featured = featured
+            self.blk360_legacy_entries[entry_id].updated_at = datetime.now()
+            return self.blk360_legacy_entries[entry_id]
+        return None
+    
+    def create_blk360_history_entry(self, entry_data: 'Blk360HistoryEntryCreate') -> 'Blk360HistoryEntry':
+        if not hasattr(self, 'blk360_history_entries'):
+            self.blk360_history_entries: Dict[str, 'Blk360HistoryEntry'] = {}
+        
+        from app.models import Blk360HistoryEntry, HistoryEntryStatus
+        entry_id = str(uuid.uuid4())
+        entry = Blk360HistoryEntry(
+            id=entry_id,
+            name=entry_data.name,
+            field=entry_data.field,
+            decade=entry_data.decade,
+            biography=entry_data.biography,
+            photo_url=entry_data.photo_url,
+            source_url=entry_data.source_url,
+            source_type=entry_data.source_type,
+            status=HistoryEntryStatus.APPROVED,
+            approved=True,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.blk360_history_entries[entry_id] = entry
+        return entry
+    
+    def get_all_blk360_history_entries(self, approved_only: bool = True) -> List['Blk360HistoryEntry']:
+        if not hasattr(self, 'blk360_history_entries'):
+            self.blk360_history_entries: Dict[str, 'Blk360HistoryEntry'] = {}
+        entries = list(self.blk360_history_entries.values())
+        if approved_only:
+            entries = [e for e in entries if e.approved]
+        return entries
+    
+    def create_blk360_forum_post(self, post_data: 'Blk360ForumPostCreate') -> 'Blk360ForumPost':
+        if not hasattr(self, 'blk360_forum_posts'):
+            self.blk360_forum_posts: Dict[str, 'Blk360ForumPost'] = {}
+        
+        from app.models import Blk360ForumPost, Forum360PostStatus
+        post_id = str(uuid.uuid4())
+        post = Blk360ForumPost(
+            id=post_id,
+            title=post_data.title,
+            content=post_data.content,
+            category=post_data.category,
+            author_name=post_data.author_name,
+            author_email=post_data.author_email,
+            status=Forum360PostStatus.ACTIVE,
+            pinned=False,
+            views=0,
+            reply_count=0,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.blk360_forum_posts[post_id] = post
+        return post
+    
+    def get_all_blk360_forum_posts(self, category: Optional['Forum360Category'] = None) -> List['Blk360ForumPost']:
+        if not hasattr(self, 'blk360_forum_posts'):
+            self.blk360_forum_posts: Dict[str, 'Blk360ForumPost'] = {}
+        posts = list(self.blk360_forum_posts.values())
+        if category:
+            posts = [p for p in posts if p.category == category]
+        posts.sort(key=lambda x: x.created_at, reverse=True)
+        return posts
+    
+    def get_blk360_forum_post(self, post_id: str) -> Optional['Blk360ForumPost']:
+        if not hasattr(self, 'blk360_forum_posts'):
+            self.blk360_forum_posts: Dict[str, 'Blk360ForumPost'] = {}
+        return self.blk360_forum_posts.get(post_id)
+    
+    def create_blk360_forum_reply(self, reply_data: 'Blk360ForumReplyCreate') -> 'Blk360ForumReply':
+        if not hasattr(self, 'blk360_forum_replies'):
+            self.blk360_forum_replies: Dict[str, 'Blk360ForumReply'] = {}
+        
+        from app.models import Blk360ForumReply
+        reply_id = str(uuid.uuid4())
+        reply = Blk360ForumReply(
+            id=reply_id,
+            post_id=reply_data.post_id,
+            content=reply_data.content,
+            author_name=reply_data.author_name,
+            author_email=reply_data.author_email,
+            created_at=datetime.now()
+        )
+        self.blk360_forum_replies[reply_id] = reply
+        
+        if reply_data.post_id in self.blk360_forum_posts:
+            self.blk360_forum_posts[reply_data.post_id].reply_count += 1
+        
+        return reply
+    
+    def get_blk360_forum_replies(self, post_id: str) -> List['Blk360ForumReply']:
+        if not hasattr(self, 'blk360_forum_replies'):
+            self.blk360_forum_replies: Dict[str, 'Blk360ForumReply'] = {}
+        replies = [r for r in self.blk360_forum_replies.values() if r.post_id == post_id]
+        replies.sort(key=lambda x: x.created_at)
+        return replies
+    
+    def get_blk360_analytics_metrics(self) -> 'Blk360AnalyticsMetrics':
+        if not hasattr(self, 'blk360_subscriptions'):
+            self.blk360_subscriptions: Dict[str, 'Blk360Subscription'] = {}
+        if not hasattr(self, 'blk360_wealth_modules'):
+            self.blk360_wealth_modules: Dict[str, 'Blk360WealthModule'] = {}
+        if not hasattr(self, 'blk360_legacy_entries'):
+            self.blk360_legacy_entries: Dict[str, 'Blk360LegacyEntry'] = {}
+        if not hasattr(self, 'blk360_history_entries'):
+            self.blk360_history_entries: Dict[str, 'Blk360HistoryEntry'] = {}
+        if not hasattr(self, 'blk360_forum_posts'):
+            self.blk360_forum_posts: Dict[str, 'Blk360ForumPost'] = {}
+        if not hasattr(self, 'blk360_forum_replies'):
+            self.blk360_forum_replies: Dict[str, 'Blk360ForumReply'] = {}
+        
+        from app.models import Blk360AnalyticsMetrics, SubscriptionTier, LegacyEntryStatus
+        
+        total_subs = len(self.blk360_subscriptions)
+        premium_subs = len([s for s in self.blk360_subscriptions.values() if s.tier == SubscriptionTier.PREMIUM])
+        elite_subs = len([s for s in self.blk360_subscriptions.values() if s.tier == SubscriptionTier.ELITE])
+        monthly_revenue = (premium_subs * 9.99) + (elite_subs * 99.0)
+        
+        legacy_pending = len([e for e in self.blk360_legacy_entries.values() if e.status == LegacyEntryStatus.PENDING])
+        legacy_approved = len([e for e in self.blk360_legacy_entries.values() if e.status == LegacyEntryStatus.APPROVED])
+        
+        return Blk360AnalyticsMetrics(
+            total_subscriptions=total_subs,
+            premium_subscribers=premium_subs,
+            elite_subscribers=elite_subs,
+            monthly_revenue=monthly_revenue,
+            wealth_modules_count=len(self.blk360_wealth_modules),
+            legacy_entries_pending=legacy_pending,
+            legacy_entries_approved=legacy_approved,
+            history_entries_count=len(self.blk360_history_entries),
+            forum_posts_count=len(self.blk360_forum_posts),
+            forum_replies_count=len(self.blk360_forum_replies)
+        )
 
 db = InMemoryDatabase()

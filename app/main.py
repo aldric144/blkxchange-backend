@@ -81,6 +81,9 @@ UPLOAD_DIR = Path("/home/ubuntu/blkxchange/blkxchange-backend/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
+from app.routes_phase2 import router as phase2_router
+app.include_router(phase2_router)
+
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok"}
@@ -274,6 +277,29 @@ async def get_vendor(vendor_id: str):
         raise HTTPException(status_code=404, detail="Vendor not found")
     return vendor
 
+@app.put("/api/vendors/{vendor_id}", response_model=Vendor)
+async def update_vendor(
+    vendor_id: str,
+    vendor_data: dict,
+    admin: bool = Depends(require_admin)
+):
+    """Update a vendor (admin only)"""
+    vendor = db.update_vendor(vendor_id, vendor_data)
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    return vendor
+
+@app.delete("/api/vendors/{vendor_id}")
+async def delete_vendor(
+    vendor_id: str,
+    admin: bool = Depends(require_admin)
+):
+    """Delete a vendor (admin only)"""
+    success = db.delete_vendor(vendor_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    return {"message": "Vendor deleted successfully"}
+
 @app.post("/api/vendors/{vendor_id}/products", response_model=Product)
 async def create_product(vendor_id: str, product: ProductCreate):
     vendor = db.get_vendor(vendor_id)
@@ -436,22 +462,17 @@ async def submit_professional(data: PendingProfessionalCreate):
 @app.get("/api/professionals/pending", response_model=List[PendingProfessional])
 async def get_pending_professionals(
     status: Optional[PendingProfessionalStatus] = None,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Get all pending professionals (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
     return db.get_all_pending_professionals(status)
 
 @app.post("/api/admin/approve-professional/{professional_id}", response_model=Professional)
 async def approve_pending_professional(
     professional_id: str,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Approve a pending professional and create live listing (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
     professional = db.approve_pending_professional(professional_id, "admin")
     if not professional:
         raise HTTPException(status_code=404, detail="Professional not found or already processed")
@@ -460,12 +481,9 @@ async def approve_pending_professional(
 @app.post("/api/admin/reject-professional/{professional_id}")
 async def reject_pending_professional(
     professional_id: str,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Reject a pending professional submission (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
     success = db.reject_pending_professional(professional_id)
     if not success:
         raise HTTPException(status_code=404, detail="Professional not found or already processed")
@@ -475,12 +493,9 @@ async def reject_pending_professional(
 async def update_professional(
     professional_id: str,
     professional_data: dict,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Update a professional (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
     professional = db.update_professional(professional_id, professional_data)
     if not professional:
         raise HTTPException(status_code=404, detail="Professional not found")
@@ -489,12 +504,9 @@ async def update_professional(
 @app.delete("/api/professionals/{professional_id}")
 async def delete_professional(
     professional_id: str,
-    x_admin_secret: str = Header(None)
+    admin: bool = Depends(require_admin)
 ):
     """Delete a professional (admin only)"""
-    if x_admin_secret != ADMIN_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
     success = db.delete_professional(professional_id)
     if not success:
         raise HTTPException(status_code=404, detail="Professional not found")
@@ -596,7 +608,7 @@ async def get_admin_metrics(admin_ok: bool = Depends(require_admin)):
             "growth": round(growth, 1)
         },
         "impact": {
-            "totalDonated": invest_impact.total_donated,
+            "totalDonated": invest_impact.total_funds_reinvested,
             "hbcuFunds": invest_impact.hbcu_donations,
             "startupInvestments": invest_impact.startup_investments
         },

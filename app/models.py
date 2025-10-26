@@ -805,3 +805,207 @@ class LeadMatch(BaseModel):
     notified: bool = False
     responded: bool = False
     created_at: datetime
+
+
+
+# Membership Subscription Models
+class SubscriptionTier(str, Enum):
+    FREE = "free"
+    PREMIUM = "premium"
+    ELITE = "elite"
+
+class SubscriptionStatus(str, Enum):
+    ACTIVE = "active"
+    CANCELLED = "cancelled"
+    EXPIRED = "expired"
+    PENDING = "pending"
+
+class Blk360SubscriptionCreate(BaseModel):
+    user_email: EmailStr
+    tier: SubscriptionTier
+    stripe_customer_id: Optional[str] = None
+    stripe_subscription_id: Optional[str] = None
+
+class Blk360Subscription(BaseModel):
+    id: str
+    user_email: EmailStr
+    tier: SubscriptionTier
+    status: SubscriptionStatus
+    stripe_customer_id: Optional[str] = None
+    stripe_subscription_id: Optional[str] = None
+    current_period_start: Optional[datetime] = None
+    current_period_end: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+class WealthModuleCategory(str, Enum):
+    ENTREPRENEURSHIP = "entrepreneurship"
+    INVESTING = "investing"
+    LEADERSHIP = "leadership"
+    FINANCIAL_LITERACY = "financial_literacy"
+    MINDSET = "mindset"
+
+class WealthModuleAccessLevel(str, Enum):
+    FREE = "free"
+    PREMIUM = "premium"
+    ELITE = "elite"
+
+class Blk360WealthModuleCreate(BaseModel):
+    title: str
+    category: WealthModuleCategory
+    description: str
+    video_url: Optional[str] = None
+    article_url: Optional[str] = None
+    pdf_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    access_level: WealthModuleAccessLevel
+    published: bool = True
+
+class Blk360WealthModule(BaseModel):
+    id: str
+    title: str
+    category: WealthModuleCategory
+    description: str
+    video_url: Optional[str] = None
+    article_url: Optional[str] = None
+    pdf_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    access_level: WealthModuleAccessLevel
+    published: bool
+    views: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+class LegacyEntryStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+class LegacyEntryCategory(str, Enum):
+    FAMILY = "family"
+    COMMUNITY = "community"
+    BUSINESS = "business"
+    EDUCATION = "education"
+    FAITH = "faith"
+    OTHER = "other"
+
+class Blk360LegacyEntryCreate(BaseModel):
+    user_email: EmailStr
+    title: str
+    honoree_name: str
+    photo_url: Optional[str] = None
+    story: str
+    category: LegacyEntryCategory
+
+class Blk360LegacyEntry(BaseModel):
+    id: str
+    user_email: EmailStr
+    title: str
+    honoree_name: str
+    photo_url: Optional[str] = None
+    story: str
+    category: LegacyEntryCategory
+    status: LegacyEntryStatus
+    featured: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+class HistorySourceType(str, Enum):
+    MANUAL = "manual"
+    AI_CRAWLER = "ai_crawler"
+    COMMUNITY = "community"
+
+class HistoryEntryStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+class HistoryDecade(str, Enum):
+    PRE_1900 = "pre_1900"
+    DECADE_1900_1950 = "1900_1950"
+    DECADE_1950_2000 = "1950_2000"
+    DECADE_2000_TODAY = "2000_today"
+
+class Blk360HistoryEntryCreate(BaseModel):
+    name: str
+    field: str
+    decade: HistoryDecade
+    biography: str
+    photo_url: Optional[str] = None
+    source_url: Optional[str] = None
+    source_type: HistorySourceType = HistorySourceType.MANUAL
+
+class Blk360HistoryEntry(BaseModel):
+    id: str
+    name: str
+    field: str
+    decade: HistoryDecade
+    biography: str
+    photo_url: Optional[str] = None
+    source_url: Optional[str] = None
+    source_type: HistorySourceType
+    status: HistoryEntryStatus
+    approved: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+class Forum360Category(str, Enum):
+    BUSINESS = "business"
+    HEALTH = "health"
+    FAITH = "faith"
+    CULTURE = "culture"
+    TECH = "tech"
+    LEADERSHIP = "leadership"
+    ELITE_LOUNGE = "elite_lounge"
+
+class Forum360PostStatus(str, Enum):
+    ACTIVE = "active"
+    LOCKED = "locked"
+    DELETED = "deleted"
+
+class Blk360ForumPostCreate(BaseModel):
+    title: str
+    content: str
+    category: Forum360Category
+    author_name: str
+    author_email: EmailStr
+
+class Blk360ForumPost(BaseModel):
+    id: str
+    title: str
+    content: str
+    category: Forum360Category
+    author_name: str
+    author_email: str
+    status: Forum360PostStatus
+    pinned: bool = False
+    views: int = 0
+    reply_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+class Blk360ForumReplyCreate(BaseModel):
+    post_id: str
+    content: str
+    author_name: str
+    author_email: EmailStr
+
+class Blk360ForumReply(BaseModel):
+    id: str
+    post_id: str
+    content: str
+    author_name: str
+    author_email: str
+    created_at: datetime
+
+class Blk360AnalyticsMetrics(BaseModel):
+    total_subscriptions: int
+    premium_subscribers: int
+    elite_subscribers: int
+    monthly_revenue: float
+    wealth_modules_count: int
+    legacy_entries_pending: int
+    legacy_entries_approved: int
+    history_entries_count: int
+    forum_posts_count: int
+    forum_replies_count: int

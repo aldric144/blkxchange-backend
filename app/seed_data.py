@@ -1597,7 +1597,10 @@ The future of Black education is not just about information — it is about tran
             placement="sidebar"
         ))
     
-    print("Database seeded successfully!")
+    from app.seed_phase2 import seed_phase2_data
+    seed_phase2_data()
+    
+    print("\n✅ Database seeded successfully!")
     print(f"Created {len(db.vendors)} vendors")
     print(f"Created {len(db.products)} products")
     print(f"Created {len(db.professionals)} professionals")
