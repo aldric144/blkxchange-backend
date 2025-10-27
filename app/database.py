@@ -65,6 +65,14 @@ class InMemoryDatabase:
         self.blk360_audit_logs: Dict[str, 'Blk360AuditLog'] = {}
         self.blk360_affiliates: Dict[str, 'Blk360Affiliate'] = {}
         
+        self.subscriptions: Dict[str, dict] = {}
+        self.payouts: Dict[str, dict] = {}
+        self.affiliates: Dict[str, dict] = {}
+        self.ai_history: Dict[str, dict] = {}
+        self.ai_mentorships: Dict[str, dict] = {}
+        self.ai_content: Dict[str, dict] = {}
+        self.payment_metadata: Dict[str, dict] = {}
+        
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -1944,5 +1952,354 @@ class InMemoryDatabase:
     
     def get_audit_logs_by_user(self, user_id: str) -> List['Blk360AuditLog']:
         return [log for log in self.blk360_audit_logs.values() if log.user_id == user_id]
+    
+    
+    def create_subscription(self, subscription_data: dict) -> dict:
+        """Create a new subscription"""
+        subscription_id = str(uuid.uuid4())
+        subscription = {
+            "id": subscription_id,
+            "user_id": subscription_data["user_id"],
+            "plan_type": subscription_data["plan_type"],
+            "stripe_subscription_id": subscription_data.get("stripe_subscription_id", f"sub_test_{subscription_id[:8]}"),
+            "status": subscription_data.get("status", "active"),
+            "current_period_start": datetime.now(),
+            "current_period_end": datetime.now(),
+            "cancel_at_period_end": False,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
+        }
+        if not hasattr(self, 'subscriptions'):
+            self.subscriptions = {}
+        self.subscriptions[subscription_id] = subscription
+        return subscription
+    
+    def get_subscription(self, subscription_id: str) -> Optional[dict]:
+        """Get subscription by ID"""
+        if not hasattr(self, 'subscriptions'):
+            self.subscriptions = {}
+        return self.subscriptions.get(subscription_id)
+    
+    def get_subscription_by_user(self, user_id: str) -> Optional[dict]:
+        """Get active subscription for a user"""
+        if not hasattr(self, 'subscriptions'):
+            self.subscriptions = {}
+        for sub in self.subscriptions.values():
+            if sub["user_id"] == user_id and sub["status"] == "active":
+                return sub
+        return None
+    
+    def update_subscription_status(self, subscription_id: str, status: str) -> bool:
+        """Update subscription status"""
+        if not hasattr(self, 'subscriptions'):
+            self.subscriptions = {}
+        if subscription_id in self.subscriptions:
+            self.subscriptions[subscription_id]["status"] = status
+            self.subscriptions[subscription_id]["updated_at"] = datetime.now()
+            return True
+        return False
+    
+    def create_payout(self, payout_data: dict) -> dict:
+        """Create a vendor payout"""
+        payout_id = str(uuid.uuid4())
+        payout = {
+            "id": payout_id,
+            "vendor_id": payout_data["vendor_id"],
+            "amount": payout_data["amount"],
+            "stripe_payout_id": payout_data.get("stripe_payout_id", f"po_test_{payout_id[:8]}"),
+            "status": payout_data.get("status", "pending"),
+            "scheduled_date": payout_data.get("scheduled_date", datetime.now()),
+            "completed_date": None,
+            "created_at": datetime.now()
+        }
+        if not hasattr(self, 'payouts'):
+            self.payouts = {}
+        self.payouts[payout_id] = payout
+        return payout
+    
+    def get_payout(self, payout_id: str) -> Optional[dict]:
+        """Get payout by ID"""
+        if not hasattr(self, 'payouts'):
+            self.payouts = {}
+        return self.payouts.get(payout_id)
+    
+    def get_payouts_by_vendor(self, vendor_id: str) -> List[dict]:
+        """Get all payouts for a vendor"""
+        if not hasattr(self, 'payouts'):
+            self.payouts = {}
+        return [p for p in self.payouts.values() if p["vendor_id"] == vendor_id]
+    
+    def update_payout_status(self, payout_id: str, status: str) -> bool:
+        """Update payout status"""
+        if not hasattr(self, 'payouts'):
+            self.payouts = {}
+        if payout_id in self.payouts:
+            self.payouts[payout_id]["status"] = status
+            if status == "completed":
+                self.payouts[payout_id]["completed_date"] = datetime.now()
+            return True
+        return False
+    
+    def create_affiliate(self, affiliate_data: dict) -> dict:
+        """Create affiliate account"""
+        affiliate_id = str(uuid.uuid4())
+        affiliate = {
+            "id": affiliate_id,
+            "user_id": affiliate_data["user_id"],
+            "referral_code": affiliate_data["referral_code"],
+            "total_clicks": 0,
+            "total_conversions": 0,
+            "total_earnings": 0.0,
+            "status": "active",
+            "created_at": datetime.now()
+        }
+        if not hasattr(self, 'affiliates'):
+            self.affiliates = {}
+        self.affiliates[affiliate_id] = affiliate
+        return affiliate
+    
+    def get_affiliate_by_user(self, user_id: str) -> Optional[dict]:
+        """Get affiliate by user ID"""
+        if not hasattr(self, 'affiliates'):
+            self.affiliates = {}
+        for aff in self.affiliates.values():
+            if aff["user_id"] == user_id:
+                return aff
+        return None
+    
+    def get_affiliate_by_code(self, referral_code: str) -> Optional[dict]:
+        """Get affiliate by referral code"""
+        if not hasattr(self, 'affiliates'):
+            self.affiliates = {}
+        for aff in self.affiliates.values():
+            if aff["referral_code"] == referral_code:
+                return aff
+        return None
+    
+    def track_affiliate_click(self, referral_code: str) -> bool:
+        """Track affiliate click"""
+        affiliate = self.get_affiliate_by_code(referral_code)
+        if affiliate:
+            affiliate["total_clicks"] += 1
+            return True
+        return False
+    
+    def track_affiliate_conversion(self, referral_code: str, earnings: float) -> bool:
+        """Track affiliate conversion"""
+        affiliate = self.get_affiliate_by_code(referral_code)
+        if affiliate:
+            affiliate["total_conversions"] += 1
+            affiliate["total_earnings"] += earnings
+            return True
+        return False
+    
+    def create_ai_history(self, history_data: dict) -> dict:
+        """Create AI-generated history content"""
+        history_id = str(uuid.uuid4())
+        history = {
+            "id": history_id,
+            "title": history_data["title"],
+            "content": history_data["content"],
+            "source_url": history_data.get("source_url"),
+            "status": "pending",
+            "created_at": datetime.now(),
+            "approved_at": None,
+            "approved_by": None
+        }
+        if not hasattr(self, 'ai_history'):
+            self.ai_history = {}
+        self.ai_history[history_id] = history
+        return history
+    
+    def get_ai_history(self, history_id: str) -> Optional[dict]:
+        """Get AI history by ID"""
+        if not hasattr(self, 'ai_history'):
+            self.ai_history = {}
+        return self.ai_history.get(history_id)
+    
+    def get_all_ai_history(self, status: Optional[str] = None) -> List[dict]:
+        """Get all AI history, optionally filtered by status"""
+        if not hasattr(self, 'ai_history'):
+            self.ai_history = {}
+        if status:
+            return [h for h in self.ai_history.values() if h["status"] == status]
+        return list(self.ai_history.values())
+    
+    def approve_ai_history(self, history_id: str, admin_id: str) -> bool:
+        """Approve AI history content"""
+        if not hasattr(self, 'ai_history'):
+            self.ai_history = {}
+        if history_id in self.ai_history:
+            self.ai_history[history_id]["status"] = "approved"
+            self.ai_history[history_id]["approved_at"] = datetime.now()
+            self.ai_history[history_id]["approved_by"] = admin_id
+            return True
+        return False
+    
+    def reject_ai_history(self, history_id: str) -> bool:
+        """Reject AI history content"""
+        if not hasattr(self, 'ai_history'):
+            self.ai_history = {}
+        if history_id in self.ai_history:
+            self.ai_history[history_id]["status"] = "rejected"
+            return True
+        return False
+    
+    def create_ai_mentorship(self, mentorship_data: dict) -> dict:
+        """Create AI mentor match"""
+        match_id = str(uuid.uuid4())
+        mentorship = {
+            "id": match_id,
+            "mentee_id": mentorship_data["mentee_id"],
+            "mentor_id": mentorship_data["mentor_id"],
+            "match_score": mentorship_data["match_score"],
+            "status": "pending",
+            "created_at": datetime.now(),
+            "approved_at": None
+        }
+        if not hasattr(self, 'ai_mentorships'):
+            self.ai_mentorships = {}
+        self.ai_mentorships[match_id] = mentorship
+        return mentorship
+    
+    def get_ai_mentorship(self, match_id: str) -> Optional[dict]:
+        """Get AI mentorship by ID"""
+        if not hasattr(self, 'ai_mentorships'):
+            self.ai_mentorships = {}
+        return self.ai_mentorships.get(match_id)
+    
+    def get_all_ai_mentorships(self, status: Optional[str] = None) -> List[dict]:
+        """Get all AI mentorships, optionally filtered by status"""
+        if not hasattr(self, 'ai_mentorships'):
+            self.ai_mentorships = {}
+        if status:
+            return [m for m in self.ai_mentorships.values() if m["status"] == status]
+        return list(self.ai_mentorships.values())
+    
+    def approve_ai_mentorship(self, match_id: str) -> bool:
+        """Approve AI mentorship match"""
+        if not hasattr(self, 'ai_mentorships'):
+            self.ai_mentorships = {}
+        if match_id in self.ai_mentorships:
+            self.ai_mentorships[match_id]["status"] = "approved"
+            self.ai_mentorships[match_id]["approved_at"] = datetime.now()
+            return True
+        return False
+    
+    def reject_ai_mentorship(self, match_id: str) -> bool:
+        """Reject AI mentorship match"""
+        if not hasattr(self, 'ai_mentorships'):
+            self.ai_mentorships = {}
+        if match_id in self.ai_mentorships:
+            self.ai_mentorships[match_id]["status"] = "rejected"
+            return True
+        return False
+    
+    def create_ai_content(self, content_data: dict) -> dict:
+        """Create AI-generated content"""
+        content_id = str(uuid.uuid4())
+        content = {
+            "id": content_id,
+            "content_type": content_data["content_type"],
+            "title": content_data["title"],
+            "body": content_data["body"],
+            "status": "pending",
+            "created_at": datetime.now(),
+            "approved_at": None,
+            "approved_by": None
+        }
+        if not hasattr(self, 'ai_content'):
+            self.ai_content = {}
+        self.ai_content[content_id] = content
+        return content
+    
+    def get_ai_content(self, content_id: str) -> Optional[dict]:
+        """Get AI content by ID"""
+        if not hasattr(self, 'ai_content'):
+            self.ai_content = {}
+        return self.ai_content.get(content_id)
+    
+    def get_all_ai_content(self, status: Optional[str] = None, content_type: Optional[str] = None) -> List[dict]:
+        """Get all AI content, optionally filtered"""
+        if not hasattr(self, 'ai_content'):
+            self.ai_content = {}
+        results = list(self.ai_content.values())
+        if status:
+            results = [c for c in results if c["status"] == status]
+        if content_type:
+            results = [c for c in results if c["content_type"] == content_type]
+        return results
+    
+    def approve_ai_content(self, content_id: str, admin_id: str) -> bool:
+        """Approve AI content"""
+        if not hasattr(self, 'ai_content'):
+            self.ai_content = {}
+        if content_id in self.ai_content:
+            self.ai_content[content_id]["status"] = "approved"
+            self.ai_content[content_id]["approved_at"] = datetime.now()
+            self.ai_content[content_id]["approved_by"] = admin_id
+            return True
+        return False
+    
+    def reject_ai_content(self, content_id: str) -> bool:
+        """Reject AI content"""
+        if not hasattr(self, 'ai_content'):
+            self.ai_content = {}
+        if content_id in self.ai_content:
+            self.ai_content[content_id]["status"] = "rejected"
+            return True
+        return False
+    
+    def get_impact_metrics(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> dict:
+        """Get platform impact metrics (start_date and end_date are placeholders for MVP)"""
+        if not hasattr(self, 'subscriptions'):
+            self.subscriptions = {}
+        if not hasattr(self, 'payouts'):
+            self.payouts = {}
+        if not hasattr(self, 'affiliates'):
+            self.affiliates = {}
+        if not hasattr(self, 'ai_history'):
+            self.ai_history = {}
+        if not hasattr(self, 'ai_content'):
+            self.ai_content = {}
+        
+        total_subscriptions = len([s for s in self.subscriptions.values() if s["status"] == "active"])
+        total_payouts = sum(p["amount"] for p in self.payouts.values() if p["status"] == "completed")
+        total_affiliates = len(self.affiliates)
+        total_affiliate_earnings = sum(a["total_earnings"] for a in self.affiliates.values())
+        approved_history = len([h for h in self.ai_history.values() if h["status"] == "approved"])
+        approved_content = len([c for c in self.ai_content.values() if c["status"] == "approved"])
+        
+        return {
+            "total_subscriptions": total_subscriptions,
+            "total_payouts_amount": total_payouts,
+            "total_affiliates": total_affiliates,
+            "total_affiliate_earnings": total_affiliate_earnings,
+            "approved_history_count": approved_history,
+            "approved_content_count": approved_content,
+            "total_vendors": len(self.vendors),
+            "total_products": len(self.products),
+            "total_orders": len(self.orders),
+            "community_fund_total": self.impact_stats.get("total_donations", 0.0)
+        }
+    
+    def track_payment_metadata(self, metadata: dict) -> dict:
+        """Track payment metadata for audit"""
+        payment_id = str(uuid.uuid4())
+        payment = {
+            "id": payment_id,
+            "payment_type": metadata["payment_type"],
+            "stripe_payment_id": metadata.get("stripe_payment_id"),
+            "amount": metadata["amount"],
+            "status": metadata.get("status", "pending"),
+            "user_id": metadata.get("user_id"),
+            "vendor_id": metadata.get("vendor_id"),
+            "metadata": metadata.get("metadata", {}),
+            "created_at": datetime.now()
+        }
+        if not hasattr(self, 'payment_metadata'):
+            self.payment_metadata = {}
+        self.payment_metadata[payment_id] = payment
+        return payment
 
 db = InMemoryDatabase()

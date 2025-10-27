@@ -1181,3 +1181,281 @@ class Blk360Affiliate(BaseModel):
     total_earnings: float
     created_at: datetime
     updated_at: datetime
+
+# ============================================================================
+# PHASE 5A MODELS - Monetization + AI Automation
+# ============================================================================
+
+# Subscription Models
+class SubscriptionPlanType(str, Enum):
+    PREMIUM = "premium"
+    ELITE = "elite"
+
+class SubscriptionStatusType(str, Enum):
+    ACTIVE = "active"
+    CANCELED = "canceled"
+    PAST_DUE = "past_due"
+    TRIALING = "trialing"
+
+class SubscriptionCreate(BaseModel):
+    user_id: str
+    email: EmailStr
+    plan_type: SubscriptionPlanType
+
+class Subscription(BaseModel):
+    id: str
+    user_id: str
+    email: EmailStr
+    stripe_customer_id: Optional[str] = None
+    stripe_subscription_id: Optional[str] = None
+    plan_type: SubscriptionPlanType
+    status: SubscriptionStatusType
+    current_period_start: Optional[datetime] = None
+    current_period_end: Optional[datetime] = None
+    cancel_at_period_end: bool = False
+    amount: float
+    currency: str = "usd"
+    created_at: datetime
+    updated_at: datetime
+
+# Payout Models
+class PayoutStatusType(str, Enum):
+    PENDING = "pending"
+    PAID = "paid"
+    FAILED = "failed"
+
+class PayoutCreate(BaseModel):
+    vendor_id: str
+    amount: float
+
+class Payout(BaseModel):
+    id: str
+    vendor_id: str
+    stripe_account_id: Optional[str] = None
+    amount: float
+    currency: str = "usd"
+    status: PayoutStatusType
+    stripe_payout_id: Optional[str] = None
+    failure_reason: Optional[str] = None
+    arrival_date: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+# Affiliate Models
+class AffiliateStatusType(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    SUSPENDED = "suspended"
+
+class AffiliateCreate(BaseModel):
+    user_id: str
+    email: EmailStr
+
+class Affiliate(BaseModel):
+    id: str
+    user_id: str
+    email: EmailStr
+    referral_code: str
+    referral_url: str
+    clicks: int = 0
+    conversions: int = 0
+    revenue_generated: float = 0.0
+    commission_earned: float = 0.0
+    commission_rate: float = 10.0  # 10% default
+    status: AffiliateStatusType
+    created_at: datetime
+    updated_at: datetime
+
+class AffiliateClick(BaseModel):
+    id: str
+    affiliate_id: str
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    referrer: Optional[str] = None
+    clicked_at: datetime
+
+class AffiliateConversion(BaseModel):
+    id: str
+    affiliate_id: str
+    user_id: Optional[str] = None
+    order_id: Optional[str] = None
+    order_amount: float
+    commission_amount: float
+    converted_at: datetime
+
+# AI History Models
+class AIHistoryStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    PUBLISHED = "published"
+
+class AIHistoryCreate(BaseModel):
+    title: str
+    content: str
+    source: Optional[str] = None
+    category: Optional[str] = None
+    date_reference: Optional[str] = None
+    image_url: Optional[str] = None
+
+class AIHistory(BaseModel):
+    id: str
+    title: str
+    content: str
+    source: Optional[str] = None
+    category: Optional[str] = None
+    date_reference: Optional[str] = None
+    image_url: Optional[str] = None
+    status: AIHistoryStatus
+    admin_notes: Optional[str] = None
+    created_at: datetime
+    published_at: Optional[datetime] = None
+
+# AI Mentorship Models
+class AIMentorshipStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+
+class AIMentorshipCreate(BaseModel):
+    mentee_id: str
+    mentee_email: EmailStr
+    mentee_skills: List[str]
+    mentee_interests: List[str]
+    mentee_industry: str
+
+class AIMentorship(BaseModel):
+    id: str
+    mentee_id: str
+    mentee_email: EmailStr
+    mentee_skills: List[str]
+    mentee_interests: List[str]
+    mentee_industry: str
+    mentor_id: Optional[str] = None
+    mentor_email: Optional[str] = None
+    mentor_skills: List[str] = []
+    mentor_industry: Optional[str] = None
+    match_score: Optional[float] = None  # 0-100
+    status: AIMentorshipStatus
+    admin_notes: Optional[str] = None
+    created_at: datetime
+    matched_at: Optional[datetime] = None
+
+# AI Content Models
+class AIContentType(str, Enum):
+    WEALTH_HUB_TOPIC = "wealth_hub_topic"
+    BUSINESS_INSIGHT = "business_insight"
+    COMMUNITY_UPDATE = "community_update"
+
+class AIContentStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    PUBLISHED = "published"
+
+class AIContentCreate(BaseModel):
+    content_type: AIContentType
+    title: str
+    summary: str
+    full_content: Optional[str] = None
+    tags: List[str] = []
+    target_audience: Optional[str] = None
+
+class AIContent(BaseModel):
+    id: str
+    content_type: AIContentType
+    title: str
+    summary: str
+    full_content: Optional[str] = None
+    tags: List[str]
+    target_audience: Optional[str] = None
+    status: AIContentStatus
+    admin_notes: Optional[str] = None
+    created_at: datetime
+    published_at: Optional[datetime] = None
+
+# Impact Metrics Models
+class ImpactMetrics(BaseModel):
+    id: str
+    metric_date: str  # YYYY-MM-DD format
+    total_revenue: float = 0.0
+    subscription_revenue: float = 0.0
+    vendor_revenue: float = 0.0
+    donation_revenue: float = 0.0
+    affiliate_revenue: float = 0.0
+    active_subscriptions: int = 0
+    new_subscriptions: int = 0
+    canceled_subscriptions: int = 0
+    active_vendors: int = 0
+    new_vendors: int = 0
+    total_products: int = 0
+    new_products: int = 0
+    mentorship_matches: int = 0
+    ai_content_published: int = 0
+    created_at: datetime
+
+# Payment Metadata Models
+class PaymentType(str, Enum):
+    SUBSCRIPTION = "subscription"
+    DONATION = "donation"
+    VENDOR_PAYMENT = "vendor_payment"
+    AFFILIATE_PAYOUT = "affiliate_payout"
+
+class PaymentStatus(str, Enum):
+    PENDING = "pending"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+
+class PaymentMetadata(BaseModel):
+    id: str
+    stripe_payment_intent_id: Optional[str] = None
+    stripe_charge_id: Optional[str] = None
+    user_id: Optional[str] = None
+    email: Optional[str] = None
+    amount: float
+    currency: str = "usd"
+    payment_type: PaymentType
+    status: PaymentStatus
+    metadata: Dict = {}
+    created_at: datetime
+    updated_at: datetime
+
+# Stripe Webhook Models
+class StripeWebhookEvent(BaseModel):
+    event_type: str
+    event_id: str
+    data: Dict
+
+# AI Generation Request Models
+class AIHistoryGenerateRequest(BaseModel):
+    topic: str
+    category: Optional[str] = None
+
+class AIMentorMatchRequest(BaseModel):
+    mentee_id: str
+    mentee_email: EmailStr
+    mentee_skills: List[str]
+    mentee_interests: List[str]
+    mentee_industry: str
+
+class AIContentGenerateRequest(BaseModel):
+    content_type: AIContentType
+    topic: str
+    target_audience: Optional[str] = None
+
+# Admin Approval Models
+class AdminApprovalRequest(BaseModel):
+    status: str  # 'approved' or 'rejected'
+    admin_notes: Optional[str] = None
+
+# System Health Models
+class SystemHealthCheck(BaseModel):
+    status: str
+    timestamp: datetime
+    memory_usage_mb: float
+    avg_response_time_ms: float
+    active_connections: int
+    database_status: str
