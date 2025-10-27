@@ -18,7 +18,13 @@ from app.models import (
     AdSlot, AdSlotCreate, AdStatus,
     VisitorAnalytics,
     PendingProfessional, PendingProfessionalCreate, PendingProfessionalStatus,
-    MembershipTier
+    MembershipTier,
+    Blk360Wallet, Blk360WalletCreate, Blk360WalletTransaction,
+    Blk360Event, Blk360EventCreate,
+    Blk360Proposal, Blk360ProposalCreate, Blk360Vote, Blk360VoteCreate,
+    Blk360FundDonation, Blk360FundDonationCreate, Blk360FundMetrics,
+    Blk360Group, Blk360GroupCreate, Blk360GroupMember,
+    Blk360Membership, Blk360MembershipCreate
 )
 
 class InMemoryDatabase:
@@ -46,6 +52,15 @@ class InMemoryDatabase:
         self.test_professionals: Dict[str, Professional] = {}
         self.test_ad_creatives: Dict[str, AdCreative] = {}
         self.test_advertisers: Dict[str, Advertiser] = {}
+        
+        self.blk360_wallets: Dict[str, 'Blk360Wallet'] = {}
+        self.blk360_events: Dict[str, 'Blk360Event'] = {}
+        self.blk360_proposals: Dict[str, 'Blk360Proposal'] = {}
+        self.blk360_votes: Dict[str, 'Blk360Vote'] = {}
+        self.blk360_fund_donations: Dict[str, 'Blk360FundDonation'] = {}
+        self.blk360_groups: Dict[str, 'Blk360Group'] = {}
+        self.blk360_group_members: Dict[str, 'Blk360GroupMember'] = {}
+        self.blk360_memberships: Dict[str, 'Blk360Membership'] = {}
         
         self.impact_stats = {
             "total_donations": 0.0,
@@ -1681,5 +1696,204 @@ class InMemoryDatabase:
             forum_posts_count=len(self.blk360_forum_posts),
             forum_replies_count=len(self.blk360_forum_replies)
         )
+
+    
+    # Phase 3: Community Hub, Wallet, Governance, Fund Methods
+    
+    def create_blk360_wallet(self, wallet_data: Blk360WalletCreate) -> Blk360Wallet:
+        wallet_id = str(uuid.uuid4())
+        wallet = Blk360Wallet(
+            id=wallet_id,
+            user_id=wallet_data.user_id,
+            balance=0,
+            lifetime_earned=0,
+            lifetime_spent=0,
+            transactions=[],
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.blk360_wallets[wallet_id] = wallet
+        return wallet
+    
+    def get_blk360_wallet_by_user(self, user_id: str) -> Optional[Blk360Wallet]:
+        for wallet in self.blk360_wallets.values():
+            if wallet.user_id == user_id:
+                return wallet
+        return None
+    
+    def add_wallet_transaction(self, user_id: str, transaction_type: str, amount: int, description: str, category: str) -> Optional[Blk360Wallet]:
+        wallet = self.get_blk360_wallet_by_user(user_id)
+        if not wallet:
+            wallet = self.create_blk360_wallet(Blk360WalletCreate(user_id=user_id))
+        
+        transaction = Blk360WalletTransaction(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            type=transaction_type,
+            amount=amount,
+            description=description,
+            category=category,
+            timestamp=datetime.now()
+        )
+        
+        wallet.transactions.append(transaction)
+        if transaction_type == 'earned':
+            wallet.balance += amount
+            wallet.lifetime_earned += amount
+        elif transaction_type == 'spent':
+            wallet.balance -= amount
+            wallet.lifetime_spent += amount
+        wallet.updated_at = datetime.now()
+        
+        return wallet
+    
+    def create_blk360_event(self, event_data: Blk360EventCreate) -> Blk360Event:
+        event_id = str(uuid.uuid4())
+        event = Blk360Event(
+            id=event_id,
+            title=event_data.title,
+            description=event_data.description,
+            date=event_data.date,
+            time=event_data.time,
+            location=event_data.location,
+            category=event_data.category,
+            image_url=event_data.image_url,
+            rsvp_count=0,
+            status='upcoming',
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        self.blk360_events[event_id] = event
+        return event
+    
+    def get_all_blk360_events(self) -> List[Blk360Event]:
+        return list(self.blk360_events.values())
+    
+    def increment_event_rsvp(self, event_id: str) -> Optional[Blk360Event]:
+        if event_id in self.blk360_events:
+            self.blk360_events[event_id].rsvp_count += 1
+            return self.blk360_events[event_id]
+        return None
+    
+    def create_blk360_proposal(self, proposal_data: Blk360ProposalCreate) -> Blk360Proposal:
+        from datetime import timedelta
+        proposal_id = str(uuid.uuid4())
+        deadline = (datetime.now() + timedelta(days=14)).isoformat()
+        proposal = Blk360Proposal(
+            id=proposal_id,
+            title=proposal_data.title,
+            summary=proposal_data.summary,
+            description=proposal_data.description,
+            category=proposal_data.category,
+            status='active',
+            created_by=proposal_data.created_by,
+            created_at=datetime.now(),
+            deadline=deadline,
+            votes_for=0,
+            votes_against=0,
+            votes_abstain=0,
+            total_votes=0,
+            quorum_required=100
+        )
+        self.blk360_proposals[proposal_id] = proposal
+        return proposal
+    
+    def get_all_blk360_proposals(self, status: Optional[str] = None) -> List[Blk360Proposal]:
+        proposals = list(self.blk360_proposals.values())
+        if status:
+            proposals = [p for p in proposals if p.status == status]
+        return proposals
+    
+    def create_blk360_vote(self, vote_data: Blk360VoteCreate) -> Blk360Vote:
+        vote_id = str(uuid.uuid4())
+        vote = Blk360Vote(
+            id=vote_id,
+            proposal_id=vote_data.proposal_id,
+            user_id=vote_data.user_id,
+            vote=vote_data.vote,
+            timestamp=datetime.now()
+        )
+        self.blk360_votes[vote_id] = vote
+        
+        if vote_data.proposal_id in self.blk360_proposals:
+            proposal = self.blk360_proposals[vote_data.proposal_id]
+            if vote_data.vote == 'for':
+                proposal.votes_for += 1
+            elif vote_data.vote == 'against':
+                proposal.votes_against += 1
+            elif vote_data.vote == 'abstain':
+                proposal.votes_abstain += 1
+            proposal.total_votes += 1
+        
+        return vote
+    
+    def create_blk360_fund_donation(self, donation_data: Blk360FundDonationCreate) -> Blk360FundDonation:
+        donation_id = str(uuid.uuid4())
+        donation = Blk360FundDonation(
+            id=donation_id,
+            donor_name=donation_data.donor_name,
+            email=donation_data.email,
+            amount=donation_data.amount,
+            category=donation_data.category,
+            anonymous=donation_data.anonymous,
+            timestamp=datetime.now()
+        )
+        self.blk360_fund_donations[donation_id] = donation
+        return donation
+    
+    def get_all_blk360_fund_donations(self) -> List[Blk360FundDonation]:
+        return list(self.blk360_fund_donations.values())
+    
+    def get_blk360_fund_metrics(self) -> Blk360FundMetrics:
+        total_raised = sum(d.amount for d in self.blk360_fund_donations.values())
+        vendor_allocation = total_raised * 0.85
+        operations_allocation = total_raised * 0.12
+        hbcu_allocation = total_raised * 0.03
+        
+        return Blk360FundMetrics(
+            total_raised=total_raised,
+            vendor_allocation=vendor_allocation,
+            operations_allocation=operations_allocation,
+            hbcu_allocation=hbcu_allocation,
+            total_vendors_supported=len(self.vendors),
+            total_hbcus_supported=5,
+            monthly_growth=12.5
+        )
+    
+    def create_blk360_group(self, group_data: Blk360GroupCreate) -> Blk360Group:
+        group_id = str(uuid.uuid4())
+        group = Blk360Group(
+            id=group_id,
+            name=group_data.name,
+            description=group_data.description,
+            visibility=group_data.visibility,
+            created_by=group_data.created_by,
+            member_count=1,
+            created_at=datetime.now()
+        )
+        self.blk360_groups[group_id] = group
+        return group
+    
+    def get_all_blk360_groups(self) -> List[Blk360Group]:
+        return list(self.blk360_groups.values())
+    
+    def create_blk360_membership(self, membership_data: Blk360MembershipCreate) -> Blk360Membership:
+        membership_id = str(uuid.uuid4())
+        membership = Blk360Membership(
+            id=membership_id,
+            user_id=membership_data.user_id,
+            tier=membership_data.tier,
+            consent_timestamp=datetime.now(),
+            terms_accepted=membership_data.terms_accepted,
+            agreement_date=datetime.now()
+        )
+        self.blk360_memberships[membership_id] = membership
+        return membership
+    
+    def get_blk360_membership_by_user(self, user_id: str) -> Optional[Blk360Membership]:
+        for membership in self.blk360_memberships.values():
+            if membership.user_id == user_id:
+                return membership
+        return None
 
 db = InMemoryDatabase()

@@ -27,7 +27,13 @@ from app.models import (
     ForumPostCreate, ForumPost, ForumCommentCreate, ForumComment, ForumCategory,
     EventCreate, Event, EventRSVPCreate, EventRSVP,
     QuestionCreate, Question, AnswerCreate, Answer,
-    LeadCreate, Lead, LeadMatch
+    LeadCreate, Lead, LeadMatch,
+    Blk360WalletCreate, Blk360Wallet, Blk360WalletTransaction,
+    Blk360EventCreate, Blk360Event,
+    Blk360ProposalCreate, Blk360Proposal, Blk360VoteCreate, Blk360Vote,
+    Blk360FundDonationCreate, Blk360FundDonation, Blk360FundMetrics,
+    Blk360GroupCreate, Blk360Group, Blk360GroupMember,
+    Blk360MembershipCreate, Blk360Membership
 )
 from app.database import db
 from app.seed_data import seed_database
@@ -1610,3 +1616,99 @@ async def get_professional_leads(professional_id: str):
     """Get all leads matched to a professional"""
     leads = db.get_professional_leads(professional_id)
     return [{"match": match, "lead": lead} for match, lead in leads]
+
+# Phase 3: Community Hub, Wallet, Governance, Fund Routes
+
+@app.get("/api/blk360/wallet/{user_id}")
+async def get_wallet(user_id: str):
+    """Get wallet for a user"""
+    wallet = db.get_blk360_wallet_by_user(user_id)
+    if not wallet:
+        wallet = db.create_blk360_wallet(Blk360WalletCreate(user_id=user_id))
+    return wallet
+
+@app.post("/api/blk360/wallet/transaction")
+async def add_wallet_transaction(user_id: str, transaction_type: str, amount: int, description: str, category: str):
+    """Add a transaction to a wallet"""
+    wallet = db.add_wallet_transaction(user_id, transaction_type, amount, description, category)
+    return wallet
+
+@app.get("/api/blk360/events")
+async def get_events():
+    """Get all events"""
+    events = db.get_all_blk360_events()
+    return events
+
+@app.post("/api/blk360/events")
+async def create_event(event_data: Blk360EventCreate):
+    """Create a new event"""
+    event = db.create_blk360_event(event_data)
+    return event
+
+@app.post("/api/blk360/events/{event_id}/rsvp")
+async def rsvp_event(event_id: str):
+    """RSVP to an event"""
+    event = db.increment_event_rsvp(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    return event
+
+@app.get("/api/blk360/governance/proposals")
+async def get_proposals(status: Optional[str] = None):
+    """Get all proposals"""
+    proposals = db.get_all_blk360_proposals(status)
+    return proposals
+
+@app.post("/api/blk360/governance/proposals")
+async def create_proposal(proposal_data: Blk360ProposalCreate):
+    """Create a new proposal"""
+    proposal = db.create_blk360_proposal(proposal_data)
+    return proposal
+
+@app.post("/api/blk360/governance/proposals/{proposal_id}/vote")
+async def vote_on_proposal(proposal_id: str, vote_data: Blk360VoteCreate):
+    """Vote on a proposal"""
+    vote = db.create_blk360_vote(vote_data)
+    return vote
+
+@app.get("/api/blk360/fund/metrics")
+async def get_fund_metrics():
+    """Get community fund metrics"""
+    metrics = db.get_blk360_fund_metrics()
+    return metrics
+
+@app.get("/api/blk360/fund/donations/recent")
+async def get_recent_donations():
+    """Get recent donations"""
+    donations = db.get_all_blk360_fund_donations()
+    return sorted(donations, key=lambda x: x.timestamp, reverse=True)[:10]
+
+@app.post("/api/blk360/fund/donate")
+async def create_donation(donation_data: Blk360FundDonationCreate):
+    """Create a new donation"""
+    donation = db.create_blk360_fund_donation(donation_data)
+    return donation
+
+@app.get("/api/blk360/groups")
+async def get_groups():
+    """Get all groups"""
+    groups = db.get_all_blk360_groups()
+    return groups
+
+@app.post("/api/blk360/groups")
+async def create_group(group_data: Blk360GroupCreate):
+    """Create a new group"""
+    group = db.create_blk360_group(group_data)
+    return group
+
+@app.get("/api/blk360/membership/{user_id}")
+async def get_membership(user_id: str):
+    """Get membership for a user"""
+    membership = db.get_blk360_membership_by_user(user_id)
+    return membership
+
+@app.post("/api/blk360/membership")
+async def create_membership(membership_data: Blk360MembershipCreate):
+    """Create a new membership"""
+    membership = db.create_blk360_membership(membership_data)
+    return membership

@@ -1009,3 +1009,145 @@ class Blk360AnalyticsMetrics(BaseModel):
     history_entries_count: int
     forum_posts_count: int
     forum_replies_count: int
+
+# Phase 3: Community Hub, Wallet, Governance, Fund Models
+
+class Blk360WalletTransaction(BaseModel):
+    id: str
+    user_id: str
+    type: str  # 'earned' | 'spent' | 'bonus'
+    amount: int
+    description: str
+    category: str
+    timestamp: datetime
+
+class Blk360Wallet(BaseModel):
+    id: str
+    user_id: str
+    balance: int
+    lifetime_earned: int
+    lifetime_spent: int
+    transactions: List[Blk360WalletTransaction]
+    created_at: datetime
+    updated_at: datetime
+
+class Blk360WalletCreate(BaseModel):
+    user_id: str
+
+class Blk360Event(BaseModel):
+    id: str
+    title: str
+    description: str
+    date: str
+    time: str
+    location: str
+    category: str
+    image_url: Optional[str] = None
+    rsvp_count: int = 0
+    status: str  # 'upcoming' | 'ongoing' | 'past'
+    created_at: datetime
+    updated_at: datetime
+
+class Blk360EventCreate(BaseModel):
+    title: str
+    description: str
+    date: str
+    time: str
+    location: str
+    category: str
+    image_url: Optional[str] = None
+
+class Blk360Proposal(BaseModel):
+    id: str
+    title: str
+    summary: str
+    description: str
+    category: str
+    status: str  # 'active' | 'passed' | 'rejected' | 'pending'
+    created_by: str
+    created_at: datetime
+    deadline: str
+    votes_for: int = 0
+    votes_against: int = 0
+    votes_abstain: int = 0
+    total_votes: int = 0
+    quorum_required: int = 100
+
+class Blk360ProposalCreate(BaseModel):
+    title: str
+    summary: str
+    description: str
+    category: str
+    created_by: str
+
+class Blk360Vote(BaseModel):
+    id: str
+    proposal_id: str
+    user_id: str
+    vote: str  # 'for' | 'against' | 'abstain'
+    timestamp: datetime
+
+class Blk360VoteCreate(BaseModel):
+    proposal_id: str
+    user_id: str
+    vote: str
+
+class Blk360FundDonation(BaseModel):
+    id: str
+    donor_name: str
+    email: str
+    amount: float
+    category: str
+    anonymous: bool = False
+    timestamp: datetime
+
+class Blk360FundDonationCreate(BaseModel):
+    donor_name: str
+    email: str
+    amount: float
+    category: str
+    anonymous: bool = False
+
+class Blk360FundMetrics(BaseModel):
+    total_raised: float
+    vendor_allocation: float
+    operations_allocation: float
+    hbcu_allocation: float
+    total_vendors_supported: int
+    total_hbcus_supported: int
+    monthly_growth: float
+
+class Blk360Group(BaseModel):
+    id: str
+    name: str
+    description: str
+    visibility: str  # 'public' | 'private'
+    created_by: str
+    member_count: int = 0
+    created_at: datetime
+
+class Blk360GroupCreate(BaseModel):
+    name: str
+    description: str
+    visibility: str
+    created_by: str
+
+class Blk360GroupMember(BaseModel):
+    id: str
+    group_id: str
+    user_id: str
+    role: str  # 'admin' | 'member'
+    joined_at: datetime
+
+class Blk360Membership(BaseModel):
+    id: str
+    user_id: str
+    tier: str  # 'free' | 'premium' | 'elite'
+    consent_timestamp: datetime
+    terms_accepted: bool
+    agreement_date: datetime
+
+class Blk360MembershipCreate(BaseModel):
+    user_id: str
+    tier: str
+    terms_accepted: bool
