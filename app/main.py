@@ -90,6 +90,9 @@ app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 from app.routes_phase2 import router as phase2_router
 app.include_router(phase2_router)
 
+from app.routes_phase4 import router as phase4_router
+app.include_router(phase4_router)
+
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok"}

@@ -61,6 +61,9 @@ class InMemoryDatabase:
         self.blk360_groups: Dict[str, 'Blk360Group'] = {}
         self.blk360_group_members: Dict[str, 'Blk360GroupMember'] = {}
         self.blk360_memberships: Dict[str, 'Blk360Membership'] = {}
+        self.blk360_2fa: Dict[str, 'Blk360TwoFA'] = {}
+        self.blk360_audit_logs: Dict[str, 'Blk360AuditLog'] = {}
+        self.blk360_affiliates: Dict[str, 'Blk360Affiliate'] = {}
         
         self.impact_stats = {
             "total_donations": 0.0,
@@ -1895,5 +1898,51 @@ class InMemoryDatabase:
             if membership.user_id == user_id:
                 return membership
         return None
+    
+    def setup_2fa(self, user_id: str, method: str, secret_hash: str, recovery_codes: List[str]) -> 'Blk360TwoFA':
+        from app.models import Blk360TwoFA
+        from datetime import timedelta
+        
+        twofa = Blk360TwoFA(
+            user_id=user_id,
+            method=method,
+            secret_hash=secret_hash,
+            recovery_codes=recovery_codes,
+            enabled=True,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            grace_period_expires=datetime.now() + timedelta(days=30),
+            device_id=None
+        )
+        self.blk360_2fa[user_id] = twofa
+        return twofa
+    
+    def get_2fa_by_user(self, user_id: str) -> Optional['Blk360TwoFA']:
+        return self.blk360_2fa.get(user_id)
+    
+    def disable_2fa(self, user_id: str) -> bool:
+        if user_id in self.blk360_2fa:
+            del self.blk360_2fa[user_id]
+            return True
+        return False
+    
+    def log_audit_event(self, user_id: str, event: str, status: str, ip_address: Optional[str] = None, user_agent: Optional[str] = None):
+        from app.models import Blk360AuditLog
+        
+        log_id = str(uuid.uuid4())
+        audit_log = Blk360AuditLog(
+            id=log_id,
+            user_id=user_id,
+            event=event,
+            status=status,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            timestamp=datetime.now()
+        )
+        self.blk360_audit_logs[log_id] = audit_log
+        return audit_log
+    
+    def get_audit_logs_by_user(self, user_id: str) -> List['Blk360AuditLog']:
+        return [log for log in self.blk360_audit_logs.values() if log.user_id == user_id]
 
 db = InMemoryDatabase()

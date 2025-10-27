@@ -1151,3 +1151,33 @@ class Blk360MembershipCreate(BaseModel):
     user_id: str
     tier: str
     terms_accepted: bool
+
+from typing import Dict
+
+class Blk360TwoFA(BaseModel):
+    user_id: str
+    method: str  # 'email_otp' or 'totp'
+    secret_hash: str
+    recovery_codes: List[str]
+    enabled: bool = False
+    created_at: datetime
+    updated_at: datetime
+    grace_period_expires: Optional[datetime] = None
+    device_id: Optional[str] = None
+
+class Blk360AuditLog(BaseModel):
+    id: str
+    user_id: str
+    event: str  # '2fa_setup', '2fa_verify', '2fa_disable', '2fa_reset', etc.
+    status: str  # 'success', 'fail', 'reset'
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    timestamp: datetime
+
+class Blk360Affiliate(BaseModel):
+    user_id: str
+    referral_code: str
+    total_referrals: int
+    total_earnings: float
+    created_at: datetime
+    updated_at: datetime
