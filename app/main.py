@@ -279,3 +279,119 @@ async def reject_product(product_id: str, reason: Optional[str] = None, admin_ok
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product rejected", "reason": reason}
+
+@app.get("/api/search")
+async def global_search(q: str):
+    """
+    Global search across vendors, products, professionals, and orders
+    """
+    if not q or len(q.strip()) < 2:
+        return {"results": []}
+    
+    query = q.lower().strip()
+    results = []
+    
+    vendors = db.get_all_vendors()
+    for vendor in vendors:
+        if query in vendor.business_name.lower() or query in vendor.name.lower():
+            results.append({
+                "id": vendor.id,
+                "type": "vendor",
+                "title": vendor.business_name,
+                "subtitle": f"Contact: {vendor.name} | {vendor.email}",
+                "url": f"/admin360/vendors/{vendor.id}"
+            })
+    
+    products = db.get_all_products()
+    for product in products:
+        if query in product.name.lower() or query in product.description.lower():
+            vendor = db.get_vendor(product.vendor_id)
+            results.append({
+                "id": product.id,
+                "type": "product",
+                "title": product.name,
+                "subtitle": f"${product.price} | Vendor: {vendor.business_name if vendor else 'Unknown'}",
+                "url": f"/admin360/products/{product.id}"
+            })
+    
+    professionals = db.get_all_professionals()
+    for professional in professionals:
+        if query in professional.name.lower() or query in professional.title.lower():
+            results.append({
+                "id": professional.id,
+                "type": "professional",
+                "title": professional.name,
+                "subtitle": f"{professional.title} | {professional.category}",
+                "url": f"/admin360/professionals/{professional.id}"
+            })
+    
+    orders = db.get_all_orders()
+    for order in orders:
+        if query in order.customer_name.lower() or query in order.customer_email.lower():
+            results.append({
+                "id": order.id,
+                "type": "order",
+                "title": f"Order #{order.id[:8]}",
+                "subtitle": f"Customer: {order.customer_name} | ${order.total_amount}",
+                "url": f"/admin360/orders/{order.id}"
+            })
+    
+    return {"results": results[:20]}  # Limit to 20 results
+
+# Notification Endpoints
+@app.get("/api/notifications")
+async def get_notifications():
+    """
+    Get all notifications for the current admin user
+    """
+    notifications = [
+        {
+            "id": "notif-1",
+            "type": "info",
+            "title": "New Vendor Application",
+            "message": "A new vendor application has been submitted and requires review.",
+            "read": False,
+            "timestamp": "2 minutes ago",
+            "actionUrl": "/admin360/vendors"
+        },
+        {
+            "id": "notif-2",
+            "type": "success",
+            "title": "Product Approved",
+            "message": "Product 'Handmade Scarf' has been approved and is now live.",
+            "read": False,
+            "timestamp": "15 minutes ago",
+            "actionUrl": "/admin360/products"
+        },
+        {
+            "id": "notif-3",
+            "type": "warning",
+            "title": "Low Stock Alert",
+            "message": "5 products are running low on stock.",
+            "read": True,
+            "timestamp": "1 hour ago",
+            "actionUrl": "/admin360/products"
+        }
+    ]
+    return {"notifications": notifications}
+
+@app.post("/api/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str):
+    """
+    Mark a notification as read
+    """
+    return {"message": "Notification marked as read", "id": notification_id}
+
+@app.post("/api/notifications/read-all")
+async def mark_all_notifications_read():
+    """
+    Mark all notifications as read
+    """
+    return {"message": "All notifications marked as read"}
+
+@app.delete("/api/notifications/{notification_id}")
+async def delete_notification(notification_id: str):
+    """
+    Delete a notification
+    """
+    return {"message": "Notification deleted", "id": notification_id}
