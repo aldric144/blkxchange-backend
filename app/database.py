@@ -73,6 +73,19 @@ class InMemoryDatabase:
         self.ai_content: Dict[str, dict] = {}
         self.payment_metadata: Dict[str, dict] = {}
         
+        self.blk360_blkcoin_wallets: Dict[str, dict] = {}
+        self.blk360_blkcoin_transactions: Dict[str, dict] = {}
+        self.blk360_blkcoin_rewards: Dict[str, dict] = {}
+        self.blk360_scholarships: Dict[str, dict] = {}
+        self.blk360_scholarship_applications: Dict[str, dict] = {}
+        self.blk360_scholarship_donations: Dict[str, dict] = {}
+        
+        self.blk360_events_enhanced: Dict[str, dict] = {}
+        self.blk360_partners: Dict[str, dict] = {}
+        self.blk360_nonprofits: Dict[str, dict] = {}
+        self.blk360_volunteer_logs: Dict[str, dict] = {}
+        self.blk360_donations: Dict[str, dict] = {}
+        
         self.impact_stats = {
             "total_donations": 0.0,
             "total_orders": 0,
@@ -84,6 +97,7 @@ class InMemoryDatabase:
         self.password_reset_tokens: Dict[str, dict] = {}
         self._seed_black_banks()
         self._seed_admin_users()
+        self._seed_blkcoin_rewards()
     
     def create_vendor(self, vendor_data: VendorCreate) -> Vendor:
         vendor_id = str(uuid.uuid4())
@@ -2301,5 +2315,571 @@ class InMemoryDatabase:
             self.payment_metadata = {}
         self.payment_metadata[payment_id] = payment
         return payment
+    
+    def _seed_blkcoin_rewards(self):
+        """Seed default BlkCoin reward amounts"""
+        rewards = [
+            {"activity_type": "wealth_module_complete", "amount": 50.0, "description": "Complete a Wealth Hub module"},
+            {"activity_type": "event_rsvp", "amount": 10.0, "description": "RSVP to a community event"},
+            {"activity_type": "event_attend", "amount": 25.0, "description": "Attend a community event"},
+            {"activity_type": "vendor_referral", "amount": 100.0, "description": "Refer a new vendor"},
+            {"activity_type": "partner_referral", "amount": 75.0, "description": "Refer a new partner"},
+            {"activity_type": "donation", "amount": 20.0, "description": "Make a donation (per $10 donated)"},
+            {"activity_type": "forum_post", "amount": 5.0, "description": "Create a forum post"},
+            {"activity_type": "forum_comment", "amount": 2.0, "description": "Comment on a forum post"},
+            {"activity_type": "scholarship_application", "amount": 15.0, "description": "Submit a scholarship application"},
+        ]
+        for reward in rewards:
+            self.create_blkcoin_reward(reward["activity_type"], reward["amount"], reward["description"])
+    
+    def create_blkcoin_wallet(self, user_id: str, email: str):
+        """Create a new BlkCoin wallet for a user"""
+        wallet_id = str(uuid.uuid4())
+        wallet = {
+            "id": wallet_id,
+            "user_id": user_id,
+            "email": email,
+            "balance": 0.0,
+            "lifetime_earned": 0.0,
+            "lifetime_redeemed": 0.0,
+            "created_at": datetime.now().isoformat(),
+            "last_updated": datetime.now().isoformat()
+        }
+        self.blk360_blkcoin_wallets[wallet_id] = wallet
+        return wallet
+    
+    def get_blkcoin_wallet(self, user_id: str):
+        """Get BlkCoin wallet by user_id"""
+        for wallet in self.blk360_blkcoin_wallets.values():
+            if wallet["user_id"] == user_id:
+                return wallet
+        return None
+    
+    def update_blkcoin_balance(self, user_id: str, amount: float, transaction_type: str, activity_type: str, reason: str, metadata: dict = None):
+        """Update BlkCoin balance and create transaction record"""
+        wallet = self.get_blkcoin_wallet(user_id)
+        if not wallet:
+            return None
+        
+        if transaction_type == "earn":
+            wallet["balance"] += amount
+            wallet["lifetime_earned"] += amount
+        elif transaction_type == "redeem":
+            if wallet["balance"] < amount:
+                return None
+            wallet["balance"] -= amount
+            wallet["lifetime_redeemed"] += amount
+        
+        wallet["last_updated"] = datetime.now().isoformat()
+        
+        tx_id = str(uuid.uuid4())
+        transaction = {
+            "id": tx_id,
+            "user_id": user_id,
+            "transaction_type": transaction_type,
+            "activity_type": activity_type,
+            "amount": amount,
+            "balance_after": wallet["balance"],
+            "reason": reason,
+            "metadata": metadata or {},
+            "created_at": datetime.now().isoformat()
+        }
+        self.blk360_blkcoin_transactions[tx_id] = transaction
+        
+        return wallet
+    
+    def get_blkcoin_transactions(self, user_id: str, limit: int = 50):
+        """Get transaction history for a user"""
+        transactions = [
+            tx for tx in self.blk360_blkcoin_transactions.values()
+            if tx["user_id"] == user_id
+        ]
+        transactions.sort(key=lambda x: x["created_at"], reverse=True)
+        return transactions[:limit]
+    
+    def get_blkcoin_reward_amount(self, activity_type: str):
+        """Get reward amount for an activity type"""
+        for reward in self.blk360_blkcoin_rewards.values():
+            if reward["activity_type"] == activity_type and reward["is_active"]:
+                return reward["amount"]
+        return 0.0
+    
+    def create_blkcoin_reward(self, activity_type: str, amount: float, description: str):
+        """Create a new BlkCoin reward rule"""
+        reward_id = str(uuid.uuid4())
+        reward = {
+            "id": reward_id,
+            "activity_type": activity_type,
+            "amount": amount,
+            "description": description,
+            "is_active": True,
+            "created_at": datetime.now().isoformat()
+        }
+        self.blk360_blkcoin_rewards[reward_id] = reward
+        return reward
+    
+    def create_scholarship(self, title: str, description: str, amount: float, deadline: str, goal_category: str, requirements: str, eligibility_criteria: str):
+        """Create a new scholarship"""
+        scholarship_id = str(uuid.uuid4())
+        scholarship = {
+            "id": scholarship_id,
+            "title": title,
+            "description": description,
+            "amount": amount,
+            "deadline": deadline,
+            "goal_category": goal_category,
+            "requirements": requirements,
+            "eligibility_criteria": eligibility_criteria,
+            "status": "open",
+            "total_raised": 0.0,
+            "applications_count": 0,
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        self.blk360_scholarships[scholarship_id] = scholarship
+        return scholarship
+    
+    def get_scholarship(self, scholarship_id: str):
+        """Get scholarship by ID"""
+        return self.blk360_scholarships.get(scholarship_id)
+    
+    def get_scholarships(self, status: str = None):
+        """Get all scholarships, optionally filtered by status"""
+        scholarships = list(self.blk360_scholarships.values())
+        if status:
+            scholarships = [s for s in scholarships if s["status"] == status]
+        scholarships.sort(key=lambda x: x["created_at"], reverse=True)
+        return scholarships
+    
+    def update_scholarship(self, scholarship_id: str, updates: dict):
+        """Update scholarship"""
+        scholarship = self.blk360_scholarships.get(scholarship_id)
+        if not scholarship:
+            return None
+        scholarship.update(updates)
+        scholarship["updated_at"] = datetime.now().isoformat()
+        return scholarship
+    
+    def create_scholarship_application(self, user_id: str, scholarship_id: str, applicant_name: str, email: str, phone: str, essay: str, goal_category: str, amount_requested: float, additional_info: str = None):
+        """Create a scholarship application"""
+        application_id = str(uuid.uuid4())
+        scholarship = self.get_scholarship(scholarship_id)
+        
+        application = {
+            "id": application_id,
+            "user_id": user_id,
+            "scholarship_id": scholarship_id,
+            "scholarship_title": scholarship["title"] if scholarship else None,
+            "applicant_name": applicant_name,
+            "email": email,
+            "phone": phone,
+            "essay": essay,
+            "goal_category": goal_category,
+            "amount_requested": amount_requested,
+            "additional_info": additional_info,
+            "status": "pending",
+            "admin_notes": None,
+            "reviewed_by": None,
+            "reviewed_at": None,
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        self.blk360_scholarship_applications[application_id] = application
+        
+        if scholarship:
+            scholarship["applications_count"] += 1
+        
+        return application
+    
+    def get_scholarship_application(self, application_id: str):
+        """Get scholarship application by ID"""
+        return self.blk360_scholarship_applications.get(application_id)
+    
+    def get_scholarship_applications(self, scholarship_id: str = None, status: str = None):
+        """Get scholarship applications, optionally filtered"""
+        applications = list(self.blk360_scholarship_applications.values())
+        if scholarship_id:
+            applications = [a for a in applications if a["scholarship_id"] == scholarship_id]
+        if status:
+            applications = [a for a in applications if a["status"] == status]
+        applications.sort(key=lambda x: x["created_at"], reverse=True)
+        return applications
+    
+    def update_scholarship_application(self, application_id: str, status: str, admin_notes: str = None, reviewed_by: str = None, award_amount: float = None):
+        """Update scholarship application status"""
+        application = self.blk360_scholarship_applications.get(application_id)
+        if not application:
+            return None
+        
+        application["status"] = status
+        application["admin_notes"] = admin_notes
+        application["reviewed_by"] = reviewed_by
+        application["reviewed_at"] = datetime.now().isoformat()
+        application["updated_at"] = datetime.now().isoformat()
+        
+        if award_amount:
+            application["award_amount"] = award_amount
+        
+        return application
+    
+    def create_scholarship_donation(self, user_id: str, scholarship_id: str, donor_name: str, email: str, amount: float, is_anonymous: bool = False):
+        """Create a scholarship donation"""
+        donation_id = str(uuid.uuid4())
+        scholarship = self.get_scholarship(scholarship_id)
+        
+        donation = {
+            "id": donation_id,
+            "user_id": user_id,
+            "scholarship_id": scholarship_id,
+            "scholarship_title": scholarship["title"] if scholarship else None,
+            "donor_name": donor_name,
+            "email": email,
+            "amount": amount,
+            "is_anonymous": is_anonymous,
+            "created_at": datetime.now().isoformat()
+        }
+        self.blk360_scholarship_donations[donation_id] = donation
+        
+        if scholarship:
+            scholarship["total_raised"] += amount
+        
+        return donation
+    
+    def get_scholarship_donations(self, scholarship_id: str = None):
+        """Get scholarship donations"""
+        donations = list(self.blk360_scholarship_donations.values())
+        if scholarship_id:
+            donations = [d for d in donations if d["scholarship_id"] == scholarship_id]
+        donations.sort(key=lambda x: x["created_at"], reverse=True)
+        return donations
+    
+    def get_impact_metrics_v2(self, start_date: str, end_date: str):
+        """Get comprehensive impact metrics including Phase 5B data"""
+        base_metrics = self.get_impact_metrics(start_date, end_date)
+        
+        total_blkcoin_circulating = sum(w["balance"] for w in self.blk360_blkcoin_wallets.values())
+        total_blkcoin_earned = sum(w["lifetime_earned"] for w in self.blk360_blkcoin_wallets.values())
+        total_blkcoin_redeemed = sum(w["lifetime_redeemed"] for w in self.blk360_blkcoin_wallets.values())
+        active_wallets = len([w for w in self.blk360_blkcoin_wallets.values() if w["balance"] > 0])
+        
+        total_scholarships = len(self.blk360_scholarships)
+        open_scholarships = len([s for s in self.blk360_scholarships.values() if s["status"] == "open"])
+        total_scholarship_funds = sum(s["total_raised"] for s in self.blk360_scholarships.values())
+        total_applications = len(self.blk360_scholarship_applications)
+        approved_applications = len([a for a in self.blk360_scholarship_applications.values() if a["status"] == "approved"])
+        
+        return {
+            **base_metrics,
+            "blkcoin": {
+                "total_circulating": total_blkcoin_circulating,
+                "total_earned": total_blkcoin_earned,
+                "total_redeemed": total_blkcoin_redeemed,
+                "active_wallets": active_wallets,
+                "total_wallets": len(self.blk360_blkcoin_wallets)
+            },
+            "scholarships": {
+                "total_scholarships": total_scholarships,
+                "open_scholarships": open_scholarships,
+                "total_funds_raised": total_scholarship_funds,
+                "total_applications": total_applications,
+                "approved_applications": approved_applications,
+                "pending_applications": len([a for a in self.blk360_scholarship_applications.values() if a["status"] == "pending"])
+            }
+        }
+    
+    def create_event_enhanced(self, title: str, description: str, category: str, location: str, 
+                             start_time: str, end_time: str, rsvp_limit: int = None, 
+                             ticket_price: float = 0.0, image_url: str = None, 
+                             is_volunteer_event: bool = False, blkcoin_reward: float = None):
+        event_id = str(uuid.uuid4())
+        event = {
+            "id": event_id,
+            "title": title,
+            "description": description,
+            "category": category,
+            "location": location,
+            "start_time": start_time,
+            "end_time": end_time,
+            "rsvp_count": 0,
+            "rsvp_limit": rsvp_limit,
+            "ticket_price": ticket_price,
+            "image_url": image_url,
+            "is_volunteer_event": is_volunteer_event,
+            "blkcoin_reward": blkcoin_reward or (25.0 if is_volunteer_event else 10.0),
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        self.blk360_events_enhanced[event_id] = event
+        return event
+    
+    def get_event_enhanced(self, event_id: str):
+        return self.blk360_events_enhanced.get(event_id)
+    
+    def get_all_events_enhanced(self, category: str = None, upcoming_only: bool = False):
+        events = list(self.blk360_events_enhanced.values())
+        if category:
+            events = [e for e in events if e["category"] == category]
+        if upcoming_only:
+            now = datetime.now().isoformat()
+            events = [e for e in events if e["start_time"] > now]
+        events.sort(key=lambda x: x["start_time"])
+        return events
+    
+    def update_event_enhanced(self, event_id: str, updates: dict):
+        event = self.blk360_events_enhanced.get(event_id)
+        if not event:
+            return None
+        event.update(updates)
+        event["updated_at"] = datetime.now().isoformat()
+        return event
+    
+    def delete_event_enhanced(self, event_id: str):
+        if event_id in self.blk360_events_enhanced:
+            del self.blk360_events_enhanced[event_id]
+            return True
+        return False
+    
+    def create_partner(self, name: str, category: str, mission: str, website: str, 
+                      contact_name: str, contact_email: str, contact_phone: str, 
+                      logo_url: str, description: str):
+        partner_id = str(uuid.uuid4())
+        partner = {
+            "id": partner_id,
+            "name": name,
+            "category": category,
+            "mission": mission,
+            "website": website,
+            "contact_name": contact_name,
+            "contact_email": contact_email,
+            "contact_phone": contact_phone,
+            "logo_url": logo_url,
+            "description": description,
+            "status": "pending",
+            "badge_level": None,
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        self.blk360_partners[partner_id] = partner
+        return partner
+    
+    def get_partner(self, partner_id: str):
+        return self.blk360_partners.get(partner_id)
+    
+    def get_all_partners(self, status: str = None, category: str = None):
+        partners = list(self.blk360_partners.values())
+        if status:
+            partners = [p for p in partners if p["status"] == status]
+        if category:
+            partners = [p for p in partners if p["category"] == category]
+        partners.sort(key=lambda x: x["created_at"], reverse=True)
+        return partners
+    
+    def update_partner(self, partner_id: str, updates: dict):
+        partner = self.blk360_partners.get(partner_id)
+        if not partner:
+            return None
+        partner.update(updates)
+        partner["updated_at"] = datetime.now().isoformat()
+        return partner
+    
+    def create_nonprofit(self, name: str, ein: str, focus_area: str, mission: str, 
+                        website: str, contact_name: str, contact_email: str, 
+                        contact_phone: str, logo_url: str, description: str, 
+                        address: str, city: str, state: str, zip_code: str):
+        nonprofit_id = str(uuid.uuid4())
+        nonprofit = {
+            "id": nonprofit_id,
+            "name": name,
+            "ein": ein,
+            "focus_area": focus_area,
+            "mission": mission,
+            "website": website,
+            "contact_name": contact_name,
+            "contact_email": contact_email,
+            "contact_phone": contact_phone,
+            "logo_url": logo_url,
+            "description": description,
+            "address": address,
+            "city": city,
+            "state": state,
+            "zip": zip_code,
+            "status": "pending",
+            "total_donations": 0.0,
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        self.blk360_nonprofits[nonprofit_id] = nonprofit
+        return nonprofit
+    
+    def get_nonprofit(self, nonprofit_id: str):
+        return self.blk360_nonprofits.get(nonprofit_id)
+    
+    def get_all_nonprofits(self, status: str = None, focus_area: str = None):
+        nonprofits = list(self.blk360_nonprofits.values())
+        if status:
+            nonprofits = [n for n in nonprofits if n["status"] == status]
+        if focus_area:
+            nonprofits = [n for n in nonprofits if n["focus_area"] == focus_area]
+        nonprofits.sort(key=lambda x: x["created_at"], reverse=True)
+        return nonprofits
+    
+    def update_nonprofit(self, nonprofit_id: str, updates: dict):
+        nonprofit = self.blk360_nonprofits.get(nonprofit_id)
+        if not nonprofit:
+            return None
+        nonprofit.update(updates)
+        nonprofit["updated_at"] = datetime.now().isoformat()
+        return nonprofit
+    
+    def create_volunteer_log(self, user_id: str, event_id: str, hours: float, notes: str = None):
+        log_id = str(uuid.uuid4())
+        event = self.get_event_enhanced(event_id)
+        blkcoin_earned = hours * 10.0
+        
+        log = {
+            "id": log_id,
+            "user_id": user_id,
+            "event_id": event_id,
+            "event_title": event["title"] if event else None,
+            "hours": hours,
+            "notes": notes,
+            "blkcoin_earned": blkcoin_earned,
+            "created_at": datetime.now().isoformat()
+        }
+        self.blk360_volunteer_logs[log_id] = log
+        
+        wallet = self.get_blkcoin_wallet(user_id)
+        if wallet:
+            self.update_blkcoin_balance(
+                user_id=user_id,
+                amount=blkcoin_earned,
+                transaction_type="earn",
+                activity_type="volunteer",
+                reason=f"Volunteered {hours} hours at {event['title'] if event else 'event'}",
+                metadata={"event_id": event_id, "hours": hours}
+            )
+        
+        return log
+    
+    def get_volunteer_logs(self, user_id: str = None, event_id: str = None):
+        logs = list(self.blk360_volunteer_logs.values())
+        if user_id:
+            logs = [l for l in logs if l["user_id"] == user_id]
+        if event_id:
+            logs = [l for l in logs if l["event_id"] == event_id]
+        logs.sort(key=lambda x: x["created_at"], reverse=True)
+        return logs
+    
+    def create_donation_enhanced(self, user_id: str, recipient_type: str, recipient_id: str, 
+                                donor_name: str, email: str, amount: float, 
+                                is_anonymous: bool = False, message: str = None):
+        donation_id = str(uuid.uuid4())
+        
+        recipient_name = None
+        if recipient_type == "partner":
+            partner = self.get_partner(recipient_id)
+            recipient_name = partner["name"] if partner else None
+        elif recipient_type == "nonprofit":
+            nonprofit = self.get_nonprofit(recipient_id)
+            recipient_name = nonprofit["name"] if nonprofit else None
+            if nonprofit:
+                nonprofit["total_donations"] += amount
+        elif recipient_type == "event":
+            event = self.get_event_enhanced(recipient_id)
+            recipient_name = event["title"] if event else None
+        elif recipient_type == "scholarship":
+            scholarship = self.get_scholarship(recipient_id)
+            recipient_name = scholarship["title"] if scholarship else None
+        
+        blkcoin_earned = (amount // 10) * 20
+        
+        donation = {
+            "id": donation_id,
+            "user_id": user_id,
+            "recipient_type": recipient_type,
+            "recipient_id": recipient_id,
+            "recipient_name": recipient_name,
+            "donor_name": donor_name,
+            "email": email,
+            "amount": amount,
+            "is_anonymous": is_anonymous,
+            "message": message,
+            "blkcoin_earned": blkcoin_earned,
+            "created_at": datetime.now().isoformat()
+        }
+        self.blk360_donations[donation_id] = donation
+        
+        wallet = self.get_blkcoin_wallet(user_id)
+        if wallet and blkcoin_earned > 0:
+            self.update_blkcoin_balance(
+                user_id=user_id,
+                amount=blkcoin_earned,
+                transaction_type="earn",
+                activity_type="donation",
+                reason=f"Donated ${amount} to {recipient_name or recipient_type}",
+                metadata={"recipient_type": recipient_type, "recipient_id": recipient_id, "amount": amount}
+            )
+        
+        return donation
+    
+    def get_donations_enhanced(self, recipient_type: str = None, recipient_id: str = None, user_id: str = None):
+        donations = list(self.blk360_donations.values())
+        if recipient_type:
+            donations = [d for d in donations if d["recipient_type"] == recipient_type]
+        if recipient_id:
+            donations = [d for d in donations if d["recipient_id"] == recipient_id]
+        if user_id:
+            donations = [d for d in donations if d["user_id"] == user_id]
+        donations.sort(key=lambda x: x["created_at"], reverse=True)
+        return donations
+    
+    def get_impact_metrics_v3(self, start_date: str, end_date: str):
+        v2_metrics = self.get_impact_metrics_v2(start_date, end_date)
+        
+        total_events = len(self.blk360_events_enhanced)
+        upcoming_events = len([e for e in self.blk360_events_enhanced.values() if e["start_time"] > datetime.now().isoformat()])
+        total_rsvps = sum(e["rsvp_count"] for e in self.blk360_events_enhanced.values())
+        
+        active_partners = len([p for p in self.blk360_partners.values() if p["status"] == "active"])
+        total_partners = len(self.blk360_partners)
+        
+        active_nonprofits = len([n for n in self.blk360_nonprofits.values() if n["status"] == "active"])
+        total_nonprofits = len(self.blk360_nonprofits)
+        
+        total_volunteer_hours = sum(l["hours"] for l in self.blk360_volunteer_logs.values())
+        total_volunteers = len(set(l["user_id"] for l in self.blk360_volunteer_logs.values()))
+        
+        total_donations_amount = sum(d["amount"] for d in self.blk360_donations.values())
+        total_donations_count = len(self.blk360_donations)
+        
+        return {
+            **v2_metrics,
+            "events": {
+                "total_events": total_events,
+                "upcoming_events": upcoming_events,
+                "total_rsvps": total_rsvps,
+                "past_events": total_events - upcoming_events
+            },
+            "partners": {
+                "total_partners": total_partners,
+                "active_partners": active_partners,
+                "pending_partners": len([p for p in self.blk360_partners.values() if p["status"] == "pending"])
+            },
+            "nonprofits": {
+                "total_nonprofits": total_nonprofits,
+                "active_nonprofits": active_nonprofits,
+                "pending_nonprofits": len([n for n in self.blk360_nonprofits.values() if n["status"] == "pending"])
+            },
+            "volunteers": {
+                "total_hours": total_volunteer_hours,
+                "total_volunteers": total_volunteers,
+                "total_logs": len(self.blk360_volunteer_logs)
+            },
+            "donations": {
+                "total_amount": total_donations_amount,
+                "total_count": total_donations_count,
+                "average_donation": total_donations_amount / total_donations_count if total_donations_count > 0 else 0
+            }
+        }
 
 db = InMemoryDatabase()

@@ -1459,3 +1459,381 @@ class SystemHealthCheck(BaseModel):
     avg_response_time_ms: float
     active_connections: int
     database_status: str
+
+# ==================== PHASE 5B MODELS ====================
+# BlkCoin™ Rewards Engine + Scholarship Portal
+
+# BlkCoin Models
+class BlkCoinActivityType(str, Enum):
+    WEALTH_MODULE_COMPLETE = "wealth_module_complete"
+    EVENT_RSVP = "event_rsvp"
+    EVENT_ATTEND = "event_attend"
+    VENDOR_REFERRAL = "vendor_referral"
+    PARTNER_REFERRAL = "partner_referral"
+    DONATION = "donation"
+    FORUM_POST = "forum_post"
+    FORUM_COMMENT = "forum_comment"
+    SCHOLARSHIP_APPLICATION = "scholarship_application"
+    ADMIN_BONUS = "admin_bonus"
+
+class BlkCoinRedemptionType(str, Enum):
+    PREMIUM_UPGRADE = "premium_upgrade"
+    VENDOR_DISCOUNT = "vendor_discount"
+    MARKETPLACE_COUPON = "marketplace_coupon"
+    SCHOLARSHIP_ENTRY = "scholarship_entry"
+    COMMUNITY_DONATION = "community_donation"
+
+class Blk360BlkCoinWallet(BaseModel):
+    id: str
+    user_id: str
+    email: EmailStr
+    balance: float = 0.0
+    lifetime_earned: float = 0.0
+    lifetime_redeemed: float = 0.0
+    created_at: datetime
+    last_updated: datetime
+
+class Blk360BlkCoinTransaction(BaseModel):
+    id: str
+    user_id: str
+    transaction_type: str  # 'earn' or 'redeem'
+    activity_type: str
+    amount: float
+    balance_after: float
+    reason: str
+    metadata: Dict = {}
+    created_at: datetime
+
+class BlkCoinEarnRequest(BaseModel):
+    user_id: str
+    activity_type: BlkCoinActivityType
+    reason: str
+    metadata: Optional[Dict] = {}
+
+class BlkCoinRedeemRequest(BaseModel):
+    user_id: str
+    redemption_type: BlkCoinRedemptionType
+    amount: float
+    reason: str
+    metadata: Optional[Dict] = {}
+
+class Blk360BlkCoinReward(BaseModel):
+    id: str
+    activity_type: BlkCoinActivityType
+    amount: float
+    description: str
+    is_active: bool = True
+    created_at: datetime
+
+# Scholarship Models
+class ScholarshipStatus(str, Enum):
+    DRAFT = "draft"
+    OPEN = "open"
+    CLOSED = "closed"
+    AWARDED = "awarded"
+
+class ScholarshipApplicationStatus(str, Enum):
+    PENDING = "pending"
+    UNDER_REVIEW = "under_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    AWARDED = "awarded"
+
+class ScholarshipGoalCategory(str, Enum):
+    EDUCATION = "education"
+    ENTREPRENEURSHIP = "entrepreneurship"
+    TECHNOLOGY = "technology"
+    ARTS_CULTURE = "arts_culture"
+    COMMUNITY_SERVICE = "community_service"
+    HEALTHCARE = "healthcare"
+    OTHER = "other"
+
+class Blk360ScholarshipCreate(BaseModel):
+    title: str
+    description: str
+    amount: float
+    deadline: datetime
+    goal_category: ScholarshipGoalCategory
+    requirements: str
+    eligibility_criteria: str
+
+class Blk360Scholarship(BaseModel):
+    id: str
+    title: str
+    description: str
+    amount: float
+    deadline: datetime
+    goal_category: ScholarshipGoalCategory
+    requirements: str
+    eligibility_criteria: str
+    status: ScholarshipStatus
+    total_raised: float = 0.0
+    applications_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+class Blk360ScholarshipApplicationCreate(BaseModel):
+    user_id: str
+    scholarship_id: str
+    applicant_name: str
+    email: EmailStr
+    phone: str
+    essay: str
+    goal_category: ScholarshipGoalCategory
+    amount_requested: float
+    additional_info: Optional[str] = None
+
+class Blk360ScholarshipApplication(BaseModel):
+    id: str
+    user_id: str
+    scholarship_id: str
+    scholarship_title: Optional[str] = None
+    applicant_name: str
+    email: EmailStr
+    phone: str
+    essay: str
+    goal_category: ScholarshipGoalCategory
+    amount_requested: float
+    additional_info: Optional[str] = None
+    status: ScholarshipApplicationStatus
+    admin_notes: Optional[str] = None
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+class Blk360ScholarshipDonationCreate(BaseModel):
+    user_id: str
+    scholarship_id: str
+    donor_name: str
+    email: EmailStr
+    amount: float
+    is_anonymous: bool = False
+
+class Blk360ScholarshipDonation(BaseModel):
+    id: str
+    user_id: str
+    scholarship_id: str
+    scholarship_title: Optional[str] = None
+    donor_name: str
+    email: EmailStr
+    amount: float
+    is_anonymous: bool
+    created_at: datetime
+
+class ScholarshipApprovalRequest(BaseModel):
+    status: ScholarshipApplicationStatus
+    admin_notes: Optional[str] = None
+    award_amount: Optional[float] = None
+
+# Impact Dashboard V2 Models
+class ImpactMetricsV2(BaseModel):
+    # Existing metrics
+    subscriptions: Dict
+    vendors: Dict
+    products: Dict
+    mentorship: Dict
+    ai_content: Dict
+    community_fund: Dict
+    # Phase 5B metrics
+    blkcoin: Dict
+    scholarships: Dict
+    date_range: Dict
+
+# ==================== PHASE 5C MODELS ====================
+# Community & Events Management Dashboard
+
+# Event Management Models (Enhanced from existing)
+class Blk360EventCreateEnhanced(BaseModel):
+    title: str
+    description: str
+    category: str
+    location: str
+    start_time: datetime
+    end_time: datetime
+    rsvp_limit: Optional[int] = None
+    ticket_price: Optional[float] = 0.0
+    image_url: Optional[str] = None
+    is_volunteer_event: bool = False
+    blkcoin_reward: Optional[float] = None
+
+class Blk360EventEnhanced(BaseModel):
+    id: str
+    title: str
+    description: str
+    category: str
+    location: str
+    start_time: datetime
+    end_time: datetime
+    rsvp_count: int = 0
+    rsvp_limit: Optional[int] = None
+    ticket_price: float = 0.0
+    image_url: Optional[str] = None
+    is_volunteer_event: bool = False
+    blkcoin_reward: Optional[float] = None
+    created_at: datetime
+    updated_at: datetime
+
+# Partner Models
+class PartnerCategory(str, Enum):
+    CORPORATE = "corporate"
+    NONPROFIT = "nonprofit"
+    EDUCATIONAL = "educational"
+    MEDIA = "media"
+    FINANCIAL = "financial"
+    TECHNOLOGY = "technology"
+    OTHER = "other"
+
+class PartnerStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+class Blk360PartnerCreate(BaseModel):
+    name: str
+    category: PartnerCategory
+    mission: str
+    website: Optional[str] = None
+    contact_name: str
+    contact_email: EmailStr
+    contact_phone: str
+    logo_url: Optional[str] = None
+    description: str
+
+class Blk360Partner(BaseModel):
+    id: str
+    name: str
+    category: PartnerCategory
+    mission: str
+    website: Optional[str] = None
+    contact_name: str
+    contact_email: EmailStr
+    contact_phone: str
+    logo_url: Optional[str] = None
+    description: str
+    status: PartnerStatus
+    badge_level: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+# Nonprofit Models
+class NonprofitFocusArea(str, Enum):
+    EDUCATION = "education"
+    HEALTHCARE = "healthcare"
+    ECONOMIC_DEVELOPMENT = "economic_development"
+    ARTS_CULTURE = "arts_culture"
+    SOCIAL_JUSTICE = "social_justice"
+    YOUTH_DEVELOPMENT = "youth_development"
+    COMMUNITY_SERVICE = "community_service"
+    OTHER = "other"
+
+class Blk360NonprofitCreate(BaseModel):
+    name: str
+    ein: str
+    focus_area: NonprofitFocusArea
+    mission: str
+    website: Optional[str] = None
+    contact_name: str
+    contact_email: EmailStr
+    contact_phone: str
+    logo_url: Optional[str] = None
+    description: str
+    address: str
+    city: str
+    state: str
+    zip: str
+
+class Blk360Nonprofit(BaseModel):
+    id: str
+    name: str
+    ein: str
+    focus_area: NonprofitFocusArea
+    mission: str
+    website: Optional[str] = None
+    contact_name: str
+    contact_email: EmailStr
+    contact_phone: str
+    logo_url: Optional[str] = None
+    description: str
+    address: str
+    city: str
+    state: str
+    zip: str
+    status: PartnerStatus
+    total_donations: float = 0.0
+    created_at: datetime
+    updated_at: datetime
+
+# Volunteer Models
+class Blk360VolunteerLogCreate(BaseModel):
+    user_id: str
+    event_id: str
+    hours: float
+    notes: Optional[str] = None
+
+class Blk360VolunteerLog(BaseModel):
+    id: str
+    user_id: str
+    event_id: str
+    event_title: Optional[str] = None
+    hours: float
+    notes: Optional[str] = None
+    blkcoin_earned: float = 0.0
+    created_at: datetime
+
+# Donation Tracking (Enhanced)
+class Blk360DonationCreate(BaseModel):
+    user_id: str
+    recipient_type: str  # 'partner', 'nonprofit', 'event', 'scholarship'
+    recipient_id: str
+    donor_name: str
+    email: EmailStr
+    amount: float
+    is_anonymous: bool = False
+    message: Optional[str] = None
+
+class Blk360Donation(BaseModel):
+    id: str
+    user_id: str
+    recipient_type: str
+    recipient_id: str
+    recipient_name: Optional[str] = None
+    donor_name: str
+    email: EmailStr
+    amount: float
+    is_anonymous: bool
+    message: Optional[str] = None
+    blkcoin_earned: float = 0.0
+    created_at: datetime
+
+class Blk360DonationEnhanced(BaseModel):
+    user_id: str
+    recipient_type: str
+    recipient_id: str
+    donor_name: str
+    email: EmailStr
+    amount: float
+    is_anonymous: bool = False
+    message: Optional[str] = None
+
+# Impact Dashboard V3 Models
+class ImpactMetricsV3(BaseModel):
+    # Phase 5A metrics
+    subscriptions: Dict
+    vendors: Dict
+    products: Dict
+    mentorship: Dict
+    ai_content: Dict
+    community_fund: Dict
+    # Phase 5B metrics
+    blkcoin: Dict
+    scholarships: Dict
+    # Phase 5C metrics
+    events: Dict
+    partners: Dict
+    nonprofits: Dict
+    volunteers: Dict
+    donations: Dict
+    date_range: Dict

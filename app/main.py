@@ -96,6 +96,12 @@ app.include_router(phase4_router)
 from app.routes_phase5a import router as phase5a_router
 app.include_router(phase5a_router)
 
+from app.routes_phase5b import router as phase5b_router
+app.include_router(phase5b_router)
+
+from app.routes_phase5c import router as phase5c_router
+app.include_router(phase5c_router)
+
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok"}
