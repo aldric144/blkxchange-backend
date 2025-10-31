@@ -33,10 +33,15 @@ async def require_admin(x_admin_secret: Optional[str] = Header(None)):
 async def startup_event():
     seed_database()
 
-# Disable CORS. Do not remove this for full-stack development.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=[
+        "https://blkxchange.com",
+        "https://www.blkxchange.com",
+        "https://frontend-omega-five-72.vercel.app",
+        "https://blkxchange-deployment-app-7u8i8y3c.devinapps.com",
+        "http://localhost:5173",  # For local development
+    ],
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
