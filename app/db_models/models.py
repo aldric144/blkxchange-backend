@@ -213,3 +213,68 @@ class ImpactStat(Base):
     scholarship_donations = Column(Float, default=0.0)
     nonprofit_donations = Column(Float, default=0.0)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Category(Base):
+    __tablename__ = "categories"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False, unique=True)
+    slug = Column(String, nullable=False, unique=True)
+    description = Column(Text)
+    color_theme = Column(String)
+    image_url = Column(String)
+    icon = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password_hash = Column(String)
+    membership_tier = Column(String, default="Free")
+    join_date = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Partner(Base):
+    __tablename__ = "partners"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    org_name = Column(String, nullable=False)
+    logo_url = Column(String)
+    website = Column(String)
+    description = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Testimonial(Base):
+    __tablename__ = "testimonials"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_name = Column(String, nullable=False)
+    photo_url = Column(String)
+    quote = Column(Text, nullable=False)
+    rating = Column(Integer, default=5)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Scholarship(Base):
+    __tablename__ = "scholarships"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    deadline = Column(String)
+    apply_url = Column(String)
+    amount = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class BusinessMatchmaker(Base):
+    __tablename__ = "business_matchmaker"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer)
+    interest = Column(String)
+    preferred_category = Column(String)
+    match_score = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
