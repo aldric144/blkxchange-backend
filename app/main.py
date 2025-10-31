@@ -15,8 +15,11 @@ from app.models import (
 from app.database import db
 from app.seed_data import seed_database
 from app.email import send_vendor_welcome_email
+from app.routes import articles
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
+
+app.include_router(articles.router, prefix="/api/articles", tags=["Articles"])
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET_KEY", "changeme")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")

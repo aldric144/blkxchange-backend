@@ -239,3 +239,19 @@ class ProductEnhanced(BaseModel):
     reviews_count: int = 0
     created_at: datetime
     updated_at: datetime
+
+class ArticleCreate(BaseModel):
+    title: str
+    category: str
+    body: str
+    author: str
+    image_url: Optional[str] = None
+
+class Article(BaseModel):
+    id: int
+    title: str
+    category: str
+    body: str
+    author: str
+    image_url: Optional[str] = None
+    created_at: datetime
