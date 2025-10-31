@@ -3,13 +3,19 @@ from typing import Optional
 import os
 import jwt
 from fastapi import HTTPException, Header
+from dotenv import load_dotenv
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-key-please-change")
+load_dotenv()
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@example.com")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "change-me-in-production")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+if not SECRET_KEY or not ADMIN_EMAIL or not ADMIN_PASSWORD:
+    raise ValueError("Missing required environment variables: JWT_SECRET_KEY, ADMIN_EMAIL, or ADMIN_PASSWORD")
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
