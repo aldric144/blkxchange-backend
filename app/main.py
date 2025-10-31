@@ -15,11 +15,18 @@ from app.models import (
 from app.database import db
 from app.seed_data import seed_database
 from app.email import send_vendor_welcome_email
-from app.routes import articles
+from app.routes import articles, admin, modules, legacy, history, forums, events, groups
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
 
 app.include_router(articles.router, prefix="/api/articles", tags=["Articles"])
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin360"])
+app.include_router(modules.router, prefix="/api/modules", tags=["Wealth Hub"])
+app.include_router(legacy.router, prefix="/api/legacy", tags=["Legacy Wall"])
+app.include_router(history.router, prefix="/api/history", tags=["History Window"])
+app.include_router(forums.router, prefix="/api/forums", tags=["Community Forum"])
+app.include_router(events.router, prefix="/api/events", tags=["Community Hub"])
+app.include_router(groups.router, prefix="/api/groups", tags=["Private Groups"])
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET_KEY", "changeme")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")

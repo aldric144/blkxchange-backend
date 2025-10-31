@@ -3,3 +3,4 @@ psycopg[binary]==3.2.11
 aiosmtplib==5.0.0
 httpx==0.28.1
 uvicorn==0.38.0
+pyjwt
