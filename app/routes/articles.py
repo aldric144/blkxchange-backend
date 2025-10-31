@@ -136,3 +136,60 @@ async def get_article(article_id: int):
         image_url=row["image_url"],
         created_at=datetime.fromisoformat(row["created_at"])
     )
+
+@router.put("/{article_id}", response_model=Article)
+async def update_article(article_id: int, article: ArticleCreate):
+    """
+    Update an existing article
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM articles WHERE id = ?", (article_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Article not found")
+    
+    cursor.execute(
+        """
+        UPDATE articles 
+        SET title = ?, category = ?, body = ?, author = ?, image_url = ?
+        WHERE id = ?
+        """,
+        (article.title, article.category, article.body, article.author, article.image_url, article_id)
+    )
+    
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM articles WHERE id = ?", (article_id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    return Article(
+        id=row["id"],
+        title=row["title"],
+        category=row["category"],
+        body=row["body"],
+        author=row["author"],
+        image_url=row["image_url"],
+        created_at=datetime.fromisoformat(row["created_at"])
+    )
+
+@router.delete("/{article_id}")
+async def delete_article(article_id: int):
+    """
+    Delete an article
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM articles WHERE id = ?", (article_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Article not found")
+    
+    cursor.execute("DELETE FROM articles WHERE id = ?", (article_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "Article deleted successfully"}

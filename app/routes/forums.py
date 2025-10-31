@@ -197,3 +197,56 @@ async def create_reply(reply: ReplyCreate):
         author=row[3],
         created_at=row[4]
     )
+
+@router.put("/topics/{topic_id}", response_model=Topic)
+async def update_topic(topic_id: int, topic: TopicCreate):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM topics WHERE id = ?", (topic_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Topic not found")
+    
+    cursor.execute("""
+        UPDATE topics 
+        SET category = ?, title = ?, content = ?, author = ?
+        WHERE id = ?
+    """, (topic.category, topic.title, topic.content, topic.author, topic_id))
+    
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM topics WHERE id = ?", (topic_id,))
+    row = cursor.fetchone()
+    
+    cursor.execute("SELECT COUNT(*) FROM replies WHERE topic_id = ?", (topic_id,))
+    reply_count = cursor.fetchone()[0]
+    
+    conn.close()
+    
+    return Topic(
+        id=row[0],
+        category=row[1],
+        title=row[2],
+        content=row[3],
+        author=row[4],
+        created_at=row[5],
+        reply_count=reply_count
+    )
+
+@router.delete("/topics/{topic_id}")
+async def delete_topic(topic_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM topics WHERE id = ?", (topic_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Topic not found")
+    
+    cursor.execute("DELETE FROM replies WHERE topic_id = ?", (topic_id,))
+    cursor.execute("DELETE FROM topics WHERE id = ?", (topic_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "Topic deleted successfully"}

@@ -123,3 +123,52 @@ async def get_event(event_id: int):
         image_url=row[6],
         created_at=row[7]
     )
+
+@router.put("/{event_id}", response_model=Event)
+async def update_event(event_id: int, event: EventCreate):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM events WHERE id = ?", (event_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    cursor.execute("""
+        UPDATE events 
+        SET name = ?, description = ?, category = ?, date = ?, location = ?, image_url = ?
+        WHERE id = ?
+    """, (event.name, event.description, event.category, event.date, event.location, event.image_url, event_id))
+    
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM events WHERE id = ?", (event_id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    return Event(
+        id=row[0],
+        name=row[1],
+        description=row[2],
+        category=row[3],
+        date=row[4],
+        location=row[5],
+        image_url=row[6],
+        created_at=row[7]
+    )
+
+@router.delete("/{event_id}")
+async def delete_event(event_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM events WHERE id = ?", (event_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "Event deleted successfully"}

@@ -113,3 +113,50 @@ async def get_module(module_id: int):
         video_url=row[4],
         created_at=row[5]
     )
+
+@router.put("/{module_id}", response_model=Module)
+async def update_module(module_id: int, module: ModuleCreate):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM modules WHERE id = ?", (module_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Module not found")
+    
+    cursor.execute("""
+        UPDATE modules 
+        SET title = ?, category = ?, description = ?, video_url = ?
+        WHERE id = ?
+    """, (module.title, module.category, module.description, module.video_url, module_id))
+    
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM modules WHERE id = ?", (module_id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    return Module(
+        id=row[0],
+        title=row[1],
+        category=row[2],
+        description=row[3],
+        video_url=row[4],
+        created_at=row[5]
+    )
+
+@router.delete("/{module_id}")
+async def delete_module(module_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM modules WHERE id = ?", (module_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Module not found")
+    
+    cursor.execute("DELETE FROM modules WHERE id = ?", (module_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "Module deleted successfully"}

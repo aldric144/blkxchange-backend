@@ -112,3 +112,51 @@ async def get_legacy_entry(legacy_id: int):
         era=row[5],
         created_at=row[6]
     )
+
+@router.put("/{legacy_id}", response_model=Legacy)
+async def update_legacy_entry(legacy_id: int, legacy: LegacyCreate):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM legacy WHERE id = ?", (legacy_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Legacy entry not found")
+    
+    cursor.execute("""
+        UPDATE legacy 
+        SET name = ?, relation = ?, biography = ?, photo_url = ?, era = ?
+        WHERE id = ?
+    """, (legacy.name, legacy.relation, legacy.biography, legacy.photo_url, legacy.era, legacy_id))
+    
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM legacy WHERE id = ?", (legacy_id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    return Legacy(
+        id=row[0],
+        name=row[1],
+        relation=row[2],
+        biography=row[3],
+        photo_url=row[4],
+        era=row[5],
+        created_at=row[6]
+    )
+
+@router.delete("/{legacy_id}")
+async def delete_legacy_entry(legacy_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM legacy WHERE id = ?", (legacy_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Legacy entry not found")
+    
+    cursor.execute("DELETE FROM legacy WHERE id = ?", (legacy_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "Legacy entry deleted successfully"}

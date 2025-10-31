@@ -122,3 +122,55 @@ async def get_group(group_id: int):
         member_count=row[6],
         created_at=row[7]
     )
+
+@router.put("/{group_id}", response_model=Group)
+async def update_group(group_id: int, group: GroupCreate):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM groups WHERE id = ?", (group_id,))
+    existing = cursor.fetchone()
+    if not existing:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    member_count = existing[6]
+    
+    cursor.execute("""
+        UPDATE groups 
+        SET name = ?, description = ?, category = ?, is_private = ?, image_url = ?
+        WHERE id = ?
+    """, (group.name, group.description, group.category, group.is_private, group.image_url, group_id))
+    
+    conn.commit()
+    
+    cursor.execute("SELECT * FROM groups WHERE id = ?", (group_id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    return Group(
+        id=row[0],
+        name=row[1],
+        description=row[2],
+        category=row[3],
+        is_private=bool(row[4]),
+        image_url=row[5],
+        member_count=row[6],
+        created_at=row[7]
+    )
+
+@router.delete("/{group_id}")
+async def delete_group(group_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM groups WHERE id = ?", (group_id,))
+    if not cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    cursor.execute("DELETE FROM groups WHERE id = ?", (group_id,))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "Group deleted successfully"}
