@@ -1,9 +1,12 @@
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, Depends, File, UploadFile
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List
 import psycopg
+import shutil
+from pathlib import Path
+import uuid
 
 load_dotenv()
 
@@ -63,6 +66,39 @@ app.add_middleware(
 async def healthz():
     return {"status": "ok"}
 
+@app.post("/api/upload")
+async def upload_image(file: UploadFile = File(...)):
+    """
+    Upload an image file and return the URL
+    Accepts: PNG, JPG, JPEG, WEBP (max 5MB)
+    """
+    allowed_types = ["image/png", "image/jpeg", "image/jpg", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Only PNG, JPG, JPEG, and WEBP are allowed.")
+    
+    file_content = await file.read()
+    if len(file_content) > 5 * 1024 * 1024:  # 5MB in bytes
+        raise HTTPException(status_code=400, detail="File size exceeds 5MB limit.")
+    
+    upload_dir = Path("uploads")
+    upload_dir.mkdir(exist_ok=True)
+    
+    file_extension = file.filename.split(".")[-1]
+    unique_filename = f"{uuid.uuid4()}.{file_extension}"
+    file_path = upload_dir / unique_filename
+    
+    with open(file_path, "wb") as buffer:
+        buffer.write(file_content)
+    
+    file_url = f"/uploads/{unique_filename}"
+    
+    return {
+        "success": True,
+        "url": file_url,
+        "filename": unique_filename,
+        "size": len(file_content)
+    }
+
 @app.post("/api/vendors", response_model=Vendor)
 async def create_vendor(vendor: VendorCreate):
     new_vendor = db.create_vendor(vendor)
@@ -111,6 +147,20 @@ async def get_vendor(vendor_id: str):
         raise HTTPException(status_code=404, detail="Vendor not found")
     return vendor
 
+@app.put("/api/vendors/{vendor_id}", response_model=Vendor)
+async def update_vendor(vendor_id: str, vendor: VendorCreate):
+    updated_vendor = db.update_vendor(vendor_id, vendor)
+    if not updated_vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    return updated_vendor
+
+@app.delete("/api/vendors/{vendor_id}")
+async def delete_vendor(vendor_id: str):
+    success = db.delete_vendor(vendor_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    return {"message": "Vendor deleted successfully"}
+
 @app.post("/api/vendors/{vendor_id}/products", response_model=Product)
 async def create_product(vendor_id: str, product: ProductCreate):
     vendor = db.get_vendor(vendor_id)
@@ -157,6 +207,20 @@ async def get_professional(professional_id: str):
     if not professional:
         raise HTTPException(status_code=404, detail="Professional not found")
     return professional
+
+@app.put("/api/professionals/{professional_id}", response_model=Professional)
+async def update_professional(professional_id: str, professional: ProfessionalCreate):
+    updated_professional = db.update_professional(professional_id, professional)
+    if not updated_professional:
+        raise HTTPException(status_code=404, detail="Professional not found")
+    return updated_professional
+
+@app.delete("/api/professionals/{professional_id}")
+async def delete_professional(professional_id: str):
+    success = db.delete_professional(professional_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Professional not found")
+    return {"message": "Professional deleted successfully"}
 
 @app.post("/api/orders", response_model=Order)
 async def create_order(order: OrderCreate):

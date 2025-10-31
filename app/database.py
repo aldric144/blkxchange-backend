@@ -58,6 +58,24 @@ class InMemoryDatabase:
             self.vendors[vendor_id].total_sales += amount
             self.vendors[vendor_id].community_contribution += community_amount
     
+    def update_vendor(self, vendor_id: str, vendor_data: VendorCreate) -> Optional[Vendor]:
+        if vendor_id in self.vendors:
+            vendor = self.vendors[vendor_id]
+            vendor.email = vendor_data.email
+            vendor.name = vendor_data.name
+            vendor.business_name = vendor_data.business_name
+            vendor.business_description = vendor_data.business_description
+            vendor.phone = vendor_data.phone
+            vendor.stripe_account_id = vendor_data.stripe_account_id
+            return vendor
+        return None
+    
+    def delete_vendor(self, vendor_id: str) -> bool:
+        if vendor_id in self.vendors:
+            del self.vendors[vendor_id]
+            return True
+        return False
+    
     def create_product(self, vendor_id: str, product_data: ProductCreate) -> Product:
         product_id = str(uuid.uuid4())
         product = Product(
@@ -134,6 +152,27 @@ class InMemoryDatabase:
         if category:
             professionals = [p for p in professionals if p.category == category]
         return professionals
+    
+    def update_professional(self, professional_id: str, professional_data: ProfessionalCreate) -> Optional[Professional]:
+        if professional_id in self.professionals:
+            professional = self.professionals[professional_id]
+            professional.email = professional_data.email
+            professional.name = professional_data.name
+            professional.title = professional_data.title
+            professional.category = professional_data.category
+            professional.bio = professional_data.bio
+            professional.credentials = professional_data.credentials
+            professional.hourly_rate = professional_data.hourly_rate
+            professional.phone = professional_data.phone
+            professional.image_url = professional_data.image_url
+            return professional
+        return None
+    
+    def delete_professional(self, professional_id: str) -> bool:
+        if professional_id in self.professionals:
+            del self.professionals[professional_id]
+            return True
+        return False
     
     def create_order(self, order_data: OrderCreate) -> Order:
         order_id = str(uuid.uuid4())
