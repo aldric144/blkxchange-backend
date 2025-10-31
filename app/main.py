@@ -71,7 +71,10 @@ async def upload_image(file: UploadFile = File(...)):
     """
     Upload an image file and return the URL
     Accepts: PNG, JPG, JPEG, WEBP (max 5MB)
+    Uses Cloudinary for persistent cloud storage
     """
+    from app.cloudinary_config import upload_image_to_cloudinary
+    
     allowed_types = ["image/png", "image/jpeg", "image/jpg", "image/webp"]
     if file.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid file type. Only PNG, JPG, JPEG, and WEBP are allowed.")
@@ -79,6 +82,19 @@ async def upload_image(file: UploadFile = File(...)):
     file_content = await file.read()
     if len(file_content) > 5 * 1024 * 1024:  # 5MB in bytes
         raise HTTPException(status_code=400, detail="File size exceeds 5MB limit.")
+    
+    cloudinary_enabled = os.getenv("CLOUDINARY_CLOUD_NAME") and os.getenv("CLOUDINARY_API_KEY")
+    
+    if cloudinary_enabled:
+        result = upload_image_to_cloudinary(file_content, file.filename)
+        if result["success"]:
+            return {
+                "success": True,
+                "url": result["url"],
+                "filename": file.filename,
+                "size": result["bytes"],
+                "storage": "cloudinary"
+            }
     
     upload_dir = Path("uploads")
     upload_dir.mkdir(exist_ok=True)
@@ -96,7 +112,8 @@ async def upload_image(file: UploadFile = File(...)):
         "success": True,
         "url": file_url,
         "filename": unique_filename,
-        "size": len(file_content)
+        "size": len(file_content),
+        "storage": "local"
     }
 
 @app.post("/api/vendors", response_model=Vendor)
