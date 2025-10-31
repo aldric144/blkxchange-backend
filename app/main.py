@@ -48,8 +48,10 @@ app.add_middleware(
     allow_origins=[
         "https://blkxchange.com",
         "https://www.blkxchange.com",
+        "https://admin.blkxchange.com",
         "https://frontend-omega-five-72.vercel.app",
         "https://blkxchange-deployment-app-7u8i8y3c.devinapps.com",
+        "https://blkxchangedeploymentapp-pwvsejlq.devinapps.com",
         "http://localhost:5173",  # For local development
     ],
     allow_credentials=True,
