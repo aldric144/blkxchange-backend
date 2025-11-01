@@ -21,12 +21,13 @@ from app.models import (
 from app.database import db
 from app.seed_data import seed_database
 from app.email import send_vendor_welcome_email
-from app.routes import articles, admin, modules, legacy, history, forums, events, groups
+from app.routes import articles, admin, modules, legacy, history, forums, events, groups, comments
 from app.routes import categories, users, partners, testimonials, scholarships
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
 
 app.include_router(articles.router, prefix="/api/articles", tags=["Articles"])
+app.include_router(comments.router, prefix="/api/comments", tags=["Comments"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin360"])
 app.include_router(modules.router, prefix="/api/modules", tags=["Wealth Hub"])
 app.include_router(legacy.router, prefix="/api/legacy", tags=["Legacy Wall"])
