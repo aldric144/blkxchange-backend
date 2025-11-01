@@ -1,1 +1,1 @@
-web: poetry run fastapi run app/main.py --host 0.0.0.0 --port $PORT
+web: gunicorn app.main:app -k uvicorn.workers.UvicornWorker -w ${WEB_CONCURRENCY:-2} -b 0.0.0.0:$PORT --timeout 120
