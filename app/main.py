@@ -62,6 +62,7 @@ app.add_middleware(
         "https://frontend-omega-five-72.vercel.app",
         "https://blkxchange-deployment-app-7u8i8y3c.devinapps.com",
         "https://blkxchangedeploymentapp-pwvsejlq.devinapps.com",
+        "https://blkxchangemarketplace-kytxrr7p.devinapps.com",  # Marketplace Frontend
         "http://localhost:5173",  # For local development
     ],
     allow_credentials=True,
