@@ -65,10 +65,13 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get("sub")
-        if user_id is None:
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
             raise credentials_exception
+        user_id = int(user_id_str)
     except jwt.PyJWTError:
+        raise credentials_exception
+    except (ValueError, TypeError):
         raise credentials_exception
     
     user = db.query(User).filter(User.id == user_id).first()
@@ -117,7 +120,7 @@ async def signup(request: SignupRequest, db: Session = Depends(get_db)):
     db.add(wallet)
     db.commit()
     
-    access_token = create_access_token(data={"sub": new_user.id})
+    access_token = create_access_token(data={"sub": str(new_user.id)})
     
     return {
         "access_token": access_token,
@@ -153,7 +156,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
     
     return {
         "access_token": access_token,
