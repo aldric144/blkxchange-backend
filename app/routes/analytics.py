@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.exc import OperationalError
 from typing import List, Dict
 import sqlite3
 import os
@@ -17,12 +18,25 @@ EVENTS_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__
 async def get_analytics_overview(db: Session = Depends(get_db)):
     """Get overall platform analytics including views, comments, likes, and user activity"""
     
-    total_users = db.query(User).count()
+    total_users = 0
+    try:
+        total_users = db.query(User).count()
+    except OperationalError:
+        pass
     
-    total_articles = db.query(Article).count()
+    total_articles = 0
+    try:
+        total_articles = db.query(Article).count()
+    except OperationalError:
+        pass
     
-    total_topics = db.query(ForumTopic).count()
-    total_replies = db.query(ForumReply).count()
+    total_topics = 0
+    total_replies = 0
+    try:
+        total_topics = db.query(ForumTopic).count()
+        total_replies = db.query(ForumReply).count()
+    except OperationalError:
+        pass
     
     total_comments = 0
     try:
@@ -44,7 +58,11 @@ async def get_analytics_overview(db: Session = Depends(get_db)):
     except Exception:
         pass
     
-    total_rsvps = db.query(UserEvent).count()
+    total_rsvps = 0
+    try:
+        total_rsvps = db.query(UserEvent).count()
+    except OperationalError:
+        pass
     
     top_contributors = []
     try:
@@ -67,10 +85,14 @@ async def get_analytics_overview(db: Session = Depends(get_db)):
     except Exception:
         pass
     
-    most_active_forum_users = db.query(
-        ForumTopic.author,
-        func.count(ForumTopic.id).label('topic_count')
-    ).group_by(ForumTopic.author).order_by(func.count(ForumTopic.id).desc()).limit(10).all()
+    most_active_forum_users = []
+    try:
+        most_active_forum_users = db.query(
+            ForumTopic.author,
+            func.count(ForumTopic.id).label('topic_count')
+        ).group_by(ForumTopic.author).order_by(func.count(ForumTopic.id).desc()).limit(10).all()
+    except OperationalError:
+        pass
     
     return {
         "total_users": total_users,
@@ -85,7 +107,7 @@ async def get_analytics_overview(db: Session = Depends(get_db)):
         "most_active_forum_users": [
             {"username": user[0], "topic_count": user[1]}
             for user in most_active_forum_users
-        ]
+        ] if most_active_forum_users else []
     }
 
 @router.get("/events")
@@ -102,12 +124,16 @@ async def get_event_analytics(db: Session = Depends(get_db)):
         
         for event in events:
             event_id = event[0]
-            rsvp_count = db.query(UserEvent).filter(UserEvent.event_id == event_id).count()
-            
-            status_breakdown = db.query(
-                UserEvent.status,
-                func.count(UserEvent.id)
-            ).filter(UserEvent.event_id == event_id).group_by(UserEvent.status).all()
+            rsvp_count = 0
+            status_breakdown = []
+            try:
+                rsvp_count = db.query(UserEvent).filter(UserEvent.event_id == event_id).count()
+                status_breakdown = db.query(
+                    UserEvent.status,
+                    func.count(UserEvent.id)
+                ).filter(UserEvent.event_id == event_id).group_by(UserEvent.status).all()
+            except OperationalError:
+                pass
             
             events_with_rsvps.append({
                 "event_id": event_id,
@@ -133,7 +159,11 @@ async def get_event_analytics(db: Session = Depends(get_db)):
         for event in events:
             event_id = event[0]
             category = event[1]
-            rsvp_count = db.query(UserEvent).filter(UserEvent.event_id == event_id).count()
+            rsvp_count = 0
+            try:
+                rsvp_count = db.query(UserEvent).filter(UserEvent.event_id == event_id).count()
+            except OperationalError:
+                pass
             
             if category not in category_rsvps:
                 category_rsvps[category] = 0
