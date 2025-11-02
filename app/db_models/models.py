@@ -305,3 +305,49 @@ class UserBadge(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     badge_id = Column(Integer, ForeignKey("badges.id"), nullable=False)
     earned_at = Column(DateTime, default=datetime.utcnow)
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    subscription_type = Column(String, nullable=False, default="Free")
+    start_date = Column(DateTime, default=datetime.utcnow)
+    end_date = Column(DateTime)
+    status = Column(String, default="active")
+    stripe_subscription_id = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Wallet(Base):
+    __tablename__ = "wallet"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
+    points_balance = Column(Integer, default=0)
+    total_earned = Column(Integer, default=0)
+    total_redeemed = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    transaction_type = Column(String, nullable=False)
+    points = Column(Integer, nullable=False)
+    description = Column(String)
+    reference_id = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Investment(Base):
+    __tablename__ = "investments"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    category = Column(String, nullable=False)
+    recipient_name = Column(String, nullable=False)
+    amount = Column(Float, nullable=False)
+    description = Column(Text)
+    date = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
