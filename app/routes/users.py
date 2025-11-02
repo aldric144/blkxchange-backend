@@ -4,14 +4,19 @@ Handles user management and membership tiers
 """
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+import sqlite3
+import os
 
 from app.db_models import get_db
-from app.db_models.models import User
+from app.db_models.models import User, UserEvent, UserBadge, Badge
 
 router = APIRouter()
+
+COMMENTS_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "comments.db")
 
 class UserBase(BaseModel):
     username: str
@@ -109,3 +114,74 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return None
+
+@router.get("/username/{username}")
+def get_user_profile(username: str, db: Session = Depends(get_db)):
+    """Get user profile with activity history and badges"""
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user_events = db.query(UserEvent).filter(UserEvent.user_id == user.id).all()
+    
+    user_badges_query = db.query(UserBadge, Badge).join(
+        Badge, UserBadge.badge_id == Badge.id
+    ).filter(UserBadge.user_id == user.id).all()
+    
+    badges = [
+        {
+            "id": badge.id,
+            "name": badge.name,
+            "description": badge.description,
+            "icon": badge.icon,
+            "earned_at": user_badge.earned_at.isoformat()
+        }
+        for user_badge, badge in user_badges_query
+    ]
+    
+    comments = []
+    try:
+        conn = sqlite3.connect(COMMENTS_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, article_id, content, created_at FROM comments WHERE author = ? ORDER BY created_at DESC LIMIT 10",
+            (username,)
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        
+        comments = [
+            {
+                "id": row[0],
+                "article_id": row[1],
+                "content": row[2],
+                "created_at": row[3]
+            }
+            for row in rows
+        ]
+    except Exception as e:
+        pass
+    
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "membership_tier": user.membership_tier,
+        "join_date": user.join_date.isoformat(),
+        "events": [
+            {
+                "id": ue.id,
+                "event_id": ue.event_id,
+                "status": ue.status,
+                "created_at": ue.created_at.isoformat()
+            }
+            for ue in user_events
+        ],
+        "badges": badges,
+        "comments": comments,
+        "stats": {
+            "total_events": len(user_events),
+            "total_badges": len(badges),
+            "total_comments": len(comments)
+        }
+    }

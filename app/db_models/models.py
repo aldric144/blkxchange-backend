@@ -278,3 +278,30 @@ class BusinessMatchmaker(Base):
     preferred_category = Column(String)
     match_score = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class UserEvent(Base):
+    __tablename__ = "users_events"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    event_id = Column(Integer, nullable=False)
+    status = Column(String, default="attending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Badge(Base):
+    __tablename__ = "badges"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False, unique=True)
+    description = Column(Text)
+    icon = Column(String)
+    criteria = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class UserBadge(Base):
+    __tablename__ = "user_badges"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    badge_id = Column(Integer, ForeignKey("badges.id"), nullable=False)
+    earned_at = Column(DateTime, default=datetime.utcnow)
