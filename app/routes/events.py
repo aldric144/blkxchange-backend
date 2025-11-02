@@ -93,6 +93,38 @@ async def get_events(category: Optional[str] = None):
     
     return events
 
+@router.get("/with-rsvp", response_model=List[EventWithRSVP])
+async def get_events_with_rsvp(category: Optional[str] = None, db: Session = Depends(get_db)):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    if category:
+        cursor.execute("SELECT * FROM events WHERE category = ? ORDER BY date ASC", (category,))
+    else:
+        cursor.execute("SELECT * FROM events ORDER BY date ASC")
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    events = []
+    for row in rows:
+        event_id = row[0]
+        rsvp_count = db.query(UserEvent).filter(UserEvent.event_id == event_id).count()
+        
+        events.append(EventWithRSVP(
+            id=event_id,
+            name=row[1],
+            description=row[2],
+            category=row[3],
+            date=row[4],
+            location=row[5],
+            image_url=row[6],
+            created_at=row[7],
+            rsvp_count=rsvp_count
+        ))
+    
+    return events
+
 @router.post("/", response_model=Event)
 async def create_event(event: EventCreate):
     conn = sqlite3.connect(DB_PATH)
