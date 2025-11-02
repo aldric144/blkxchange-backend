@@ -24,6 +24,7 @@ from app.email import send_vendor_welcome_email
 from app.routes import articles, admin, modules, legacy, history, forums, events, groups, comments, analytics
 from app.routes import categories, users, partners, testimonials, scholarships
 from app.routes import auth, subscription, wallet, investments
+from app.routes import wealth, dao, donations
 
 app = FastAPI(title="BlkXchange API", version="1.0.0")
 
@@ -48,6 +49,10 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(subscription.router, prefix="/api/subscription", tags=["Subscription"])
 app.include_router(wallet.router, prefix="/api/wallet", tags=["Wallet"])
 app.include_router(investments.router, prefix="/api/investments", tags=["Investments"])
+
+app.include_router(wealth.router)
+app.include_router(dao.router)
+app.include_router(donations.router)
 
 ADMIN_SECRET = os.getenv("ADMIN_SECRET_KEY", "changeme")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
