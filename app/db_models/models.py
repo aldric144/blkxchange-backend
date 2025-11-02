@@ -351,3 +351,67 @@ class Investment(Base):
     description = Column(Text)
     date = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class DAOProposal(Base):
+    __tablename__ = "dao_proposals"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String, nullable=False)
+    summary = Column(Text, nullable=False)
+    description = Column(Text)
+    category = Column(String)
+    status = Column(String, default="pending")
+    votes_for = Column(Integer, default=0)
+    votes_against = Column(Integer, default=0)
+    total_points_for = Column(Integer, default=0)
+    total_points_against = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class DAOVote(Base):
+    __tablename__ = "dao_votes"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    proposal_id = Column(Integer, ForeignKey("dao_proposals.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    vote_value = Column(String, nullable=False)
+    points_used = Column(Integer, default=0)
+    vote_weight = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class WealthModule(Base):
+    __tablename__ = "wealth_modules"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    content = Column(Text)
+    tier_required = Column(String, default="Free")
+    points_reward = Column(Integer, default=0)
+    duration_minutes = Column(Integer)
+    category = Column(String)
+    order_index = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class WealthProgress(Base):
+    __tablename__ = "wealth_progress"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    module_id = Column(Integer, ForeignKey("wealth_modules.id"), nullable=False)
+    completed_at = Column(DateTime, default=datetime.utcnow)
+    points_earned = Column(Integer, default=0)
+
+class Donation(Base):
+    __tablename__ = "donations"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    amount = Column(Float, nullable=False)
+    category = Column(String)
+    points_awarded = Column(Integer, default=0)
+    stripe_payment_id = Column(String)
+    stripe_session_id = Column(String)
+    status = Column(String, default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
